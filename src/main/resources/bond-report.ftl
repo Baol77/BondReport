@@ -121,23 +121,35 @@
         }
 
         function filterTable() {
+            const isin = document.getElementById("filterIsin").value.toLowerCase();
             const issuer = document.getElementById("filterIssuer").value.toLowerCase();
+            const priceMax = parseFloat(document.getElementById("filterPrice").value || "0");
             const currency = document.getElementById("filterCurrency").value;
             const minMat = document.getElementById("filterMinMat").value;
             const maxMat = document.getElementById("filterMaxMat").value;
+            const minYield = parseFloat(document.getElementById("filterMinYield").value || "0");
+            const minTotal = parseFloat(document.getElementById("filterMinTotal").value || "0");
 
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
             rows.forEach(r => {
-                const isinOrIssuerCell = (r.cells[0].innerText + " " + r.cells[1].innerText).toLowerCase();
+                const isinCell = r.cells[0].innerText.toLowerCase();
+                const issuerCell = r.cells[1].innerText.toLowerCase();
+                const priceCell = parseNum(r.cells[2].innerText);
                 const currencyCell = r.cells[3].innerText;
                 const mat = r.cells[6].innerText;
+                const currYield = parseNum(r.cells[7].innerText);
+                const totalYield = parseNum(r.cells[8].innerText);
 
                 let ok = true;
-                if (issuer && isinOrIssuerCell.indexOf(issuer) === -1) ok = false;
+                if (isin && isinCell.indexOf(isin) === -1) ok = false;
+                if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
+                if (priceMax && priceMax < priceCell) ok = false;
                 if (currency && currencyCell !== currency) ok = false;
                 if (minMat && mat < minMat) ok = false;
                 if (maxMat && mat > maxMat) ok = false;
+                if (currYield < minYield) ok = false;
+                if (totalYield < minTotal) ok = false;
 
                 r.style.display = ok ? "" : "none";
             });
@@ -248,21 +260,6 @@
 
 <div class="controls">
     <label>
-        ISIN / Issuer:
-        <input id="filterIssuer" type="text" placeholder="e.g. US900123AT75, Romania" oninput="filterTable()">
-    </label>
-
-    <label>
-        Currency:
-        <select id="filterCurrency" onchange="filterTable()">
-            <option value="">All</option>
-            <#list currencies as c>
-            <option value="${c}">${c}</option>
-        </#list>
-        </select>
-    </label>
-
-    <label>
         Maturity from:
         <input id="filterMinMat" type="date" onchange="filterTable()">
     </label>
@@ -279,15 +276,35 @@
 <table id="bondTable">
     <thead>
     <tr>
-        <th onclick="sortTable(0)">ISIN <span class="arrow"></span></th>
-        <th onclick="sortTable(1)">Issuer <span class="arrow"></span></th>
-        <th onclick="sortTable(2)">Price <span class="arrow"></span></th>
-        <th onclick="sortTable(3)">Currency <span class="arrow"></span></th>
+        <th onclick="sortTable(0)">ISIN<span class="arrow"></span><br>
+            <input id="filterIsin" type="text" placeholder="e.g. US900123AT75" onclick="event.stopPropagation()" oninput="filterTable()">
+        </th>
+        <th onclick="sortTable(1)">Issuer<span class="arrow"></span><br>
+            <input id="filterIssuer" type="text" placeholder="e.g. Romania" onclick="event.stopPropagation()" oninput="filterTable()">
+        </th>
+        <th onclick="sortTable(2)">Price <span class="arrow"></span><br>
+            <input id="filterPrice" type="number" step="10" placeholder="max" onclick="event.stopPropagation()"
+                   oninput="filterTable()" style="width:60px;">
+        </th>
+        <th onclick="sortTable(3)">Currency<span class="arrow"></span><br>
+            <select id="filterCurrency" onchange="filterTable()" onclick="event.stopPropagation()">
+                <option value="">All</option>
+                <#list currencies as c>
+                <option value="${c}">${c}</option>
+            </#list>
+            </select>
+        </th>
         <th onclick="sortTable(4)">Price (${reportCurrency}) <span class="arrow"></span></th>
         <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
         <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
-        <th onclick="sortTable(7)">Curr. Yield % <span class="arrow"></span></th>
-        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000) <span class="arrow"></span></th>
+        <th onclick="sortTable(7)">Curr. Yield %<span class="arrow"></span><br>
+            <input id="filterMinYield" type="number" step="0.5" placeholder="min" onclick="event.stopPropagation()"
+                   oninput="filterTable()" style="width:70px;">
+        </th>
+        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
+            <input id="filterMinTotal" type="number" step="500" placeholder="min" onclick="event.stopPropagation()"
+                   oninput="filterTable()" style="width:80px;">
+        </th>
     </tr>
     </thead>
 
