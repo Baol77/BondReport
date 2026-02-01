@@ -32,6 +32,9 @@ public class HtmlReportWriter {
         Map<String, Object> model = new HashMap<>();
         model.put("bonds", bonds);
         model.put("reportCurrency", reportCurrency);
+        model.put("generatedAt",
+            java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
         // distinct currencies for dropdown
         List<String> currencies = bonds.stream()

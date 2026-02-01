@@ -239,7 +239,12 @@
 </head>
 <body>
 
-<h2>Bond Yield Ranking (${reportCurrency})</h2>
+<h2>
+    Bond Yield Ranking (${reportCurrency})
+    <span style="font-size:12px;color:#666;">
+        — 📅 ${generatedAt}
+    </span>
+</h2>
 
 <div class="controls">
     <label>
