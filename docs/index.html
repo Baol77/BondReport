@@ -53,7 +53,7 @@
         <th>Maturity</th>
         <th>Orig. Currency</th>
         <th>Current Yield %</th>
-        <th>Total Yield % to Maturity</th>
+        <th>Total Yield to Maturity % (per €1,000)</th>
     </tr>
     </thead>
 
