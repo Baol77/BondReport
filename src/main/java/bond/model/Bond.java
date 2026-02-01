@@ -5,10 +5,11 @@ import java.time.LocalDate;
 public record Bond(
     String isin,
     String issuer,
+    double price,
+    String currency,
     double priceEur,
     double couponPct,
     LocalDate maturity,
-    String currency,
     double currentYieldPct,
     double totalYieldPctToMaturity
 ) {}

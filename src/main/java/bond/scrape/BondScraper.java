@@ -48,23 +48,28 @@ public class BondScraper {
                 String d = r.get("Descrizione");
 
                 String isin = r.get("Codice ISIN");
-                String issuer = d.substring(0, d.indexOf(' '));
+
+                String issuer = d.split("\\d", 2)[0].trim(); // REPUBLIC OF ...01/01/1111
+                issuer = issuer.replace("BTP", "ITALY");
 
                 int pct = d.indexOf('%');
+
                 double coupon = Double.parseDouble(
                     d.substring(d.lastIndexOf(' ', pct) + 1, pct).replace(',', '.')
                 );
                 if (coupon == 0) continue; // avoid 0% Bonds
 
                 LocalDate maturity = LocalDate.parse(r.get("Data scadenza"));
+
                 String ccy = r.get("Divisa");
                 if (ccy.equals("NOK")) continue;
 
                 double price = parse(r.get("Prezzo di riferimento"));
+
                 double priceEur = price / fx.getOrDefault(ccy, 1.0);
 
                 list.add(calculator.buildBond(
-                    isin, issuer, priceEur, coupon, maturity, ccy
+                    isin, issuer, price, priceEur, coupon, maturity, ccy
                 ));
             } catch (Exception ignored) {
             }

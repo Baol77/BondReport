@@ -9,7 +9,7 @@ public class BondCalculator {
 
     private static final double IT_TAX = 0.875;
 
-    public Bond buildBond(String isin, String issuer, double priceEur,
+    public Bond buildBond(String isin, String issuer,double price, double priceEur,
                           double couponPct, LocalDate maturity, String currency) {
 
         double years = ChronoUnit.DAYS.between(LocalDate.now(), maturity) / 365.25;
@@ -21,10 +21,11 @@ public class BondCalculator {
         return new Bond(
             isin,
             issuer,
+            price,
+            currency,
             round(priceEur, 2),
             couponPct,
             maturity,
-            currency,
             round(currentYield, 2),
             round(Yield1000ToM, 0)
         );

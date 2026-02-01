@@ -48,10 +48,11 @@
     <tr>
         <th>ISIN</th>
         <th>Issuer</th>
+        <th>Price</th>
+        <th>Currency</th>
         <th>Price (EUR)</th>
         <th>Coupon %</th>
         <th>Maturity</th>
-        <th>Orig. Currency</th>
         <th>Curr. Yield %</th>
         <th>Tot. Yield to Maturity (per €1,000)</th>
     </tr>
@@ -62,11 +63,12 @@
         <tr>
             <td>${b.isin()}</td>
             <td>${b.issuer()}</td>
-            <td class="<#if (b.priceEur() <=100)>good<#else>bad</#if>">
-                ${b.priceEur()?string["0.00"]}</td>
+            <td class="<#if (b.price() <=100)>good<#else>bad</#if>">
+                ${b.price()?string["0.00"]}</td>
+            <td>${b.currency()}</td>
+            <td>${b.priceEur()?string["0.00"]}</td>
             <td>${b.couponPct()?string["0.00"]}</td>
             <td>${b.maturity()}</td>
-            <td>${b.currency()}</td>
             <td>${b.currentYieldPct()?string["0.00"]}</td>
             <td>${b.totalYieldPctToMaturity()?string["0"]}</td>
         </tr>
