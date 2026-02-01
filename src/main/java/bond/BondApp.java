@@ -25,11 +25,11 @@ public class BondApp {
         bonds.sort(Comparator.comparingDouble(Bond::currentYieldPct).reversed());
 
         HtmlReportWriter w = new HtmlReportWriter();
-        w.writeEur(bonds, "docs/index.html");
-        w.writeChf(bonds, "docs/chf.html");
+        w.writeEur(bonds, "docs/eur/index.html");
+        w.writeChf(bonds, "docs/chf/index.html");
 
         System.out.println("✅ Reports generated:");
-        System.out.println(" - bond-report-eur.html");
-        System.out.println(" - bond-report-chf.html");
+        System.out.println(" - docs/eur/index.html");
+        System.out.println(" - docs/chf/index.html");
     }
 }
