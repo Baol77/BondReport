@@ -52,8 +52,8 @@
         <th>Coupon %</th>
         <th>Maturity</th>
         <th>Orig. Currency</th>
-        <th>Current Yield %</th>
-        <th>Total Yield to Maturity % (per €1,000)</th>
+        <th>Curr. Yield %</th>
+        <th>Tot. Yield to Maturity (per €1,000)</th>
     </tr>
     </thead>
 
