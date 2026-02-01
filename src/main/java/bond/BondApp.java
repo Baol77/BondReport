@@ -24,7 +24,7 @@ public class BondApp {
         bonds.removeIf(Objects::isNull);
         bonds.sort(Comparator.comparingDouble(Bond::currentYieldPct).reversed());
 
-        new HtmlReportWriter().write(bonds, "bond_ytm_report.html");
+        new HtmlReportWriter().write(bonds);
 
         System.out.println("✅ Report generated: bond_ytm_report.html");
     }
