@@ -1,9 +1,11 @@
-name: Deploy static content to Pages
+name: Build & Deploy Bond Report
 
 on:
   push:
     branches: ["master"]
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"   # daily at 03:00 UTC
 
 permissions:
   contents: read
@@ -15,14 +17,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Build & generate reports
+        run: mvn -B clean package
+
+      # assuming your app writes HTML into /docs
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
