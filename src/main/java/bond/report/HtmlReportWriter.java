@@ -4,13 +4,9 @@ import bond.model.Bond;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileWriter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HtmlReportWriter {
 
@@ -18,29 +14,35 @@ public class HtmlReportWriter {
 
     public HtmlReportWriter() {
         cfg = new Configuration(Configuration.VERSION_2_3_32);
-        cfg.setClassLoaderForTemplateLoading(
-            getClass().getClassLoader(), "/");
+        cfg.setClassForTemplateLoading(getClass(), "/");
         cfg.setDefaultEncoding("UTF-8");
     }
 
-    public void write(List<Bond> bonds) throws Exception {
-        Template template = cfg.getTemplate("bond-report.ftl");
+    public void writeEur(List<Bond> bonds, String file) throws Exception {
+        write(bonds, file, "EUR");
+    }
 
-        Path out = Path.of("docs/index.html");
-        Files.createDirectories(out.getParent());
+    public void writeChf(List<Bond> bonds, String file) throws Exception {
+        write(bonds, file, "CHF");
+    }
+
+    private void write(List<Bond> bonds, String file, String reportCurrency) throws Exception {
+        Template t = cfg.getTemplate("bond-report.ftl");
 
         Map<String, Object> model = new HashMap<>();
         model.put("bonds", bonds);
-        model.put("currencies", bonds.stream()
+        model.put("reportCurrency", reportCurrency);
+
+        // distinct currencies for dropdown
+        List<String> currencies = bonds.stream()
             .map(Bond::currency)
             .distinct()
             .sorted()
-            .toList());
+            .toList();
+        model.put("currencies", currencies);
 
-        try (Writer w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
-            template.process(model, w);
+        try (FileWriter w = new FileWriter(file)) {
+            t.process(model, w);
         }
-
-        System.out.println("✅ Report written to " + out.toAbsolutePath());
     }
 }

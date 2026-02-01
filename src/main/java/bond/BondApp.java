@@ -24,8 +24,12 @@ public class BondApp {
         bonds.removeIf(Objects::isNull);
         bonds.sort(Comparator.comparingDouble(Bond::currentYieldPct).reversed());
 
-        new HtmlReportWriter().write(bonds);
+        HtmlReportWriter w = new HtmlReportWriter();
+        w.writeEur(bonds, "docs/index.html");
+        w.writeChf(bonds, "docs/chf.html");
 
-        System.out.println("✅ Report generated: bond_ytm_report.html");
+        System.out.println("✅ Reports generated:");
+        System.out.println(" - bond-report-eur.html");
+        System.out.println(" - bond-report-chf.html");
     }
 }

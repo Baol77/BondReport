@@ -55,23 +55,19 @@
             background: #eef6ff;
         }
 
-        /* Heatmap on Current Yield % */
-        .heat-low  { background: #ffe5e5; }
-        .heat-mid  { background: #fff4cc; }
-        .heat-high { background: #e6ffed; font-weight: bold; }
+        /* Price coloring */
+        .good { color: #006400; font-weight: bold; }
+        .bad  { color: #b00020; font-weight: bold; }
 
         .arrow { font-size: 10px; margin-left: 4px; }
         button { cursor: pointer; }
-
-        .good { color: #006400; font-weight: bold; }
-        .bad  { color: #b00020; font-weight: bold; }
     </style>
     <script>
-        let currentSortCol = 8;
+        let currentSortCol = 7;
         let currentSortDir = "desc";
 
         function parseValue(v) {
-            v = v.replace("€", "").replace("%", "").replace(",", ".").trim();
+            v = v.replace(/[€CHF%]/g, "").replace(",", ".").trim();
             const n = parseFloat(v);
             return isNaN(n) ? v : n;
         }
@@ -157,56 +153,57 @@
             URL.revokeObjectURL(url);
         }
 
-       function clamp(x, min, max) {
-    return Math.min(max, Math.max(min, x));
-}
+        /* ===== Gradient heatmap on Current Yield % ===== */
 
-function lerp(a, b, t) {
-    return Math.round(a + (b - a) * t);
-}
-
-function lerpColor(c1, c2, t) {
-    return "rgb(" +
-        lerp(c1[0], c2[0], t) + "," +
-        lerp(c1[1], c2[1], t) + "," +
-        lerp(c1[2], c2[2], t) + ")";
-}
-
-function parseValue(s) {
-    return parseFloat(s.replace(",", "."));
-}
-
-function applyHeatmap() {
-    const rows = document.querySelectorAll("#bondTable tbody tr");
-
-    const red    = [255, 210, 210];
-    const yellow = [255, 245, 180];
-    const green  = [210, 245, 210];
-
-    rows.forEach(r => {
-        const v = parseValue(r.cells[7].innerText); // Curr. Yield %
-
-        let bg;
-        if (v <= 1) {
-            bg = "rgb(" + red.join(",") + ")";
-        } else if (v < 3) {
-            bg = lerpColor(red, yellow, (v - 1) / 2);
-        } else if (v < 5) {
-            bg = lerpColor(yellow, green, (v - 3) / 2);
-        } else {
-            bg = "rgb(" + green.join(",") + ")";
+        function lerp(a, b, t) {
+            return Math.round(a + (b - a) * t);
         }
 
-        r.cells[7].style.backgroundColor = bg;
-    });
-}
+        function lerpColor(c1, c2, t) {
+            return "rgb(" +
+                lerp(c1[0], c2[0], t) + "," +
+                lerp(c1[1], c2[1], t) + "," +
+                lerp(c1[2], c2[2], t) + ")";
+        }
 
-document.addEventListener("DOMContentLoaded", applyHeatmap);
+        function parseNum(s) {
+            return parseFloat(s.replace(",", "."));
+        }
+
+        function applyHeatmap() {
+            const rows = document.querySelectorAll("#bondTable tbody tr");
+
+            const red    = [255, 215, 215];   // ~0–1%
+            const yellow = [255, 245, 190];   // ~3%
+            const green  = [215, 245, 215];   // ~5%+
+
+            rows.forEach(r => {
+                const v = parseNum(r.cells[7].innerText); // Curr. Yield %
+
+                let bg;
+                if (v <= 1) {
+                    bg = "rgb(" + red.join(",") + ")";
+                } else if (v < 3) {
+                    bg = lerpColor(red, yellow, (v - 1) / 2);
+                } else if (v < 5) {
+                    bg = lerpColor(yellow, green, (v - 3) / 2);
+                } else {
+                    bg = "rgb(" + green.join(",") + ")";
+                }
+
+                r.cells[7].style.backgroundColor = bg;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            sortTable(7, true);
+            applyHeatmap();
+        });
     </script>
 </head>
 <body>
 
-<h2>Bond Yield Ranking (EUR equivalent, maturity &gt; 5 years)</h2>
+<h2>Bond Yield Ranking (${reportCurrency}, maturity &gt; 5 years)</h2>
 
 <div class="controls">
     <label>
@@ -244,11 +241,11 @@ document.addEventListener("DOMContentLoaded", applyHeatmap);
         <th onclick="sortTable(1)">Issuer <span class="arrow"></span></th>
         <th onclick="sortTable(2)">Price <span class="arrow"></span></th>
         <th onclick="sortTable(3)">Currency <span class="arrow"></span></th>
-        <th onclick="sortTable(4)">Price (EUR) <span class="arrow"></span></th>
+        <th onclick="sortTable(4)">Price (${reportCurrency}) <span class="arrow"></span></th>
         <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
         <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
         <th onclick="sortTable(7)">Curr. Yield % <span class="arrow"></span></th>
-        <th onclick="sortTable(8)">Tot. Yield to Maturity (per €1,000) <span class="arrow"></span></th>
+        <th onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000) <span class="arrow"></span></th>
     </tr>
     </thead>
 
@@ -257,15 +254,39 @@ document.addEventListener("DOMContentLoaded", applyHeatmap);
     <tr>
         <td>${b.isin()}</td>
         <td>${b.issuer()}</td>
-        <td class="<#if (b.price() <=100)>good<#else>bad</#if>">
+
+        <td class="<#if (b.price() <= 100)>good<#else>bad</#if>">
             ${b.price()?string["0.00"]}
         </td>
+
         <td>${b.currency()}</td>
-        <td>${b.priceEur()?string["0.00"]}</td>
+
+        <td>
+            <#if reportCurrency == "EUR">
+            ${b.priceEur()?string["0.00"]}
+            <#else>
+            ${b.priceChf()?string["0.00"]}
+        </#if>
+        </td>
+
         <td>${b.couponPct()?string["0.00"]}</td>
         <td>${b.maturity()}</td>
-        <td>${b.currentYieldPct()?string["0.00"]}</td>
-        <td>${b.totalYieldPctToMaturity()?string["0"]}</td>
+
+        <td>
+            <#if reportCurrency == "EUR">
+            ${b.currentYieldPct()?string["0.00"]}
+            <#else>
+            ${b.currentYieldPctChf()?string["0.00"]}
+        </#if>
+        </td>
+
+        <td>
+            <#if reportCurrency == "EUR">
+            ${b.totalYieldPctToMaturity()?string["0"]}
+            <#else>
+            ${b.totalYieldPctToMaturityChf()?string["0"]}
+        </#if>
+        </td>
     </tr>
     </#list>
     </tbody>

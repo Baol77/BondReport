@@ -67,9 +67,10 @@ public class BondScraper {
                 double price = parse(r.get("Prezzo di riferimento"));
 
                 double priceEur = price / fx.getOrDefault(ccy, 1.0);
+                double priceChf = priceEur * fx.getOrDefault("CHF", 1.0);
 
                 list.add(calculator.buildBond(
-                    isin, issuer, price, priceEur, coupon, maturity, ccy
+                    isin, issuer, price, priceEur, priceChf, coupon, maturity, ccy
                 ));
             } catch (Exception ignored) {
             }
