@@ -31,6 +31,11 @@ public class HtmlReportWriter {
 
         Map<String, Object> model = new HashMap<>();
         model.put("bonds", bonds);
+        model.put("currencies", bonds.stream()
+            .map(Bond::currency)
+            .distinct()
+            .sorted()
+            .toList());
 
         try (Writer w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
             template.process(model, w);

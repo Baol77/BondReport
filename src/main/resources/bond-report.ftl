@@ -10,68 +10,263 @@
             margin: 20px;
         }
         h2 {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 13px;
+        }
+        .controls input, .controls select, .controls button {
+            font-size: 13px;
+            padding: 4px 6px;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
             font-size: 14px;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #f2f2f2;
+            z-index: 2;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 2px solid #999;
         }
         th, td {
             border: 1px solid #ccc;
             padding: 6px 8px;
             text-align: right;
         }
-        th {
-            background: #f2f2f2;
-            text-align: center;
-        }
-        td:first-child, th:first-child {
-            text-align: left;
-        }
+        td:first-child, th:first-child,
         td:nth-child(2), th:nth-child(2) {
             text-align: left;
         }
         tr:hover {
             background: #eef6ff;
         }
+
+        /* Heatmap on Current Yield % */
+        .heat-low  { background: #ffe5e5; }
+        .heat-mid  { background: #fff4cc; }
+        .heat-high { background: #e6ffed; font-weight: bold; }
+
+        .arrow { font-size: 10px; margin-left: 4px; }
+        button { cursor: pointer; }
+
         .good { color: #006400; font-weight: bold; }
-        .bad  { color: #b00020; }
+        .bad  { color: #b00020; font-weight: bold; }
     </style>
+    <script>
+        let currentSortCol = 8;
+        let currentSortDir = "desc";
+
+        function parseValue(v) {
+            v = v.replace("€", "").replace("%", "").replace(",", ".").trim();
+            const n = parseFloat(v);
+            return isNaN(n) ? v : n;
+        }
+
+        function sortTable(col, initial) {
+            const table = document.getElementById("bondTable");
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+
+            const ths = table.tHead.rows[0].cells;
+            let dir = "asc";
+
+            if (!initial && col === currentSortCol) {
+                dir = currentSortDir === "asc" ? "desc" : "asc";
+            } else if (initial) {
+                dir = currentSortDir;
+            } else {
+                dir = "desc";
+            }
+
+            currentSortCol = col;
+            currentSortDir = dir;
+
+            Array.from(ths).forEach(h => {
+                const s = h.querySelector(".arrow");
+                if (s) s.textContent = "";
+            });
+            ths[col].querySelector(".arrow").textContent = dir === "asc" ? "▲" : "▼";
+
+            rows.sort((a, b) => {
+                const x = parseValue(a.cells[col].innerText);
+                const y = parseValue(b.cells[col].innerText);
+                if (typeof x === "number" && typeof y === "number") {
+                    return dir === "asc" ? x - y : y - x;
+                }
+                return dir === "asc"
+                        ? x.toString().localeCompare(y.toString())
+                        : y.toString().localeCompare(x.toString());
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+        }
+
+        function filterTable() {
+            const issuer = document.getElementById("filterIssuer").value.toLowerCase();
+            const currency = document.getElementById("filterCurrency").value;
+            const minMat = document.getElementById("filterMinMat").value;
+            const maxMat = document.getElementById("filterMaxMat").value;
+
+            const rows = document.querySelectorAll("#bondTable tbody tr");
+
+            rows.forEach(r => {
+                const issuerCell = r.cells[1].innerText.toLowerCase();
+                const currencyCell = r.cells[3].innerText;
+                const mat = r.cells[6].innerText;
+
+                let ok = true;
+                if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
+                if (currency && currencyCell !== currency) ok = false;
+                if (minMat && mat < minMat) ok = false;
+                if (maxMat && mat > maxMat) ok = false;
+
+                r.style.display = ok ? "" : "none";
+            });
+        }
+
+        function exportCSV() {
+            const rows = document.querySelectorAll("#bondTable tr");
+            let csv = [];
+
+            rows.forEach(r => {
+                const cols = Array.from(r.cells)
+                        .map(td => '"' + td.innerText.replace(/"/g, '""') + '"');
+                csv.push(cols.join(","));
+            });
+
+            const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "bond-report.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+       function clamp(x, min, max) {
+    return Math.min(max, Math.max(min, x));
+}
+
+function lerp(a, b, t) {
+    return Math.round(a + (b - a) * t);
+}
+
+function lerpColor(c1, c2, t) {
+    return "rgb(" +
+        lerp(c1[0], c2[0], t) + "," +
+        lerp(c1[1], c2[1], t) + "," +
+        lerp(c1[2], c2[2], t) + ")";
+}
+
+function parseValue(s) {
+    return parseFloat(s.replace(",", "."));
+}
+
+function applyHeatmap() {
+    const rows = document.querySelectorAll("#bondTable tbody tr");
+
+    const red    = [255, 210, 210];
+    const yellow = [255, 245, 180];
+    const green  = [210, 245, 210];
+
+    rows.forEach(r => {
+        const v = parseValue(r.cells[7].innerText); // Curr. Yield %
+
+        let bg;
+        if (v <= 1) {
+            bg = "rgb(" + red.join(",") + ")";
+        } else if (v < 3) {
+            bg = lerpColor(red, yellow, (v - 1) / 2);
+        } else if (v < 5) {
+            bg = lerpColor(yellow, green, (v - 3) / 2);
+        } else {
+            bg = "rgb(" + green.join(",") + ")";
+        }
+
+        r.cells[7].style.backgroundColor = bg;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", applyHeatmap);
+    </script>
 </head>
 <body>
 
 <h2>Bond Yield Ranking (EUR equivalent, maturity &gt; 5 years)</h2>
 
-<table>
+<div class="controls">
+    <label>
+        Issuer:
+        <input id="filterIssuer" type="text" placeholder="e.g. Romania" oninput="filterTable()">
+    </label>
+
+    <label>
+        Currency:
+        <select id="filterCurrency" onchange="filterTable()">
+            <option value="">All</option>
+            <#list currencies as c>
+            <option value="${c}">${c}</option>
+        </#list>
+        </select>
+    </label>
+
+    <label>
+        Maturity from:
+        <input id="filterMinMat" type="date" onchange="filterTable()">
+    </label>
+
+    <label>
+        to:
+        <input id="filterMaxMat" type="date" onchange="filterTable()">
+    </label>
+
+    <button onclick="exportCSV()">⬇ Export CSV</button>
+</div>
+
+<table id="bondTable">
     <thead>
     <tr>
-        <th>ISIN</th>
-        <th>Issuer</th>
-        <th>Price</th>
-        <th>Currency</th>
-        <th>Price (EUR)</th>
-        <th>Coupon %</th>
-        <th>Maturity</th>
-        <th>Curr. Yield %</th>
-        <th>Tot. Yield to Maturity (per €1,000)</th>
+        <th onclick="sortTable(0)">ISIN <span class="arrow"></span></th>
+        <th onclick="sortTable(1)">Issuer <span class="arrow"></span></th>
+        <th onclick="sortTable(2)">Price <span class="arrow"></span></th>
+        <th onclick="sortTable(3)">Currency <span class="arrow"></span></th>
+        <th onclick="sortTable(4)">Price (EUR) <span class="arrow"></span></th>
+        <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
+        <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
+        <th onclick="sortTable(7)">Curr. Yield % <span class="arrow"></span></th>
+        <th onclick="sortTable(8)">Tot. Yield to Maturity (per €1,000) <span class="arrow"></span></th>
     </tr>
     </thead>
 
     <tbody>
     <#list bonds as b>
-        <tr>
-            <td>${b.isin()}</td>
-            <td>${b.issuer()}</td>
-            <td class="<#if (b.price() <=100)>good<#else>bad</#if>">
-                ${b.price()?string["0.00"]}</td>
-            <td>${b.currency()}</td>
-            <td>${b.priceEur()?string["0.00"]}</td>
-            <td>${b.couponPct()?string["0.00"]}</td>
-            <td>${b.maturity()}</td>
-            <td>${b.currentYieldPct()?string["0.00"]}</td>
-            <td>${b.totalYieldPctToMaturity()?string["0"]}</td>
-        </tr>
+    <tr>
+        <td>${b.isin()}</td>
+        <td>${b.issuer()}</td>
+        <td class="<#if (b.price() <=100)>good<#else>bad</#if>">
+            ${b.price()?string["0.00"]}
+        </td>
+        <td>${b.currency()}</td>
+        <td>${b.priceEur()?string["0.00"]}</td>
+        <td>${b.couponPct()?string["0.00"]}</td>
+        <td>${b.maturity()}</td>
+        <td>${b.currentYieldPct()?string["0.00"]}</td>
+        <td>${b.totalYieldPctToMaturity()?string["0"]}</td>
+    </tr>
     </#list>
     </tbody>
 </table>
