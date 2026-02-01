@@ -20,12 +20,18 @@
             flex-wrap: wrap;
             align-items: center;
         }
+        .controls .spacer {
+            margin-left: auto;
+        }
         .controls label {
             font-size: 13px;
         }
         .controls input, .controls select, .controls button {
             font-size: 13px;
             padding: 4px 6px;
+        }
+        .controls input[type="text"] {
+            min-width: 200px;
         }
 
         table {
@@ -261,7 +267,8 @@
         <input id="filterMaxMat" type="date" onchange="filterTable()">
     </label>
 
-    <button onclick="exportCSV()">⬇ Export CSV</button>
+    <div class="spacer"></div>
+    <button onclick="exportCSV()">📥 Export CSV</button>
 </div>
 
 <table id="bondTable">
