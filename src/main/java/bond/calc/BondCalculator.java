@@ -15,7 +15,7 @@ public class BondCalculator {
         double years = ChronoUnit.DAYS.between(LocalDate.now(), maturity) / 365.25;
         if (years <= 5) return null;
 
-        double currentYield = IT_TAX * 100 * couponPct / priceEur;
+        double currentYield = 100 * couponPct / priceEur;
         double Yield1000ToM = 10 * currentYield * years; // 1000 EUR investment
 
         return new Bond(
