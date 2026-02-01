@@ -5,8 +5,9 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import java.io.FileWriter;
+import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 public class HtmlReportWriter {
 
@@ -33,7 +34,7 @@ public class HtmlReportWriter {
         model.put("bonds", bonds);
         model.put("reportCurrency", reportCurrency);
         model.put("generatedAt",
-            java.time.LocalDateTime.now()
+            java.time.LocalDateTime.now(ZoneId.of("Europe/Zurich"))
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
         // distinct currencies for dropdown
