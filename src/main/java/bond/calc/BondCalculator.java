@@ -9,17 +9,17 @@ public class BondCalculator {
 
     private static final double IT_TAX = 0.875;
 
-    public Bond buildBond(String isin, String issuer,double price, double priceEur,  double priceChf,
+    public Bond buildBond(String isin, String issuer, double price, double priceEur, double priceChf,
                           double couponPct, LocalDate maturity, String currency) {
 
-        double years = ChronoUnit.DAYS.between(LocalDate.now(), maturity) / 365.25;
-        if (years <= 5) return null;
+        double years = Math.floor(ChronoUnit.DAYS.between(LocalDate.now(), maturity) / 365.25);
+        if (years <= 1) return null;
 
         double currentYield = 100 * couponPct / priceEur;
-        double Yield1000ToM = 10 * currentYield * years; // 1000 EUR investment
+        double YieldToM = 10 * currentYield * years + 1000 * (1 - (price - 100) / 100); // 1000 EUR investment
 
         double currentYieldChf = 100 * couponPct / priceChf;
-        double Yield1000ToMChf = 10 * currentYieldChf * years; // 1000 CHF investment
+        double YieldToMChf = 10 * currentYieldChf * years + 1000 * (1 - (price - 100) / 100); // 1000 CHF investment
 
         return new Bond(
             isin,
@@ -31,9 +31,9 @@ public class BondCalculator {
             couponPct,
             maturity,
             round(currentYield, 2),
-            round(Yield1000ToM, 0),
+            round(YieldToM, 0),
             round(currentYieldChf, 2),
-            round(Yield1000ToMChf, 0)
+            round(YieldToMChf, 0)
         );
     }
 

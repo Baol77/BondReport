@@ -12,7 +12,7 @@ public record Bond(
     double couponPct,
     LocalDate maturity,
     double currentYieldPct,
-    double totalYieldPctToMaturity,
+    double totalYieldToMat,
     double currentYieldPctChf,
-    double totalYieldPctToMaturityChf
+    double totalYieldToMatChf
 ) {}

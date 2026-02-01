@@ -51,6 +51,9 @@
         td:nth-child(2), th:nth-child(2) {
             text-align: left;
         }
+        td:nth-child(7), th:nth-child(7) {
+            white-space: nowrap;
+        }
         tr:hover {
             background: #eef6ff;
         }
@@ -120,12 +123,12 @@
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
             rows.forEach(r => {
-                const issuerCell = r.cells[1].innerText.toLowerCase();
+                const isinOrIssuerCell = (r.cells[0].innerText + " " + r.cells[1].innerText).toLowerCase();
                 const currencyCell = r.cells[3].innerText;
                 const mat = r.cells[6].innerText;
 
                 let ok = true;
-                if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
+                if (issuer && isinOrIssuerCell.indexOf(issuer) === -1) ok = false;
                 if (currency && currencyCell !== currency) ok = false;
                 if (minMat && mat < minMat) ok = false;
                 if (maxMat && mat > maxMat) ok = false;
@@ -134,13 +137,15 @@
             });
         }
 
-        function exportCSV() {
+       function exportCSV() {
             const rows = document.querySelectorAll("#bondTable tr");
             let csv = [];
 
             rows.forEach(r => {
-                const cols = Array.from(r.cells)
-                        .map(td => '"' + td.innerText.replace(/"/g, '""') + '"');
+                const cols = Array.from(r.cells).map(td => {
+                    const text = td.textContent.replace(/\s+/g, " ").trim();
+                    return '"' + text.replace(/"/g, '""') + '"';
+                });
                 csv.push(cols.join(","));
             });
 
@@ -151,7 +156,7 @@
             a.download = "bond-report.csv";
             a.click();
             URL.revokeObjectURL(url);
-        }
+       }
 
         /* ===== Gradient heatmap on Current Yield % ===== */
 
@@ -179,6 +184,7 @@
 
             rows.forEach(r => {
                 const v = parseNum(r.cells[7].innerText); // Curr. Yield %
+                const w = parseNum(r.cells[8].innerText); // Total Yield to maturity
 
                 let bg;
                 if (v <= 1) {
@@ -192,23 +198,47 @@
                 }
 
                 r.cells[7].style.backgroundColor = bg;
+
+                let bg2;
+                if (w <= 1100) {
+                    bg2 = "rgb(" + red.join(",") + ")";
+                } else if (w < 1400) {
+                    bg2 = lerpColor(red, yellow, (w - 1100) / 300);
+                } else if (w < 1700) {
+                    bg2 = lerpColor(yellow, green, (w - 1500) / 200);
+                } else {
+                    bg2 = "rgb(" + green.join(",") + ")";
+                }
+
+                r.cells[8].style.backgroundColor = bg2;
             });
         }
 
+        function setDefaultMaturityFilters() {
+            const today = new Date();
+            const min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
+            const max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
+
+            document.getElementById("filterMinMat").value = min.toISOString().slice(0,10);
+            document.getElementById("filterMaxMat").value = max.toISOString().slice(0,10);
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            sortTable(7, true);
+            setDefaultMaturityFilters();
+            filterTable();
+            sortTable(8, true);
             applyHeatmap();
         });
     </script>
 </head>
 <body>
 
-<h2>Bond Yield Ranking (${reportCurrency}, maturity &gt; 5 years)</h2>
+<h2>Bond Yield Ranking (${reportCurrency})</h2>
 
 <div class="controls">
     <label>
-        Issuer:
-        <input id="filterIssuer" type="text" placeholder="e.g. Romania" oninput="filterTable()">
+        ISIN / Issuer:
+        <input id="filterIssuer" type="text" placeholder="e.g. US900123AT75, Romania" oninput="filterTable()">
     </label>
 
     <label>
@@ -245,7 +275,7 @@
         <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
         <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
         <th onclick="sortTable(7)">Curr. Yield % <span class="arrow"></span></th>
-        <th onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000) <span class="arrow"></span></th>
+        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000) <span class="arrow"></span></th>
     </tr>
     </thead>
 
@@ -282,9 +312,9 @@
 
         <td>
             <#if reportCurrency == "EUR">
-            ${b.totalYieldPctToMaturity()?string["0"]}
+            ${b.totalYieldToMat()?string["0"]}
             <#else>
-            ${b.totalYieldPctToMaturityChf()?string["0"]}
+            ${b.totalYieldToMatChf()?string["0"]}
         </#if>
         </td>
     </tr>

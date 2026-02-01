@@ -51,6 +51,9 @@
         td:nth-child(2), th:nth-child(2) {
             text-align: left;
         }
+        td:nth-child(7), th:nth-child(7) {
+            white-space: nowrap;
+        }
         tr:hover {
             background: #eef6ff;
         }
@@ -120,12 +123,12 @@
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
             rows.forEach(r => {
-                const issuerCell = r.cells[1].innerText.toLowerCase();
+                const isinOrIssuerCell = (r.cells[0].innerText + " " + r.cells[1].innerText).toLowerCase();
                 const currencyCell = r.cells[3].innerText;
                 const mat = r.cells[6].innerText;
 
                 let ok = true;
-                if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
+                if (issuer && isinOrIssuerCell.indexOf(issuer) === -1) ok = false;
                 if (currency && currencyCell !== currency) ok = false;
                 if (minMat && mat < minMat) ok = false;
                 if (maxMat && mat > maxMat) ok = false;
@@ -134,13 +137,15 @@
             });
         }
 
-        function exportCSV() {
+       function exportCSV() {
             const rows = document.querySelectorAll("#bondTable tr");
             let csv = [];
 
             rows.forEach(r => {
-                const cols = Array.from(r.cells)
-                        .map(td => '"' + td.innerText.replace(/"/g, '""') + '"');
+                const cols = Array.from(r.cells).map(td => {
+                    const text = td.textContent.replace(/\s+/g, " ").trim();
+                    return '"' + text.replace(/"/g, '""') + '"';
+                });
                 csv.push(cols.join(","));
             });
 
@@ -151,7 +156,7 @@
             a.download = "bond-report.csv";
             a.click();
             URL.revokeObjectURL(url);
-        }
+       }
 
         /* ===== Gradient heatmap on Current Yield % ===== */
 
@@ -179,6 +184,7 @@
 
             rows.forEach(r => {
                 const v = parseNum(r.cells[7].innerText); // Curr. Yield %
+                const w = parseNum(r.cells[8].innerText); // Total Yield to maturity
 
                 let bg;
                 if (v <= 1) {
@@ -192,23 +198,47 @@
                 }
 
                 r.cells[7].style.backgroundColor = bg;
+
+                let bg2;
+                if (w <= 1100) {
+                    bg2 = "rgb(" + red.join(",") + ")";
+                } else if (w < 1400) {
+                    bg2 = lerpColor(red, yellow, (w - 1100) / 300);
+                } else if (w < 1700) {
+                    bg2 = lerpColor(yellow, green, (w - 1500) / 200);
+                } else {
+                    bg2 = "rgb(" + green.join(",") + ")";
+                }
+
+                r.cells[8].style.backgroundColor = bg2;
             });
         }
 
+        function setDefaultMaturityFilters() {
+            const today = new Date();
+            const min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
+            const max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
+
+            document.getElementById("filterMinMat").value = min.toISOString().slice(0,10);
+            document.getElementById("filterMaxMat").value = max.toISOString().slice(0,10);
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            sortTable(7, true);
+            setDefaultMaturityFilters();
+            filterTable();
+            sortTable(8, true);
             applyHeatmap();
         });
     </script>
 </head>
 <body>
 
-<h2>Bond Yield Ranking (EUR, maturity &gt; 5 years)</h2>
+<h2>Bond Yield Ranking (EUR)</h2>
 
 <div class="controls">
     <label>
-        Issuer:
-        <input id="filterIssuer" type="text" placeholder="e.g. Romania" oninput="filterTable()">
+        ISIN / Issuer:
+        <input id="filterIssuer" type="text" placeholder="e.g. US900123AT75, Romania" oninput="filterTable()">
     </label>
 
     <label>
@@ -217,6 +247,7 @@
             <option value="">All</option>
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
+            <option value="SEK">SEK</option>
             <option value="USD">USD</option>
         </select>
     </label>
@@ -245,11 +276,36 @@
         <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
         <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
         <th onclick="sortTable(7)">Curr. Yield % <span class="arrow"></span></th>
-        <th onclick="sortTable(8)">Tot. Yield to Maturity (per EUR 1,000) <span class="arrow"></span></th>
+        <th title="Supposing an investment of EUR1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per EUR 1,000) <span class="arrow"></span></th>
     </tr>
     </thead>
 
     <tbody>
+    <tr>
+        <td>US900123AL40</td>
+        <td>TURCHIA</td>
+
+        <td class="bad">
+            123,85
+        </td>
+
+        <td>USD</td>
+
+        <td>
+            103,91
+        </td>
+
+        <td>11,88</td>
+        <td>2030-01-15</td>
+
+        <td>
+            11,43
+        </td>
+
+        <td>
+            1104
+        </td>
+    </tr>
     <tr>
         <td>US900123AT75</td>
         <td>TURCHIA</td>
@@ -272,7 +328,7 @@
         </td>
 
         <td>
-            695
+            1588
         </td>
     </tr>
     <tr>
@@ -297,7 +353,7 @@
         </td>
 
         <td>
-            992
+            1932
         </td>
     </tr>
     <tr>
@@ -322,7 +378,32 @@
         </td>
 
         <td>
-            2201
+            3009
+        </td>
+    </tr>
+    <tr>
+        <td>SE0009496367</td>
+        <td>SVEZIA</td>
+
+        <td class="good">
+            97,00
+        </td>
+
+        <td>SEK</td>
+
+        <td>
+            9,22
+        </td>
+
+        <td>0,75</td>
+        <td>2028-05-12</td>
+
+        <td>
+            8,13
+        </td>
+
+        <td>
+            1193
         </td>
     </tr>
     <tr>
@@ -347,7 +428,7 @@
         </td>
 
         <td>
-            888
+            1777
         </td>
     </tr>
     <tr>
@@ -372,7 +453,7 @@
         </td>
 
         <td>
-            1186
+            2013
         </td>
     </tr>
     <tr>
@@ -397,7 +478,32 @@
         </td>
 
         <td>
-            543
+            1380
+        </td>
+    </tr>
+    <tr>
+        <td>XS2571922884</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            104,28
+        </td>
+
+        <td>USD</td>
+
+        <td>
+            87,49
+        </td>
+
+        <td>6,62</td>
+        <td>2028-02-17</td>
+
+        <td>
+            7,57
+        </td>
+
+        <td>
+            1109
         </td>
     </tr>
     <tr>
@@ -422,7 +528,7 @@
         </td>
 
         <td>
-            773
+            1702
         </td>
     </tr>
     <tr>
@@ -447,7 +553,7 @@
         </td>
 
         <td>
-            1350
+            2306
         </td>
     </tr>
     <tr>
@@ -472,7 +578,7 @@
         </td>
 
         <td>
-            583
+            1468
         </td>
     </tr>
     <tr>
@@ -497,7 +603,7 @@
         </td>
 
         <td>
-            1621
+            2751
         </td>
     </tr>
     <tr>
@@ -522,7 +628,7 @@
         </td>
 
         <td>
-            583
+            1541
         </td>
     </tr>
     <tr>
@@ -547,7 +653,7 @@
         </td>
 
         <td>
-            629
+            1624
         </td>
     </tr>
     <tr>
@@ -572,7 +678,57 @@
         </td>
 
         <td>
-            1703
+            3000
+        </td>
+    </tr>
+    <tr>
+        <td>XS2756521212</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            103,28
+        </td>
+
+        <td>USD</td>
+
+        <td>
+            86,65
+        </td>
+
+        <td>5,88</td>
+        <td>2029-01-30</td>
+
+        <td>
+            6,78
+        </td>
+
+        <td>
+            1103
+        </td>
+    </tr>
+    <tr>
+        <td>XS3114901336</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            103,27
+        </td>
+
+        <td>USD</td>
+
+        <td>
+            86,64
+        </td>
+
+        <td>5,75</td>
+        <td>2030-09-16</td>
+
+        <td>
+            6,64
+        </td>
+
+        <td>
+            1233
         </td>
     </tr>
     <tr>
@@ -597,7 +753,7 @@
         </td>
 
         <td>
-            438
+            1325
         </td>
     </tr>
     <tr>
@@ -622,7 +778,7 @@
         </td>
 
         <td>
-            840
+            1733
         </td>
     </tr>
     <tr>
@@ -647,7 +803,7 @@
         </td>
 
         <td>
-            1577
+            2821
         </td>
     </tr>
     <tr>
@@ -672,7 +828,7 @@
         </td>
 
         <td>
-            1224
+            2137
         </td>
     </tr>
     <tr>
@@ -697,7 +853,7 @@
         </td>
 
         <td>
-            1444
+            2619
         </td>
     </tr>
     <tr>
@@ -722,7 +878,7 @@
         </td>
 
         <td>
-            670
+            1679
         </td>
     </tr>
     <tr>
@@ -747,7 +903,32 @@
         </td>
 
         <td>
-            445
+            1363
+        </td>
+    </tr>
+    <tr>
+        <td>XS2538441598</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            110,05
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            110,05
+        </td>
+
+        <td>6,62</td>
+        <td>2029-09-27</td>
+
+        <td>
+            6,02
+        </td>
+
+        <td>
+            1080
         </td>
     </tr>
     <tr>
@@ -772,7 +953,7 @@
         </td>
 
         <td>
-            1110
+            2063
         </td>
     </tr>
     <tr>
@@ -797,7 +978,7 @@
         </td>
 
         <td>
-            689
+            1610
         </td>
     </tr>
     <tr>
@@ -822,7 +1003,7 @@
         </td>
 
         <td>
-            444
+            1313
         </td>
     </tr>
     <tr>
@@ -847,7 +1028,7 @@
         </td>
 
         <td>
-            500
+            1390
         </td>
     </tr>
     <tr>
@@ -872,7 +1053,7 @@
         </td>
 
         <td>
-            632
+            1605
         </td>
     </tr>
     <tr>
@@ -897,7 +1078,7 @@
         </td>
 
         <td>
-            1291
+            2452
         </td>
     </tr>
     <tr>
@@ -922,7 +1103,7 @@
         </td>
 
         <td>
-            553
+            1526
         </td>
     </tr>
     <tr>
@@ -947,7 +1128,57 @@
         </td>
 
         <td>
-            354
+            1260
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001135143</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            114,78
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            114,78
+        </td>
+
+        <td>6,25</td>
+        <td>2030-01-04</td>
+
+        <td>
+            5,45
+        </td>
+
+        <td>
+            1016
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000011868</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            110,71
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            110,71
+        </td>
+
+        <td>6,00</td>
+        <td>2029-01-31</td>
+
+        <td>
+            5,42
+        </td>
+
+        <td>
+            1001
         </td>
     </tr>
     <tr>
@@ -972,7 +1203,32 @@
         </td>
 
         <td>
-            382
+            1332
+        </td>
+    </tr>
+    <tr>
+        <td>XS2689949399</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            106,15
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            106,15
+        </td>
+
+        <td>5,50</td>
+        <td>2028-09-18</td>
+
+        <td>
+            5,18
+        </td>
+
+        <td>
+            1042
         </td>
     </tr>
     <tr>
@@ -997,7 +1253,32 @@
         </td>
 
         <td>
-            271
+            1100
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000291972</td>
+        <td>BELGIO</td>
+
+        <td class="bad">
+            106,90
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            106,90
+        </td>
+
+        <td>5,50</td>
+        <td>2028-03-28</td>
+
+        <td>
+            5,14
+        </td>
+
+        <td>
+            1034
         </td>
     </tr>
     <tr>
@@ -1022,7 +1303,7 @@
         </td>
 
         <td>
-            260
+            1193
         </td>
     </tr>
     <tr>
@@ -1047,7 +1328,32 @@
         </td>
 
         <td>
-            318
+            1258
+        </td>
+    </tr>
+    <tr>
+        <td>FR0000571218</td>
+        <td>FRANCIA</td>
+
+        <td class="bad">
+            109,54
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            109,54
+        </td>
+
+        <td>5,50</td>
+        <td>2029-04-25</td>
+
+        <td>
+            5,02
+        </td>
+
+        <td>
+            1055
         </td>
     </tr>
     <tr>
@@ -1072,7 +1378,7 @@
         </td>
 
         <td>
-            380
+            1271
         </td>
     </tr>
     <tr>
@@ -1097,7 +1403,32 @@
         </td>
 
         <td>
-            1194
+            2467
+        </td>
+    </tr>
+    <tr>
+        <td>XS2999533271</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            106,16
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            106,16
+        </td>
+
+        <td>5,25</td>
+        <td>2030-03-10</td>
+
+        <td>
+            4,95
+        </td>
+
+        <td>
+            1136
         </td>
     </tr>
     <tr>
@@ -1122,7 +1453,7 @@
         </td>
 
         <td>
-            331
+            1128
         </td>
     </tr>
     <tr>
@@ -1147,7 +1478,7 @@
         </td>
 
         <td>
-            277
+            1202
         </td>
     </tr>
     <tr>
@@ -1172,7 +1503,7 @@
         </td>
 
         <td>
-            344
+            1173
         </td>
     </tr>
     <tr>
@@ -1197,7 +1528,7 @@
         </td>
 
         <td>
-            318
+            1120
         </td>
     </tr>
     <tr>
@@ -1222,7 +1553,7 @@
         </td>
 
         <td>
-            687
+            1678
         </td>
     </tr>
     <tr>
@@ -1247,7 +1578,82 @@
         </td>
 
         <td>
-            586
+            1570
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001135176</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            114,31
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            114,31
+        </td>
+
+        <td>5,50</td>
+        <td>2031-01-04</td>
+
+        <td>
+            4,81
+        </td>
+
+        <td>
+            1049
+        </td>
+    </tr>
+    <tr>
+        <td>IT0001278511</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            109,85
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            109,85
+        </td>
+
+        <td>5,25</td>
+        <td>2029-11-01</td>
+
+        <td>
+            4,78
+        </td>
+
+        <td>
+            1045
+        </td>
+    </tr>
+    <tr>
+        <td>ES00000124C5</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            107,64
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            107,64
+        </td>
+
+        <td>5,15</td>
+        <td>2028-10-31</td>
+
+        <td>
+            4,78
+        </td>
+
+        <td>
+            1019
         </td>
     </tr>
     <tr>
@@ -1272,7 +1678,57 @@
         </td>
 
         <td>
-            622
+            1749
+        </td>
+    </tr>
+    <tr>
+        <td>IT0004889033</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            106,12
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            106,12
+        </td>
+
+        <td>4,75</td>
+        <td>2028-09-01</td>
+
+        <td>
+            4,48
+        </td>
+
+        <td>
+            1028
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001135085</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            106,24
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            106,24
+        </td>
+
+        <td>4,75</td>
+        <td>2028-07-04</td>
+
+        <td>
+            4,47
+        </td>
+
+        <td>
+            1027
         </td>
     </tr>
     <tr>
@@ -1297,7 +1753,7 @@
         </td>
 
         <td>
-            455
+            1340
         </td>
     </tr>
     <tr>
@@ -1322,7 +1778,7 @@
         </td>
 
         <td>
-            376
+            1223
         </td>
     </tr>
     <tr>
@@ -1347,7 +1803,7 @@
         </td>
 
         <td>
-            1309
+            2227
         </td>
     </tr>
     <tr>
@@ -1372,7 +1828,7 @@
         </td>
 
         <td>
-            369
+            1333
         </td>
     </tr>
     <tr>
@@ -1397,7 +1853,7 @@
         </td>
 
         <td>
-            642
+            1480
         </td>
     </tr>
     <tr>
@@ -1422,7 +1878,7 @@
         </td>
 
         <td>
-            594
+            1437
         </td>
     </tr>
     <tr>
@@ -1447,7 +1903,7 @@
         </td>
 
         <td>
-            401
+            1253
         </td>
     </tr>
     <tr>
@@ -1472,7 +1928,7 @@
         </td>
 
         <td>
-            819
+            1606
         </td>
     </tr>
     <tr>
@@ -1497,7 +1953,7 @@
         </td>
 
         <td>
-            1201
+            2136
         </td>
     </tr>
     <tr>
@@ -1522,7 +1978,7 @@
         </td>
 
         <td>
-            802
+            1677
         </td>
     </tr>
     <tr>
@@ -1547,7 +2003,7 @@
         </td>
 
         <td>
-            419
+            1488
         </td>
     </tr>
     <tr>
@@ -1572,7 +2028,7 @@
         </td>
 
         <td>
-            1474
+            2535
         </td>
     </tr>
     <tr>
@@ -1597,7 +2053,7 @@
         </td>
 
         <td>
-            1232
+            2204
         </td>
     </tr>
     <tr>
@@ -1622,7 +2078,7 @@
         </td>
 
         <td>
-            621
+            1457
         </td>
     </tr>
     <tr>
@@ -1647,7 +2103,7 @@
         </td>
 
         <td>
-            395
+            1275
         </td>
     </tr>
     <tr>
@@ -1672,7 +2128,7 @@
         </td>
 
         <td>
-            368
+            1254
         </td>
     </tr>
     <tr>
@@ -1697,7 +2153,7 @@
         </td>
 
         <td>
-            789
+            1763
         </td>
     </tr>
     <tr>
@@ -1722,7 +2178,7 @@
         </td>
 
         <td>
-            1239
+            2286
         </td>
     </tr>
     <tr>
@@ -1747,7 +2203,7 @@
         </td>
 
         <td>
-            722
+            1717
         </td>
     </tr>
     <tr>
@@ -1772,7 +2228,7 @@
         </td>
 
         <td>
-            824
+            1830
         </td>
     </tr>
     <tr>
@@ -1797,7 +2253,7 @@
         </td>
 
         <td>
-            309
+            1291
         </td>
     </tr>
     <tr>
@@ -1822,7 +2278,7 @@
         </td>
 
         <td>
-            739
+            1656
         </td>
     </tr>
     <tr>
@@ -1847,7 +2303,7 @@
         </td>
 
         <td>
-            639
+            1557
         </td>
     </tr>
     <tr>
@@ -1872,7 +2328,7 @@
         </td>
 
         <td>
-            650
+            1509
         </td>
     </tr>
     <tr>
@@ -1897,7 +2353,7 @@
         </td>
 
         <td>
-            751
+            1726
         </td>
     </tr>
     <tr>
@@ -1922,7 +2378,7 @@
         </td>
 
         <td>
-            1187
+            2185
         </td>
     </tr>
     <tr>
@@ -1947,7 +2403,7 @@
         </td>
 
         <td>
-            292
+            1174
         </td>
     </tr>
     <tr>
@@ -1972,7 +2428,7 @@
         </td>
 
         <td>
-            673
+            1973
         </td>
     </tr>
     <tr>
@@ -1997,7 +2453,7 @@
         </td>
 
         <td>
-            499
+            1685
         </td>
     </tr>
     <tr>
@@ -2022,7 +2478,7 @@
         </td>
 
         <td>
-            346
+            1175
         </td>
     </tr>
     <tr>
@@ -2047,7 +2503,7 @@
         </td>
 
         <td>
-            221
+            1172
         </td>
     </tr>
     <tr>
@@ -2072,7 +2528,7 @@
         </td>
 
         <td>
-            826
+            1810
         </td>
     </tr>
     <tr>
@@ -2097,7 +2553,7 @@
         </td>
 
         <td>
-            215
+            1132
         </td>
     </tr>
     <tr>
@@ -2122,7 +2578,7 @@
         </td>
 
         <td>
-            507
+            1415
         </td>
     </tr>
     <tr>
@@ -2147,7 +2603,7 @@
         </td>
 
         <td>
-            326
+            1402
         </td>
     </tr>
     <tr>
@@ -2172,7 +2628,7 @@
         </td>
 
         <td>
-            498
+            1472
         </td>
     </tr>
     <tr>
@@ -2197,7 +2653,7 @@
         </td>
 
         <td>
-            1165
+            2148
         </td>
     </tr>
     <tr>
@@ -2222,7 +2678,7 @@
         </td>
 
         <td>
-            293
+            1197
         </td>
     </tr>
     <tr>
@@ -2247,7 +2703,7 @@
         </td>
 
         <td>
-            646
+            1567
         </td>
     </tr>
     <tr>
@@ -2272,7 +2728,7 @@
         </td>
 
         <td>
-            951
+            1972
         </td>
     </tr>
     <tr>
@@ -2297,7 +2753,7 @@
         </td>
 
         <td>
-            610
+            1549
         </td>
     </tr>
     <tr>
@@ -2322,7 +2778,7 @@
         </td>
 
         <td>
-            311
+            1199
         </td>
     </tr>
     <tr>
@@ -2347,7 +2803,7 @@
         </td>
 
         <td>
-            579
+            1379
         </td>
     </tr>
     <tr>
@@ -2372,7 +2828,7 @@
         </td>
 
         <td>
-            1175
+            2285
         </td>
     </tr>
     <tr>
@@ -2397,7 +2853,7 @@
         </td>
 
         <td>
-            1620
+            2739
         </td>
     </tr>
     <tr>
@@ -2422,7 +2878,7 @@
         </td>
 
         <td>
-            1165
+            2336
         </td>
     </tr>
     <tr>
@@ -2447,7 +2903,7 @@
         </td>
 
         <td>
-            543
+            1474
         </td>
     </tr>
     <tr>
@@ -2472,7 +2928,7 @@
         </td>
 
         <td>
-            1537
+            2499
         </td>
     </tr>
     <tr>
@@ -2497,7 +2953,7 @@
         </td>
 
         <td>
-            601
+            1898
         </td>
     </tr>
     <tr>
@@ -2522,7 +2978,7 @@
         </td>
 
         <td>
-            291
+            1200
         </td>
     </tr>
     <tr>
@@ -2547,7 +3003,7 @@
         </td>
 
         <td>
-            534
+            1573
         </td>
     </tr>
     <tr>
@@ -2572,7 +3028,32 @@
         </td>
 
         <td>
-            539
+            1526
+        </td>
+    </tr>
+    <tr>
+        <td>XS2536817211</td>
+        <td>BULGARIA</td>
+
+        <td class="bad">
+            104,97
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,97
+        </td>
+
+        <td>4,12</td>
+        <td>2029-09-23</td>
+
+        <td>
+            3,93
+        </td>
+
+        <td>
+            1068
         </td>
     </tr>
     <tr>
@@ -2597,7 +3078,7 @@
         </td>
 
         <td>
-            197
+            1284
         </td>
     </tr>
     <tr>
@@ -2622,7 +3103,32 @@
         </td>
 
         <td>
-            317
+            1242
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005566408</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            104,98
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,98
+        </td>
+
+        <td>4,10</td>
+        <td>2029-02-01</td>
+
+        <td>
+            3,91
+        </td>
+
+        <td>
+            1067
         </td>
     </tr>
     <tr>
@@ -2647,7 +3153,7 @@
         </td>
 
         <td>
-            1601
+            2880
         </td>
     </tr>
     <tr>
@@ -2672,7 +3178,7 @@
         </td>
 
         <td>
-            1108
+            2248
         </td>
     </tr>
     <tr>
@@ -2697,7 +3203,32 @@
         </td>
 
         <td>
-            742
+            1689
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005565400</td>
+        <td>ITALY VALORE</td>
+
+        <td class="bad">
+            105,09
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            105,09
+        </td>
+
+        <td>4,10</td>
+        <td>2028-10-10</td>
+
+        <td>
+            3,90
+        </td>
+
+        <td>
+            1027
         </td>
     </tr>
     <tr>
@@ -2722,7 +3253,7 @@
         </td>
 
         <td>
-            428
+            1311
         </td>
     </tr>
     <tr>
@@ -2747,7 +3278,7 @@
         </td>
 
         <td>
-            494
+            1435
         </td>
     </tr>
     <tr>
@@ -2772,7 +3303,32 @@
         </td>
 
         <td>
-            455
+            1382
+        </td>
+    </tr>
+    <tr>
+        <td>XS2753429047</td>
+        <td>UNGHERIA GREEN BOND</td>
+
+        <td class="bad">
+            103,18
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,18
+        </td>
+
+        <td>4,00</td>
+        <td>2029-07-25</td>
+
+        <td>
+            3,88
+        </td>
+
+        <td>
+            1085
         </td>
     </tr>
     <tr>
@@ -2797,7 +3353,7 @@
         </td>
 
         <td>
-            750
+            1765
         </td>
     </tr>
     <tr>
@@ -2822,7 +3378,7 @@
         </td>
 
         <td>
-            441
+            1420
         </td>
     </tr>
     <tr>
@@ -2847,7 +3403,7 @@
         </td>
 
         <td>
-            1088
+            2129
         </td>
     </tr>
     <tr>
@@ -2872,7 +3428,7 @@
         </td>
 
         <td>
-            563
+            1535
         </td>
     </tr>
     <tr>
@@ -2897,7 +3453,7 @@
         </td>
 
         <td>
-            422
+            1342
         </td>
     </tr>
     <tr>
@@ -2922,7 +3478,7 @@
         </td>
 
         <td>
-            313
+            1394
         </td>
     </tr>
     <tr>
@@ -2947,7 +3503,7 @@
         </td>
 
         <td>
-            1085
+            2291
         </td>
     </tr>
     <tr>
@@ -2972,7 +3528,7 @@
         </td>
 
         <td>
-            844
+            1939
         </td>
     </tr>
     <tr>
@@ -2997,7 +3553,7 @@
         </td>
 
         <td>
-            1376
+            2345
         </td>
     </tr>
     <tr>
@@ -3022,7 +3578,7 @@
         </td>
 
         <td>
-            420
+            1374
         </td>
     </tr>
     <tr>
@@ -3047,7 +3603,7 @@
         </td>
 
         <td>
-            426
+            1341
         </td>
     </tr>
     <tr>
@@ -3072,7 +3628,7 @@
         </td>
 
         <td>
-            424
+            1331
         </td>
     </tr>
     <tr>
@@ -3097,7 +3653,7 @@
         </td>
 
         <td>
-            563
+            1840
         </td>
     </tr>
     <tr>
@@ -3122,7 +3678,7 @@
         </td>
 
         <td>
-            719
+            1883
         </td>
     </tr>
     <tr>
@@ -3147,7 +3703,7 @@
         </td>
 
         <td>
-            350
+            1286
         </td>
     </tr>
     <tr>
@@ -3172,7 +3728,32 @@
         </td>
 
         <td>
-            273
+            1176
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005561888</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            105,84
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            105,84
+        </td>
+
+        <td>4,00</td>
+        <td>2030-11-15</td>
+
+        <td>
+            3,78
+        </td>
+
+        <td>
+            1093
         </td>
     </tr>
     <tr>
@@ -3197,7 +3778,7 @@
         </td>
 
         <td>
-            508
+            1454
         </td>
     </tr>
     <tr>
@@ -3222,7 +3803,7 @@
         </td>
 
         <td>
-            506
+            1364
         </td>
     </tr>
     <tr>
@@ -3247,7 +3828,7 @@
         </td>
 
         <td>
-            613
+            1644
         </td>
     </tr>
     <tr>
@@ -3272,7 +3853,7 @@
         </td>
 
         <td>
-            216
+            1126
         </td>
     </tr>
     <tr>
@@ -3297,7 +3878,7 @@
         </td>
 
         <td>
-            251
+            1158
         </td>
     </tr>
     <tr>
@@ -3322,7 +3903,57 @@
         </td>
 
         <td>
-            230
+            1156
+        </td>
+    </tr>
+    <tr>
+        <td>GR0114033583</td>
+        <td>GRECIA</td>
+
+        <td class="bad">
+            103,56
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,56
+        </td>
+
+        <td>3,88</td>
+        <td>2028-06-15</td>
+
+        <td>
+            3,74
+        </td>
+
+        <td>
+            1039
+        </td>
+    </tr>
+    <tr>
+        <td>XS2722876609</td>
+        <td>LETTONIA</td>
+
+        <td class="bad">
+            103,81
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,81
+        </td>
+
+        <td>3,88</td>
+        <td>2029-05-22</td>
+
+        <td>
+            3,73
+        </td>
+
+        <td>
+            1074
         </td>
     </tr>
     <tr>
@@ -3347,7 +3978,32 @@
         </td>
 
         <td>
-            262
+            1220
+        </td>
+    </tr>
+    <tr>
+        <td>GR0124035693</td>
+        <td>GRECIA</td>
+
+        <td class="bad">
+            104,50
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,50
+        </td>
+
+        <td>3,88</td>
+        <td>2029-03-12</td>
+
+        <td>
+            3,71
+        </td>
+
+        <td>
+            1066
         </td>
     </tr>
     <tr>
@@ -3372,7 +4028,7 @@
         </td>
 
         <td>
-            333
+            1254
         </td>
     </tr>
     <tr>
@@ -3397,7 +4053,7 @@
         </td>
 
         <td>
-            259
+            1167
         </td>
     </tr>
     <tr>
@@ -3422,7 +4078,7 @@
         </td>
 
         <td>
-            756
+            1851
         </td>
     </tr>
     <tr>
@@ -3447,7 +4103,7 @@
         </td>
 
         <td>
-            310
+            1250
         </td>
     </tr>
     <tr>
@@ -3472,7 +4128,57 @@
         </td>
 
         <td>
-            403
+            1279
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005519787</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            104,85
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,85
+        </td>
+
+        <td>3,85</td>
+        <td>2029-12-15</td>
+
+        <td>
+            3,67
+        </td>
+
+        <td>
+            1062
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005548315</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            103,66
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,66
+        </td>
+
+        <td>3,80</td>
+        <td>2028-08-01</td>
+
+        <td>
+            3,67
+        </td>
+
+        <td>
+            1037
         </td>
     </tr>
     <tr>
@@ -3497,7 +4203,32 @@
         </td>
 
         <td>
-            637
+            1681
+        </td>
+    </tr>
+    <tr>
+        <td>PTOTEROE0014</td>
+        <td>PORTOGALLO</td>
+
+        <td class="bad">
+            105,88
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            105,88
+        </td>
+
+        <td>3,88</td>
+        <td>2030-02-15</td>
+
+        <td>
+            3,66
+        </td>
+
+        <td>
+            1088
         </td>
     </tr>
     <tr>
@@ -3522,7 +4253,7 @@
         </td>
 
         <td>
-            854
+            2017
         </td>
     </tr>
     <tr>
@@ -3547,7 +4278,7 @@
         </td>
 
         <td>
-            704
+            1801
         </td>
     </tr>
     <tr>
@@ -3572,7 +4303,7 @@
         </td>
 
         <td>
-            378
+            1370
         </td>
     </tr>
     <tr>
@@ -3597,7 +4328,7 @@
         </td>
 
         <td>
-            397
+            1264
         </td>
     </tr>
     <tr>
@@ -3622,7 +4353,7 @@
         </td>
 
         <td>
-            1465
+            2858
         </td>
     </tr>
     <tr>
@@ -3647,7 +4378,7 @@
         </td>
 
         <td>
-            595
+            1631
         </td>
     </tr>
     <tr>
@@ -3672,7 +4403,7 @@
         </td>
 
         <td>
-            3330
+            4730
         </td>
     </tr>
     <tr>
@@ -3697,7 +4428,32 @@
         </td>
 
         <td>
-            651
+            1839
+        </td>
+    </tr>
+    <tr>
+        <td>XS2178857954</td>
+        <td>ROMANIA</td>
+
+        <td class="bad">
+            100,05
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,05
+        </td>
+
+        <td>3,62</td>
+        <td>2030-05-26</td>
+
+        <td>
+            3,62
+        </td>
+
+        <td>
+            1144
         </td>
     </tr>
     <tr>
@@ -3722,7 +4478,7 @@
         </td>
 
         <td>
-            1664
+            3066
         </td>
     </tr>
     <tr>
@@ -3747,7 +4503,7 @@
         </td>
 
         <td>
-            631
+            1658
         </td>
     </tr>
     <tr>
@@ -3772,7 +4528,7 @@
         </td>
 
         <td>
-            535
+            1519
         </td>
     </tr>
     <tr>
@@ -3797,7 +4553,7 @@
         </td>
 
         <td>
-            320
+            1272
         </td>
     </tr>
     <tr>
@@ -3822,7 +4578,32 @@
         </td>
 
         <td>
-            339
+            1299
+        </td>
+    </tr>
+    <tr>
+        <td>US465410BY32</td>
+        <td>REPUBLIC OF ITALY</td>
+
+        <td class="good">
+            96,25
+        </td>
+
+        <td>USD</td>
+
+        <td>
+            80,75
+        </td>
+
+        <td>2,88</td>
+        <td>2029-10-17</td>
+
+        <td>
+            3,56
+        </td>
+
+        <td>
+            1144
         </td>
     </tr>
     <tr>
@@ -3847,7 +4628,7 @@
         </td>
 
         <td>
-            568
+            1482
         </td>
     </tr>
     <tr>
@@ -3872,7 +4653,7 @@
         </td>
 
         <td>
-            983
+            2069
         </td>
     </tr>
     <tr>
@@ -3897,7 +4678,7 @@
         </td>
 
         <td>
-            282
+            1228
         </td>
     </tr>
     <tr>
@@ -3922,7 +4703,7 @@
         </td>
 
         <td>
-            342
+            1302
         </td>
     </tr>
     <tr>
@@ -3947,7 +4728,32 @@
         </td>
 
         <td>
-            332
+            1296
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005542797</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            104,45
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,45
+        </td>
+
+        <td>3,70</td>
+        <td>2030-06-15</td>
+
+        <td>
+            3,54
+        </td>
+
+        <td>
+            1097
         </td>
     </tr>
     <tr>
@@ -3972,7 +4778,7 @@
         </td>
 
         <td>
-            1049
+            2132
         </td>
     </tr>
     <tr>
@@ -3997,7 +4803,7 @@
         </td>
 
         <td>
-            1025
+            2178
         </td>
     </tr>
     <tr>
@@ -4022,7 +4828,32 @@
         </td>
 
         <td>
-            231
+            1178
+        </td>
+    </tr>
+    <tr>
+        <td>XS2726911931</td>
+        <td>POLONIA</td>
+
+        <td class="bad">
+            103,26
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,26
+        </td>
+
+        <td>3,62</td>
+        <td>2030-11-29</td>
+
+        <td>
+            3,51
+        </td>
+
+        <td>
+            1108
         </td>
     </tr>
     <tr>
@@ -4047,7 +4878,7 @@
         </td>
 
         <td>
-            342
+            1308
         </td>
     </tr>
     <tr>
@@ -4072,7 +4903,7 @@
         </td>
 
         <td>
-            1397
+            2881
         </td>
     </tr>
     <tr>
@@ -4097,7 +4928,7 @@
         </td>
 
         <td>
-            1090
+            2428
         </td>
     </tr>
     <tr>
@@ -4122,7 +4953,7 @@
         </td>
 
         <td>
-            287
+            1271
         </td>
     </tr>
     <tr>
@@ -4147,7 +4978,7 @@
         </td>
 
         <td>
-            428
+            1404
         </td>
     </tr>
     <tr>
@@ -4172,7 +5003,7 @@
         </td>
 
         <td>
-            344
+            1307
         </td>
     </tr>
     <tr>
@@ -4197,7 +5028,7 @@
         </td>
 
         <td>
-            493
+            1498
         </td>
     </tr>
     <tr>
@@ -4222,7 +5053,7 @@
         </td>
 
         <td>
-            657
+            1714
         </td>
     </tr>
     <tr>
@@ -4247,7 +5078,7 @@
         </td>
 
         <td>
-            267
+            1217
         </td>
     </tr>
     <tr>
@@ -4272,7 +5103,7 @@
         </td>
 
         <td>
-            265
+            1201
         </td>
     </tr>
     <tr>
@@ -4297,7 +5128,7 @@
         </td>
 
         <td>
-            209
+            1285
         </td>
     </tr>
     <tr>
@@ -4322,7 +5153,7 @@
         </td>
 
         <td>
-            322
+            1315
         </td>
     </tr>
     <tr>
@@ -4347,7 +5178,7 @@
         </td>
 
         <td>
-            352
+            1345
         </td>
     </tr>
     <tr>
@@ -4372,7 +5203,57 @@
         </td>
 
         <td>
-            170
+            1133
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005024234</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            103,68
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,68
+        </td>
+
+        <td>3,50</td>
+        <td>2030-03-01</td>
+
+        <td>
+            3,38
+        </td>
+
+        <td>
+            1098
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012M51</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            103,68
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,68
+        </td>
+
+        <td>3,50</td>
+        <td>2029-05-31</td>
+
+        <td>
+            3,38
+        </td>
+
+        <td>
+            1064
         </td>
     </tr>
     <tr>
@@ -4397,7 +5278,7 @@
         </td>
 
         <td>
-            407
+            1441
         </td>
     </tr>
     <tr>
@@ -4422,7 +5303,7 @@
         </td>
 
         <td>
-            709
+            1903
         </td>
     </tr>
     <tr>
@@ -4447,7 +5328,7 @@
         </td>
 
         <td>
-            697
+            1809
         </td>
     </tr>
     <tr>
@@ -4472,7 +5353,7 @@
         </td>
 
         <td>
-            294
+            1243
         </td>
     </tr>
     <tr>
@@ -4497,7 +5378,7 @@
         </td>
 
         <td>
-            617
+            1665
         </td>
     </tr>
     <tr>
@@ -4522,7 +5403,7 @@
         </td>
 
         <td>
-            822
+            2070
         </td>
     </tr>
     <tr>
@@ -4547,7 +5428,7 @@
         </td>
 
         <td>
-            471
+            1541
         </td>
     </tr>
     <tr>
@@ -4572,7 +5453,7 @@
         </td>
 
         <td>
-            279
+            1256
         </td>
     </tr>
     <tr>
@@ -4597,7 +5478,7 @@
         </td>
 
         <td>
-            182
+            1134
         </td>
     </tr>
     <tr>
@@ -4622,7 +5503,32 @@
         </td>
 
         <td>
-            303
+            1295
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005521981</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            102,45
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,45
+        </td>
+
+        <td>3,40</td>
+        <td>2028-04-01</td>
+
+        <td>
+            3,32
+        </td>
+
+        <td>
+            1042
         </td>
     </tr>
     <tr>
@@ -4647,7 +5553,7 @@
         </td>
 
         <td>
-            592
+            1576
         </td>
     </tr>
     <tr>
@@ -4672,7 +5578,7 @@
         </td>
 
         <td>
-            749
+            1905
         </td>
     </tr>
     <tr>
@@ -4697,7 +5603,7 @@
         </td>
 
         <td>
-            337
+            1326
         </td>
     </tr>
     <tr>
@@ -4722,7 +5628,7 @@
         </td>
 
         <td>
-            996
+            2090
         </td>
     </tr>
     <tr>
@@ -4747,7 +5653,7 @@
         </td>
 
         <td>
-            439
+            1444
         </td>
     </tr>
     <tr>
@@ -4772,7 +5678,32 @@
         </td>
 
         <td>
-            534
+            1521
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005584849</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            102,92
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,92
+        </td>
+
+        <td>3,35</td>
+        <td>2029-07-01</td>
+
+        <td>
+            3,25
+        </td>
+
+        <td>
+            1068
         </td>
     </tr>
     <tr>
@@ -4797,7 +5728,7 @@
         </td>
 
         <td>
-            257
+            1221
         </td>
     </tr>
     <tr>
@@ -4822,7 +5753,7 @@
         </td>
 
         <td>
-            294
+            1318
         </td>
     </tr>
     <tr>
@@ -4847,7 +5778,32 @@
         </td>
 
         <td>
-            333
+            1312
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005594483</td>
+        <td>ITALY VALORE</td>
+
+        <td class="bad">
+            103,88
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            103,88
+        </td>
+
+        <td>3,35</td>
+        <td>2030-05-14</td>
+
+        <td>
+            3,22
+        </td>
+
+        <td>
+            1090
         </td>
     </tr>
     <tr>
@@ -4872,7 +5828,7 @@
         </td>
 
         <td>
-            854
+            2165
         </td>
     </tr>
     <tr>
@@ -4897,7 +5853,7 @@
         </td>
 
         <td>
-            312
+            1291
         </td>
     </tr>
     <tr>
@@ -4922,7 +5878,7 @@
         </td>
 
         <td>
-            264
+            1243
         </td>
     </tr>
     <tr>
@@ -4947,7 +5903,7 @@
         </td>
 
         <td>
-            218
+            1178
         </td>
     </tr>
     <tr>
@@ -4972,7 +5928,7 @@
         </td>
 
         <td>
-            206
+            1175
         </td>
     </tr>
     <tr>
@@ -4997,7 +5953,7 @@
         </td>
 
         <td>
-            1939
+            3445
         </td>
     </tr>
     <tr>
@@ -5022,7 +5978,7 @@
         </td>
 
         <td>
-            564
+            1599
         </td>
     </tr>
     <tr>
@@ -5047,7 +6003,7 @@
         </td>
 
         <td>
-            399
+            1451
         </td>
     </tr>
     <tr>
@@ -5072,7 +6028,7 @@
         </td>
 
         <td>
-            1444
+            2962
         </td>
     </tr>
     <tr>
@@ -5097,7 +6053,7 @@
         </td>
 
         <td>
-            291
+            1285
         </td>
     </tr>
     <tr>
@@ -5122,7 +6078,7 @@
         </td>
 
         <td>
-            170
+            1125
         </td>
     </tr>
     <tr>
@@ -5147,7 +6103,7 @@
         </td>
 
         <td>
-            294
+            1293
         </td>
     </tr>
     <tr>
@@ -5172,7 +6128,32 @@
         </td>
 
         <td>
-            223
+            1214
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005583486</td>
+        <td>ITALY VALORE</td>
+
+        <td class="bad">
+            104,01
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            104,01
+        </td>
+
+        <td>3,25</td>
+        <td>2030-03-05</td>
+
+        <td>
+            3,12
+        </td>
+
+        <td>
+            1085
         </td>
     </tr>
     <tr>
@@ -5197,7 +6178,7 @@
         </td>
 
         <td>
-            200
+            1183
         </td>
     </tr>
     <tr>
@@ -5222,7 +6203,7 @@
         </td>
 
         <td>
-            225
+            1203
         </td>
     </tr>
     <tr>
@@ -5247,7 +6228,7 @@
         </td>
 
         <td>
-            179
+            1139
         </td>
     </tr>
     <tr>
@@ -5272,7 +6253,7 @@
         </td>
 
         <td>
-            321
+            1305
         </td>
     </tr>
     <tr>
@@ -5297,7 +6278,7 @@
         </td>
 
         <td>
-            532
+            1710
         </td>
     </tr>
     <tr>
@@ -5322,7 +6303,7 @@
         </td>
 
         <td>
-            176
+            1139
         </td>
     </tr>
     <tr>
@@ -5347,7 +6328,7 @@
         </td>
 
         <td>
-            643
+            1718
         </td>
     </tr>
     <tr>
@@ -5372,7 +6353,7 @@
         </td>
 
         <td>
-            270
+            1268
         </td>
     </tr>
     <tr>
@@ -5397,7 +6378,7 @@
         </td>
 
         <td>
-            167
+            1131
         </td>
     </tr>
     <tr>
@@ -5422,7 +6403,7 @@
         </td>
 
         <td>
-            400
+            1485
         </td>
     </tr>
     <tr>
@@ -5447,7 +6428,7 @@
         </td>
 
         <td>
-            865
+            2024
         </td>
     </tr>
     <tr>
@@ -5472,7 +6453,7 @@
         </td>
 
         <td>
-            291
+            1279
         </td>
     </tr>
     <tr>
@@ -5497,7 +6478,7 @@
         </td>
 
         <td>
-            253
+            1248
         </td>
     </tr>
     <tr>
@@ -5522,7 +6503,7 @@
         </td>
 
         <td>
-            283
+            1278
         </td>
     </tr>
     <tr>
@@ -5547,7 +6528,7 @@
         </td>
 
         <td>
-            220
+            1216
         </td>
     </tr>
     <tr>
@@ -5572,7 +6553,7 @@
         </td>
 
         <td>
-            258
+            1240
         </td>
     </tr>
     <tr>
@@ -5597,7 +6578,7 @@
         </td>
 
         <td>
-            221
+            1206
         </td>
     </tr>
     <tr>
@@ -5622,7 +6603,7 @@
         </td>
 
         <td>
-            209
+            1172
         </td>
     </tr>
     <tr>
@@ -5647,7 +6628,7 @@
         </td>
 
         <td>
-            227
+            1201
         </td>
     </tr>
     <tr>
@@ -5672,7 +6653,7 @@
         </td>
 
         <td>
-            487
+            1591
         </td>
     </tr>
     <tr>
@@ -5697,7 +6678,57 @@
         </td>
 
         <td>
-            269
+            1273
+        </td>
+    </tr>
+    <tr>
+        <td>XS2975280509</td>
+        <td>POLONIA</td>
+
+        <td class="bad">
+            101,25
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,25
+        </td>
+
+        <td>3,00</td>
+        <td>2030-01-16</td>
+
+        <td>
+            2,96
+        </td>
+
+        <td>
+            1076
+        </td>
+    </tr>
+    <tr>
+        <td>XS1382696398</td>
+        <td>BULGARIA</td>
+
+        <td class="bad">
+            101,30
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,30
+        </td>
+
+        <td>3,00</td>
+        <td>2028-03-21</td>
+
+        <td>
+            2,96
+        </td>
+
+        <td>
+            1046
         </td>
     </tr>
     <tr>
@@ -5722,7 +6753,7 @@
         </td>
 
         <td>
-            732
+            2201
         </td>
     </tr>
     <tr>
@@ -5747,7 +6778,7 @@
         </td>
 
         <td>
-            682
+            2001
         </td>
     </tr>
     <tr>
@@ -5772,7 +6803,57 @@
         </td>
 
         <td>
-            629
+            1908
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005611055</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            101,75
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,75
+        </td>
+
+        <td>3,00</td>
+        <td>2029-10-01</td>
+
+        <td>
+            2,95
+        </td>
+
+        <td>
+            1071
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005365165</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            101,88
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,88
+        </td>
+
+        <td>3,00</td>
+        <td>2029-08-01</td>
+
+        <td>
+            2,94
+        </td>
+
+        <td>
+            1070
         </td>
     </tr>
     <tr>
@@ -5797,7 +6878,7 @@
         </td>
 
         <td>
-            652
+            1958
         </td>
     </tr>
     <tr>
@@ -5822,7 +6903,7 @@
         </td>
 
         <td>
-            356
+            1409
         </td>
     </tr>
     <tr>
@@ -5847,7 +6928,7 @@
         </td>
 
         <td>
-            254
+            1256
         </td>
     </tr>
     <tr>
@@ -5872,7 +6953,32 @@
         </td>
 
         <td>
-            755
+            2082
+        </td>
+    </tr>
+    <tr>
+        <td>XS1892141620</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            98,86
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            98,86
+        </td>
+
+        <td>2,88</td>
+        <td>2029-03-11</td>
+
+        <td>
+            2,91
+        </td>
+
+        <td>
+            1099
         </td>
     </tr>
     <tr>
@@ -5897,7 +7003,32 @@
         </td>
 
         <td>
-            234
+            1234
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005637399</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            101,33
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,33
+        </td>
+
+        <td>2,95</td>
+        <td>2030-07-01</td>
+
+        <td>
+            2,91
+        </td>
+
+        <td>
+            1103
         </td>
     </tr>
     <tr>
@@ -5922,7 +7053,7 @@
         </td>
 
         <td>
-            775
+            2098
         </td>
     </tr>
     <tr>
@@ -5947,7 +7078,7 @@
         </td>
 
         <td>
-            253
+            1241
         </td>
     </tr>
     <tr>
@@ -5972,7 +7103,32 @@
         </td>
 
         <td>
-            204
+            1197
+        </td>
+    </tr>
+    <tr>
+        <td>XS3268040964</td>
+        <td>POLONIA</td>
+
+        <td class="good">
+            99,80
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,80
+        </td>
+
+        <td>2,88</td>
+        <td>2031-01-15</td>
+
+        <td>
+            2,88
+        </td>
+
+        <td>
+            1117
         </td>
     </tr>
     <tr>
@@ -5997,7 +7153,32 @@
         </td>
 
         <td>
-            222
+            1203
+        </td>
+    </tr>
+    <tr>
+        <td>XS1420357318</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            99,94
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,94
+        </td>
+
+        <td>2,88</td>
+        <td>2028-05-26</td>
+
+        <td>
+            2,88
+        </td>
+
+        <td>
+            1058
         </td>
     </tr>
     <tr>
@@ -6022,7 +7203,7 @@
         </td>
 
         <td>
-            290
+            1283
         </td>
     </tr>
     <tr>
@@ -6047,7 +7228,32 @@
         </td>
 
         <td>
-            590
+            1704
+        </td>
+    </tr>
+    <tr>
+        <td>AT0000A33SH3</td>
+        <td>AUSTRIA GREEN BOND</td>
+
+        <td class="bad">
+            102,01
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,01
+        </td>
+
+        <td>2,90</td>
+        <td>2029-05-23</td>
+
+        <td>
+            2,84
+        </td>
+
+        <td>
+            1065
         </td>
     </tr>
     <tr>
@@ -6072,7 +7278,7 @@
         </td>
 
         <td>
-            200
+            1192
         </td>
     </tr>
     <tr>
@@ -6097,7 +7303,57 @@
         </td>
 
         <td>
-            2669
+            4356
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005671273</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            100,57
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,57
+        </td>
+
+        <td>2,85</td>
+        <td>2031-02-01</td>
+
+        <td>
+            2,83
+        </td>
+
+        <td>
+            1108
+        </td>
+    </tr>
+    <tr>
+        <td>FI4000557525</td>
+        <td>FINLANDIA</td>
+
+        <td class="bad">
+            101,74
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,74
+        </td>
+
+        <td>2,88</td>
+        <td>2029-04-15</td>
+
+        <td>
+            2,83
+        </td>
+
+        <td>
+            1067
         </td>
     </tr>
     <tr>
@@ -6122,7 +7378,7 @@
         </td>
 
         <td>
-            584
+            1854
         </td>
     </tr>
     <tr>
@@ -6147,7 +7403,7 @@
         </td>
 
         <td>
-            519
+            1620
         </td>
     </tr>
     <tr>
@@ -6172,7 +7428,7 @@
         </td>
 
         <td>
-            429
+            1496
         </td>
     </tr>
     <tr>
@@ -6197,7 +7453,7 @@
         </td>
 
         <td>
-            177
+            1188
         </td>
     </tr>
     <tr>
@@ -6222,7 +7478,7 @@
         </td>
 
         <td>
-            714
+            2089
         </td>
     </tr>
     <tr>
@@ -6247,7 +7503,7 @@
         </td>
 
         <td>
-            185
+            1166
         </td>
     </tr>
     <tr>
@@ -6272,7 +7528,57 @@
         </td>
 
         <td>
-            224
+            1234
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005495731</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            101,20
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,20
+        </td>
+
+        <td>2,80</td>
+        <td>2029-06-15</td>
+
+        <td>
+            2,77
+        </td>
+
+        <td>
+            1071
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005340929</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            101,38
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,38
+        </td>
+
+        <td>2,80</td>
+        <td>2028-12-01</td>
+
+        <td>
+            2,76
+        </td>
+
+        <td>
+            1041
         </td>
     </tr>
     <tr>
@@ -6297,7 +7603,57 @@
         </td>
 
         <td>
-            768
+            2015
+        </td>
+    </tr>
+    <tr>
+        <td>FR001400PM68</td>
+        <td>FRANCIA</td>
+
+        <td class="bad">
+            100,70
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,70
+        </td>
+
+        <td>2,75</td>
+        <td>2030-02-25</td>
+
+        <td>
+            2,73
+        </td>
+
+        <td>
+            1102
+        </td>
+    </tr>
+    <tr>
+        <td>XS1713475306</td>
+        <td>CROAZIA</td>
+
+        <td class="bad">
+            100,81
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,81
+        </td>
+
+        <td>2,75</td>
+        <td>2030-01-27</td>
+
+        <td>
+            2,73
+        </td>
+
+        <td>
+            1074
         </td>
     </tr>
     <tr>
@@ -6322,7 +7678,157 @@
         </td>
 
         <td>
-            664
+            2030
+        </td>
+    </tr>
+    <tr>
+        <td>FR001400HI98</td>
+        <td>FRANCIA</td>
+
+        <td class="bad">
+            101,19
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,19
+        </td>
+
+        <td>2,75</td>
+        <td>2029-02-25</td>
+
+        <td>
+            2,72
+        </td>
+
+        <td>
+            1070
+        </td>
+    </tr>
+    <tr>
+        <td>FI4000037635</td>
+        <td>FINLANDIA</td>
+
+        <td class="bad">
+            101,50
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,50
+        </td>
+
+        <td>2,75</td>
+        <td>2028-07-04</td>
+
+        <td>
+            2,71
+        </td>
+
+        <td>
+            1039
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005654642</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            100,05
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,05
+        </td>
+
+        <td>2,70</td>
+        <td>2030-10-01</td>
+
+        <td>
+            2,70
+        </td>
+
+        <td>
+            1107
+        </td>
+    </tr>
+    <tr>
+        <td>XS1713462668</td>
+        <td>CROAZIA</td>
+
+        <td class="bad">
+            100,85
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,85
+        </td>
+
+        <td>2,70</td>
+        <td>2028-06-15</td>
+
+        <td>
+            2,68
+        </td>
+
+        <td>
+            1045
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012O00</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            100,94
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,94
+        </td>
+
+        <td>2,70</td>
+        <td>2030-01-31</td>
+
+        <td>
+            2,67
+        </td>
+
+        <td>
+            1071
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000362716</td>
+        <td>BELGIO</td>
+
+        <td class="bad">
+            100,96
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,96
+        </td>
+
+        <td>2,70</td>
+        <td>2029-10-22</td>
+
+        <td>
+            2,67
+        </td>
+
+        <td>
+            1071
         </td>
     </tr>
     <tr>
@@ -6347,7 +7853,7 @@
         </td>
 
         <td>
-            232
+            1237
         </td>
     </tr>
     <tr>
@@ -6372,7 +7878,7 @@
         </td>
 
         <td>
-            620
+            1998
         </td>
     </tr>
     <tr>
@@ -6397,7 +7903,7 @@
         </td>
 
         <td>
-            252
+            1255
         </td>
     </tr>
     <tr>
@@ -6422,7 +7928,7 @@
         </td>
 
         <td>
-            164
+            1164
         </td>
     </tr>
     <tr>
@@ -6447,7 +7953,32 @@
         </td>
 
         <td>
-            224
+            1220
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005641029</td>
+        <td>ITALY</td>
+
+        <td class="bad">
+            100,89
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,89
+        </td>
+
+        <td>2,65</td>
+        <td>2028-06-15</td>
+
+        <td>
+            2,63
+        </td>
+
+        <td>
+            1044
         </td>
     </tr>
     <tr>
@@ -6472,7 +8003,7 @@
         </td>
 
         <td>
-            261
+            1329
         </td>
     </tr>
     <tr>
@@ -6497,7 +8028,7 @@
         </td>
 
         <td>
-            196
+            1185
         </td>
     </tr>
     <tr>
@@ -6522,7 +8053,57 @@
         </td>
 
         <td>
-            607
+            1889
+        </td>
+    </tr>
+    <tr>
+        <td>XS1768067297</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            96,09
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,09
+        </td>
+
+        <td>2,50</td>
+        <td>2030-02-08</td>
+
+        <td>
+            2,60
+        </td>
+
+        <td>
+            1143
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000365743</td>
+        <td>BELGIO</td>
+
+        <td class="bad">
+            100,09
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,09
+        </td>
+
+        <td>2,60</td>
+        <td>2030-10-22</td>
+
+        <td>
+            2,60
+        </td>
+
+        <td>
+            1103
         </td>
     </tr>
     <tr>
@@ -6547,7 +8128,7 @@
         </td>
 
         <td>
-            174
+            1151
         </td>
     </tr>
     <tr>
@@ -6572,7 +8153,7 @@
         </td>
 
         <td>
-            245
+            1268
         </td>
     </tr>
     <tr>
@@ -6597,7 +8178,7 @@
         </td>
 
         <td>
-            175
+            1172
         </td>
     </tr>
     <tr>
@@ -6622,7 +8203,7 @@
         </td>
 
         <td>
-            705
+            2152
         </td>
     </tr>
     <tr>
@@ -6647,7 +8228,7 @@
         </td>
 
         <td>
-            176
+            1185
         </td>
     </tr>
     <tr>
@@ -6672,7 +8253,7 @@
         </td>
 
         <td>
-            624
+            2031
         </td>
     </tr>
     <tr>
@@ -6697,7 +8278,7 @@
         </td>
 
         <td>
-            194
+            1222
         </td>
     </tr>
     <tr>
@@ -6722,7 +8303,7 @@
         </td>
 
         <td>
-            216
+            1229
         </td>
     </tr>
     <tr>
@@ -6747,7 +8328,7 @@
         </td>
 
         <td>
-            703
+            1985
         </td>
     </tr>
     <tr>
@@ -6772,7 +8353,7 @@
         </td>
 
         <td>
-            702
+            1983
         </td>
     </tr>
     <tr>
@@ -6797,7 +8378,7 @@
         </td>
 
         <td>
-            231
+            1251
         </td>
     </tr>
     <tr>
@@ -6822,7 +8403,7 @@
         </td>
 
         <td>
-            231
+            1249
         </td>
     </tr>
     <tr>
@@ -6847,7 +8428,7 @@
         </td>
 
         <td>
-            189
+            1195
         </td>
     </tr>
     <tr>
@@ -6872,7 +8453,7 @@
         </td>
 
         <td>
-            481
+            1688
         </td>
     </tr>
     <tr>
@@ -6897,7 +8478,7 @@
         </td>
 
         <td>
-            176
+            1163
         </td>
     </tr>
     <tr>
@@ -6922,7 +8503,7 @@
         </td>
 
         <td>
-            266
+            1358
         </td>
     </tr>
     <tr>
@@ -6947,7 +8528,32 @@
         </td>
 
         <td>
-            171
+            1156
+        </td>
+    </tr>
+    <tr>
+        <td>FR0011883966</td>
+        <td>FRANCIA</td>
+
+        <td class="good">
+            99,74
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,74
+        </td>
+
+        <td>2,50</td>
+        <td>2030-05-25</td>
+
+        <td>
+            2,51
+        </td>
+
+        <td>
+            1103
         </td>
     </tr>
     <tr>
@@ -6972,7 +8578,57 @@
         </td>
 
         <td>
-            207
+            1239
+        </td>
+    </tr>
+    <tr>
+        <td>FI4000577952</td>
+        <td>FINLANDIA</td>
+
+        <td class="bad">
+            100,26
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,26
+        </td>
+
+        <td>2,50</td>
+        <td>2030-04-15</td>
+
+        <td>
+            2,49
+        </td>
+
+        <td>
+            1097
+        </td>
+    </tr>
+    <tr>
+        <td>NL0015001DQ7</td>
+        <td>OLANDA</td>
+
+        <td class="bad">
+            100,58
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,58
+        </td>
+
+        <td>2,50</td>
+        <td>2030-01-15</td>
+
+        <td>
+            2,49
+        </td>
+
+        <td>
+            1069
         </td>
     </tr>
     <tr>
@@ -6997,7 +8653,57 @@
         </td>
 
         <td>
-            129
+            1115
+        </td>
+    </tr>
+    <tr>
+        <td>AT0000A3EPP2</td>
+        <td>AUSTRIA</td>
+
+        <td class="bad">
+            100,68
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,68
+        </td>
+
+        <td>2,50</td>
+        <td>2029-10-20</td>
+
+        <td>
+            2,48
+        </td>
+
+        <td>
+            1068
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25034</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            100,86
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,86
+        </td>
+
+        <td>2,50</td>
+        <td>2029-10-11</td>
+
+        <td>
+            2,48
+        </td>
+
+        <td>
+            1066
         </td>
     </tr>
     <tr>
@@ -7022,7 +8728,7 @@
         </td>
 
         <td>
-            528
+            1869
         </td>
     </tr>
     <tr>
@@ -7047,7 +8753,7 @@
         </td>
 
         <td>
-            183
+            1210
         </td>
     </tr>
     <tr>
@@ -7072,7 +8778,7 @@
         </td>
 
         <td>
-            739
+            1687
         </td>
     </tr>
     <tr>
@@ -7097,7 +8803,82 @@
         </td>
 
         <td>
-            597
+            2013
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005689960</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            100,00
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,00
+        </td>
+
+        <td>2,40</td>
+        <td>2029-03-15</td>
+
+        <td>
+            2,40
+        </td>
+
+        <td>
+            1072
+        </td>
+    </tr>
+    <tr>
+        <td>IE00BJ38CR43</td>
+        <td>IRLANDA</td>
+
+        <td class="bad">
+            100,02
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,02
+        </td>
+
+        <td>2,40</td>
+        <td>2030-05-15</td>
+
+        <td>
+            2,40
+        </td>
+
+        <td>
+            1096
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU27006</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            100,11
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,11
+        </td>
+
+        <td>2,40</td>
+        <td>2030-11-15</td>
+
+        <td>
+            2,40
+        </td>
+
+        <td>
+            1095
         </td>
     </tr>
     <tr>
@@ -7122,7 +8903,82 @@
         </td>
 
         <td>
-            172
+            1332
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25042</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            100,26
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,26
+        </td>
+
+        <td>2,40</td>
+        <td>2030-04-18</td>
+
+        <td>
+            2,39
+        </td>
+
+        <td>
+            1093
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012O59</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            100,50
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,50
+        </td>
+
+        <td>2,40</td>
+        <td>2028-05-31</td>
+
+        <td>
+            2,39
+        </td>
+
+        <td>
+            1043
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25018</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            100,69
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,69
+        </td>
+
+        <td>2,40</td>
+        <td>2028-10-19</td>
+
+        <td>
+            2,38
+        </td>
+
+        <td>
+            1041
         </td>
     </tr>
     <tr>
@@ -7147,7 +9003,7 @@
         </td>
 
         <td>
-            194
+            1239
         </td>
     </tr>
     <tr>
@@ -7172,7 +9028,7 @@
         </td>
 
         <td>
-            129
+            1219
         </td>
     </tr>
     <tr>
@@ -7197,7 +9053,7 @@
         </td>
 
         <td>
-            1299
+            3006
         </td>
     </tr>
     <tr>
@@ -7222,7 +9078,57 @@
         </td>
 
         <td>
-            355
+            1588
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005660052</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            99,93
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,93
+        </td>
+
+        <td>2,35</td>
+        <td>2029-01-15</td>
+
+        <td>
+            2,35
+        </td>
+
+        <td>
+            1048
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012P90</td>
+        <td>SPAGNA</td>
+
+        <td class="bad">
+            100,08
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,08
+        </td>
+
+        <td>2,35</td>
+        <td>2029-03-31</td>
+
+        <td>
+            2,35
+        </td>
+
+        <td>
+            1070
         </td>
     </tr>
     <tr>
@@ -7247,7 +9153,7 @@
         </td>
 
         <td>
-            165
+            1183
         </td>
     </tr>
     <tr>
@@ -7272,7 +9178,7 @@
         </td>
 
         <td>
-            165
+            1182
         </td>
     </tr>
     <tr>
@@ -7297,7 +9203,7 @@
         </td>
 
         <td>
-            363
+            1250
         </td>
     </tr>
     <tr>
@@ -7322,7 +9228,7 @@
         </td>
 
         <td>
-            555
+            1893
         </td>
     </tr>
     <tr>
@@ -7347,7 +9253,7 @@
         </td>
 
         <td>
-            136
+            1236
         </td>
     </tr>
     <tr>
@@ -7372,7 +9278,7 @@
         </td>
 
         <td>
-            183
+            1218
         </td>
     </tr>
     <tr>
@@ -7397,7 +9303,7 @@
         </td>
 
         <td>
-            282
+            1437
         </td>
     </tr>
     <tr>
@@ -7422,7 +9328,7 @@
         </td>
 
         <td>
-            435
+            1767
         </td>
     </tr>
     <tr>
@@ -7447,7 +9353,7 @@
         </td>
 
         <td>
-            300
+            1229
         </td>
     </tr>
     <tr>
@@ -7472,7 +9378,32 @@
         </td>
 
         <td>
-            141
+            1177
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25059</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            99,25
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,25
+        </td>
+
+        <td>2,20</td>
+        <td>2030-10-10</td>
+
+        <td>
+            2,22
+        </td>
+
+        <td>
+            1096
         </td>
     </tr>
     <tr>
@@ -7497,7 +9428,7 @@
         </td>
 
         <td>
-            296
+            1496
         </td>
     </tr>
     <tr>
@@ -7522,7 +9453,7 @@
         </td>
 
         <td>
-            464
+            1783
         </td>
     </tr>
     <tr>
@@ -7547,7 +9478,32 @@
         </td>
 
         <td>
-            992
+            2686
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25000</td>
+        <td>GERMANIA</td>
+
+        <td class="bad">
+            100,23
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,23
+        </td>
+
+        <td>2,20</td>
+        <td>2028-04-13</td>
+
+        <td>
+            2,19
+        </td>
+
+        <td>
+            1042
         </td>
     </tr>
     <tr>
@@ -7572,7 +9528,7 @@
         </td>
 
         <td>
-            322
+            1504
         </td>
     </tr>
     <tr>
@@ -7597,7 +9553,32 @@
         </td>
 
         <td>
-            202
+            1384
+        </td>
+    </tr>
+    <tr>
+        <td>XS2434895558</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            98,92
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            98,92
+        </td>
+
+        <td>2,12</td>
+        <td>2028-03-07</td>
+
+        <td>
+            2,15
+        </td>
+
+        <td>
+            1054
         </td>
     </tr>
     <tr>
@@ -7622,7 +9603,7 @@
         </td>
 
         <td>
-            207
+            1101
         </td>
     </tr>
     <tr>
@@ -7647,7 +9628,32 @@
         </td>
 
         <td>
-            145
+            1188
+        </td>
+    </tr>
+    <tr>
+        <td>PTOTEVOE0018</td>
+        <td>PORTOGALLO</td>
+
+        <td class="bad">
+            100,14
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            100,14
+        </td>
+
+        <td>2,12</td>
+        <td>2028-10-17</td>
+
+        <td>
+            2,12
+        </td>
+
+        <td>
+            1041
         </td>
     </tr>
     <tr>
@@ -7672,7 +9678,82 @@
         </td>
 
         <td>
-            190
+            1300
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001102622</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            99,44
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,44
+        </td>
+
+        <td>2,10</td>
+        <td>2029-11-15</td>
+
+        <td>
+            2,11
+        </td>
+
+        <td>
+            1069
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU25026</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            99,68
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,68
+        </td>
+
+        <td>2,10</td>
+        <td>2029-04-12</td>
+
+        <td>
+            2,11
+        </td>
+
+        <td>
+            1066
+        </td>
+    </tr>
+    <tr>
+        <td>DE000BU35025</td>
+        <td>GERMANIA GREEN BOND</td>
+
+        <td class="good">
+            99,73
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,73
+        </td>
+
+        <td>2,10</td>
+        <td>2029-04-12</td>
+
+        <td>
+            2,11
+        </td>
+
+        <td>
+            1066
         </td>
     </tr>
     <tr>
@@ -7697,7 +9778,7 @@
         </td>
 
         <td>
-            444
+            1782
         </td>
     </tr>
     <tr>
@@ -7722,7 +9803,7 @@
         </td>
 
         <td>
-            196
+            1292
         </td>
     </tr>
     <tr>
@@ -7747,7 +9828,32 @@
         </td>
 
         <td>
-            918
+            2569
+        </td>
+    </tr>
+    <tr>
+        <td>ES00000127A2</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            97,72
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,72
+        </td>
+
+        <td>1,95</td>
+        <td>2030-07-30</td>
+
+        <td>
+            2,00
+        </td>
+
+        <td>
+            1103
         </td>
     </tr>
     <tr>
@@ -7772,7 +9878,7 @@
         </td>
 
         <td>
-            317
+            1304
         </td>
     </tr>
     <tr>
@@ -7797,7 +9903,57 @@
         </td>
 
         <td>
-            222
+            1354
+        </td>
+    </tr>
+    <tr>
+        <td>PTOTEXOE0024</td>
+        <td>PORTOGALLO</td>
+
+        <td class="good">
+            99,15
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            99,15
+        </td>
+
+        <td>1,95</td>
+        <td>2029-06-15</td>
+
+        <td>
+            1,97
+        </td>
+
+        <td>
+            1068
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005532723</td>
+        <td>ITALY Italia</td>
+
+        <td class="bad">
+            102,44
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,44
+        </td>
+
+        <td>2,00</td>
+        <td>2028-03-14</td>
+
+        <td>
+            1,95
+        </td>
+
+        <td>
+            1015
         </td>
     </tr>
     <tr>
@@ -7822,7 +9978,32 @@
         </td>
 
         <td>
-            900
+            2636
+        </td>
+    </tr>
+    <tr>
+        <td>XS2364199757</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            91,48
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            91,48
+        </td>
+
+        <td>1,75</td>
+        <td>2030-07-13</td>
+
+        <td>
+            1,91
+        </td>
+
+        <td>
+            1162
         </td>
     </tr>
     <tr>
@@ -7847,7 +10028,7 @@
         </td>
 
         <td>
-            428
+            1758
         </td>
     </tr>
     <tr>
@@ -7872,7 +10053,7 @@
         </td>
 
         <td>
-            490
+            1952
         </td>
     </tr>
     <tr>
@@ -7897,7 +10078,7 @@
         </td>
 
         <td>
-            120
+            1179
         </td>
     </tr>
     <tr>
@@ -7922,7 +10103,7 @@
         </td>
 
         <td>
-            460
+            1908
         </td>
     </tr>
     <tr>
@@ -7947,7 +10128,7 @@
         </td>
 
         <td>
-            115
+            1229
         </td>
     </tr>
     <tr>
@@ -7972,7 +10153,7 @@
         </td>
 
         <td>
-            115
+            1085
         </td>
     </tr>
     <tr>
@@ -7997,7 +10178,7 @@
         </td>
 
         <td>
-            203
+            1384
         </td>
     </tr>
     <tr>
@@ -8022,7 +10203,7 @@
         </td>
 
         <td>
-            117
+            1157
         </td>
     </tr>
     <tr>
@@ -8047,7 +10228,7 @@
         </td>
 
         <td>
-            108
+            1174
         </td>
     </tr>
     <tr>
@@ -8072,7 +10253,7 @@
         </td>
 
         <td>
-            182
+            1157
         </td>
     </tr>
     <tr>
@@ -8097,7 +10278,7 @@
         </td>
 
         <td>
-            114
+            1168
         </td>
     </tr>
     <tr>
@@ -8122,7 +10303,7 @@
         </td>
 
         <td>
-            474
+            2036
         </td>
     </tr>
     <tr>
@@ -8147,7 +10328,32 @@
         </td>
 
         <td>
-            176
+            1342
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005413171</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            95,42
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,42
+        </td>
+
+        <td>1,65</td>
+        <td>2030-12-01</td>
+
+        <td>
+            1,73
+        </td>
+
+        <td>
+            1115
         </td>
     </tr>
     <tr>
@@ -8172,7 +10378,7 @@
         </td>
 
         <td>
-            442
+            1991
         </td>
     </tr>
     <tr>
@@ -8197,7 +10403,7 @@
         </td>
 
         <td>
-            267
+            1565
         </td>
     </tr>
     <tr>
@@ -8222,7 +10428,7 @@
         </td>
 
         <td>
-            244
+            1506
         </td>
     </tr>
     <tr>
@@ -8247,7 +10453,7 @@
         </td>
 
         <td>
-            202
+            1437
         </td>
     </tr>
     <tr>
@@ -8272,7 +10478,7 @@
         </td>
 
         <td>
-            107
+            1173
         </td>
     </tr>
     <tr>
@@ -8297,7 +10503,82 @@
         </td>
 
         <td>
-            85
+            1141
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005517195</td>
+        <td>ITALY Italia</td>
+
+        <td class="bad">
+            102,13
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,13
+        </td>
+
+        <td>1,60</td>
+        <td>2028-11-22</td>
+
+        <td>
+            1,57
+        </td>
+
+        <td>
+            1010
+        </td>
+    </tr>
+    <tr>
+        <td>GR0124036709</td>
+        <td>GRECIA</td>
+
+        <td class="good">
+            95,90
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,90
+        </td>
+
+        <td>1,50</td>
+        <td>2030-06-18</td>
+
+        <td>
+            1,56
+        </td>
+
+        <td>
+            1104
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005497000</td>
+        <td>ITALY Italia</td>
+
+        <td class="bad">
+            102,25
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,25
+        </td>
+
+        <td>1,60</td>
+        <td>2030-06-28</td>
+
+        <td>
+            1,56
+        </td>
+
+        <td>
+            1040
         </td>
     </tr>
     <tr>
@@ -8322,7 +10603,7 @@
         </td>
 
         <td>
-            160
+            1347
         </td>
     </tr>
     <tr>
@@ -8347,7 +10628,57 @@
         </td>
 
         <td>
-            247
+            1573
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012E51</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            97,36
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,36
+        </td>
+
+        <td>1,45</td>
+        <td>2029-04-30</td>
+
+        <td>
+            1,49
+        </td>
+
+        <td>
+            1071
+        </td>
+    </tr>
+    <tr>
+        <td>XS2262211076</td>
+        <td>ROMANIA</td>
+
+        <td class="good">
+            92,81
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            92,81
+        </td>
+
+        <td>1,38</td>
+        <td>2029-12-02</td>
+
+        <td>
+            1,48
+        </td>
+
+        <td>
+            1116
         </td>
     </tr>
     <tr>
@@ -8372,7 +10703,7 @@
         </td>
 
         <td>
-            367
+            1852
         </td>
     </tr>
     <tr>
@@ -8397,7 +10728,32 @@
         </td>
 
         <td>
-            121
+            1259
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005543803</td>
+        <td>ITALYi</td>
+
+        <td class="bad">
+            102,75
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            102,75
+        </td>
+
+        <td>1,50</td>
+        <td>2029-05-15</td>
+
+        <td>
+            1,46
+        </td>
+
+        <td>
+            1016
         </td>
     </tr>
     <tr>
@@ -8422,7 +10778,57 @@
         </td>
 
         <td>
-            105
+            1195
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012B88</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            98,09
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            98,09
+        </td>
+
+        <td>1,40</td>
+        <td>2028-07-30</td>
+
+        <td>
+            1,43
+        </td>
+
+        <td>
+            1048
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005383309</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            95,27
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,27
+        </td>
+
+        <td>1,35</td>
+        <td>2030-04-01</td>
+
+        <td>
+            1,42
+        </td>
+
+        <td>
+            1104
         </td>
     </tr>
     <tr>
@@ -8447,7 +10853,32 @@
         </td>
 
         <td>
-            73
+            1124
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012B39</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            98,37
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            98,37
+        </td>
+
+        <td>1,40</td>
+        <td>2028-04-30</td>
+
+        <td>
+            1,42
+        </td>
+
+        <td>
+            1045
         </td>
     </tr>
     <tr>
@@ -8472,7 +10903,32 @@
         </td>
 
         <td>
-            101
+            1205
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012G34</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            94,34
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,34
+        </td>
+
+        <td>1,25</td>
+        <td>2030-10-31</td>
+
+        <td>
+            1,32
+        </td>
+
+        <td>
+            1110
         </td>
     </tr>
     <tr>
@@ -8497,7 +10953,32 @@
         </td>
 
         <td>
-            106
+            1235
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005246134</td>
+        <td>ITALYi</td>
+
+        <td class="bad">
+            101,82
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            101,82
+        </td>
+
+        <td>1,30</td>
+        <td>2028-05-15</td>
+
+        <td>
+            1,28
+        </td>
+
+        <td>
+            1007
         </td>
     </tr>
     <tr>
@@ -8522,7 +11003,7 @@
         </td>
 
         <td>
-            155
+            1360
         </td>
     </tr>
     <tr>
@@ -8547,7 +11028,7 @@
         </td>
 
         <td>
-            138
+            1372
         </td>
     </tr>
     <tr>
@@ -8572,7 +11053,82 @@
         </td>
 
         <td>
-            81
+            1058
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005415291</td>
+        <td>ITALY FUTURA</td>
+
+        <td class="good">
+            94,25
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,25
+        </td>
+
+        <td>1,15</td>
+        <td>2030-07-14</td>
+
+        <td>
+            1,22
+        </td>
+
+        <td>
+            1106
+        </td>
+    </tr>
+    <tr>
+        <td>SI0002103842</td>
+        <td>SLOVENIA</td>
+
+        <td class="good">
+            97,64
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,64
+        </td>
+
+        <td>1,19</td>
+        <td>2029-03-14</td>
+
+        <td>
+            1,22
+        </td>
+
+        <td>
+            1060
+        </td>
+    </tr>
+    <tr>
+        <td>XS1843434876</td>
+        <td>CROAZIA</td>
+
+        <td class="good">
+            95,77
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,77
+        </td>
+
+        <td>1,12</td>
+        <td>2029-06-19</td>
+
+        <td>
+            1,17
+        </td>
+
+        <td>
+            1078
         </td>
     </tr>
     <tr>
@@ -8597,7 +11153,32 @@
         </td>
 
         <td>
-            285
+            1850
+        </td>
+    </tr>
+    <tr>
+        <td>IE00BH3SQ895</td>
+        <td>IRLANDA</td>
+
+        <td class="good">
+            96,33
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,33
+        </td>
+
+        <td>1,10</td>
+        <td>2029-05-15</td>
+
+        <td>
+            1,14
+        </td>
+
+        <td>
+            1071
         </td>
     </tr>
     <tr>
@@ -8622,7 +11203,7 @@
         </td>
 
         <td>
-            129
+            1365
         </td>
     </tr>
     <tr>
@@ -8647,7 +11228,7 @@
         </td>
 
         <td>
-            107
+            1282
         </td>
     </tr>
     <tr>
@@ -8672,7 +11253,7 @@
         </td>
 
         <td>
-            59
+            1138
         </td>
     </tr>
     <tr>
@@ -8697,7 +11278,7 @@
         </td>
 
         <td>
-            60
+            1043
         </td>
     </tr>
     <tr>
@@ -8722,7 +11303,7 @@
         </td>
 
         <td>
-            68
+            1177
         </td>
     </tr>
     <tr>
@@ -8747,7 +11328,7 @@
         </td>
 
         <td>
-            62
+            1154
         </td>
     </tr>
     <tr>
@@ -8772,7 +11353,82 @@
         </td>
 
         <td>
-            62
+            1142
+        </td>
+    </tr>
+    <tr>
+        <td>XS1958534528</td>
+        <td>POLONIA GREEN BOND</td>
+
+        <td class="good">
+            95,75
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,75
+        </td>
+
+        <td>1,00</td>
+        <td>2029-03-07</td>
+
+        <td>
+            1,04
+        </td>
+
+        <td>
+            1074
+        </td>
+    </tr>
+    <tr>
+        <td>XS1508566392</td>
+        <td>POLONIA</td>
+
+        <td class="good">
+            96,66
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,66
+        </td>
+
+        <td>1,00</td>
+        <td>2028-10-25</td>
+
+        <td>
+            1,03
+        </td>
+
+        <td>
+            1054
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005403396</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            92,98
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            92,98
+        </td>
+
+        <td>0,95</td>
+        <td>2030-08-01</td>
+
+        <td>
+            1,02
+        </td>
+
+        <td>
+            1111
         </td>
     </tr>
     <tr>
@@ -8797,7 +11453,7 @@
         </td>
 
         <td>
-            60
+            1158
         </td>
     </tr>
     <tr>
@@ -8822,7 +11478,32 @@
         </td>
 
         <td>
-            51
+            1136
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000347568</td>
+        <td>BELGIO</td>
+
+        <td class="good">
+            95,35
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,35
+        </td>
+
+        <td>0,90</td>
+        <td>2029-06-22</td>
+
+        <td>
+            0,94
+        </td>
+
+        <td>
+            1075
         </td>
     </tr>
     <tr>
@@ -8847,7 +11528,7 @@
         </td>
 
         <td>
-            105
+            1298
         </td>
     </tr>
     <tr>
@@ -8872,7 +11553,32 @@
         </td>
 
         <td>
-            168
+            1618
+        </td>
+    </tr>
+    <tr>
+        <td>IE00BDHDPR44</td>
+        <td>IRLANDA</td>
+
+        <td class="good">
+            97,37
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,37
+        </td>
+
+        <td>0,90</td>
+        <td>2028-05-15</td>
+
+        <td>
+            0,92
+        </td>
+
+        <td>
+            1045
         </td>
     </tr>
     <tr>
@@ -8897,7 +11603,32 @@
         </td>
 
         <td>
-            66
+            1179
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012K53</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            94,82
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,82
+        </td>
+
+        <td>0,80</td>
+        <td>2029-07-30</td>
+
+        <td>
+            0,84
+        </td>
+
+        <td>
+            1077
         </td>
     </tr>
     <tr>
@@ -8922,7 +11653,7 @@
         </td>
 
         <td>
-            143
+            1539
         </td>
     </tr>
     <tr>
@@ -8947,7 +11678,7 @@
         </td>
 
         <td>
-            126
+            1461
         </td>
     </tr>
     <tr>
@@ -8972,7 +11703,32 @@
         </td>
 
         <td>
-            45
+            1137
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000345547</td>
+        <td>BELGIO</td>
+
+        <td class="good">
+            96,82
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,82
+        </td>
+
+        <td>0,80</td>
+        <td>2028-06-22</td>
+
+        <td>
+            0,83
+        </td>
+
+        <td>
+            1048
         </td>
     </tr>
     <tr>
@@ -8997,7 +11753,7 @@
         </td>
 
         <td>
-            43
+            1130
         </td>
     </tr>
     <tr>
@@ -9022,7 +11778,7 @@
         </td>
 
         <td>
-            113
+            1477
         </td>
     </tr>
     <tr>
@@ -9047,7 +11803,132 @@
         </td>
 
         <td>
-            50
+            1166
+        </td>
+    </tr>
+    <tr>
+        <td>FR0013341682</td>
+        <td>FRANCIA</td>
+
+        <td class="good">
+            95,78
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,78
+        </td>
+
+        <td>0,75</td>
+        <td>2028-11-25</td>
+
+        <td>
+            0,78
+        </td>
+
+        <td>
+            1058
+        </td>
+    </tr>
+    <tr>
+        <td>FR0013286192</td>
+        <td>FRANCIA</td>
+
+        <td class="good">
+            96,62
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,62
+        </td>
+
+        <td>0,75</td>
+        <td>2028-05-25</td>
+
+        <td>
+            0,78
+        </td>
+
+        <td>
+            1049
+        </td>
+    </tr>
+    <tr>
+        <td>FR001400AIN5</td>
+        <td>FRANCIA</td>
+
+        <td class="good">
+            97,12
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,12
+        </td>
+
+        <td>0,75</td>
+        <td>2028-02-25</td>
+
+        <td>
+            0,77
+        </td>
+
+        <td>
+            1044
+        </td>
+    </tr>
+    <tr>
+        <td>NL0012818504</td>
+        <td>OLANDA</td>
+
+        <td class="good">
+            96,78
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,78
+        </td>
+
+        <td>0,75</td>
+        <td>2028-07-15</td>
+
+        <td>
+            0,77
+        </td>
+
+        <td>
+            1048
+        </td>
+    </tr>
+    <tr>
+        <td>AT0000A1ZGE4</td>
+        <td>AUSTRIA</td>
+
+        <td class="good">
+            97,30
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            97,30
+        </td>
+
+        <td>0,75</td>
+        <td>2028-02-20</td>
+
+        <td>
+            0,77
+        </td>
+
+        <td>
+            1042
         </td>
     </tr>
     <tr>
@@ -9072,7 +11953,7 @@
         </td>
 
         <td>
-            101
+            1400
         </td>
     </tr>
     <tr>
@@ -9097,7 +11978,7 @@
         </td>
 
         <td>
-            37
+            1144
         </td>
     </tr>
     <tr>
@@ -9122,7 +12003,57 @@
         </td>
 
         <td>
-            91
+            1460
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012F43</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            93,64
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            93,64
+        </td>
+
+        <td>0,60</td>
+        <td>2029-10-31</td>
+
+        <td>
+            0,64
+        </td>
+
+        <td>
+            1083
+        </td>
+    </tr>
+    <tr>
+        <td>XS2259191273</td>
+        <td>UNGHERIA</td>
+
+        <td class="good">
+            88,24
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            88,24
+        </td>
+
+        <td>0,50</td>
+        <td>2030-11-18</td>
+
+        <td>
+            0,57
+        </td>
+
+        <td>
+            1140
         </td>
     </tr>
     <tr>
@@ -9147,7 +12078,7 @@
         </td>
 
         <td>
-            37
+            1159
         </td>
     </tr>
     <tr>
@@ -9172,7 +12103,207 @@
         </td>
 
         <td>
-            32
+            1143
+        </td>
+    </tr>
+    <tr>
+        <td>ES0000012F76</td>
+        <td>SPAGNA</td>
+
+        <td class="good">
+            92,21
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            92,21
+        </td>
+
+        <td>0,50</td>
+        <td>2030-04-30</td>
+
+        <td>
+            0,54
+        </td>
+
+        <td>
+            1100
+        </td>
+    </tr>
+    <tr>
+        <td>FI4000348727</td>
+        <td>FINLANDIA</td>
+
+        <td class="good">
+            95,76
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,76
+        </td>
+
+        <td>0,52</td>
+        <td>2028-09-15</td>
+
+        <td>
+            0,54
+        </td>
+
+        <td>
+            1053
+        </td>
+    </tr>
+    <tr>
+        <td>FR0013407236</td>
+        <td>FRANCIA</td>
+
+        <td class="good">
+            94,01
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,01
+        </td>
+
+        <td>0,50</td>
+        <td>2029-05-25</td>
+
+        <td>
+            0,53
+        </td>
+
+        <td>
+            1076
+        </td>
+    </tr>
+    <tr>
+        <td>FI4000369467</td>
+        <td>FINLANDIA</td>
+
+        <td class="good">
+            93,68
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            93,68
+        </td>
+
+        <td>0,50</td>
+        <td>2029-09-15</td>
+
+        <td>
+            0,53
+        </td>
+
+        <td>
+            1079
+        </td>
+    </tr>
+    <tr>
+        <td>AT0000A269M8</td>
+        <td>AUSTRIA</td>
+
+        <td class="good">
+            94,80
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,80
+        </td>
+
+        <td>0,50</td>
+        <td>2029-02-20</td>
+
+        <td>
+            0,53
+        </td>
+
+        <td>
+            1068
+        </td>
+    </tr>
+    <tr>
+        <td>PTOTELOE0028</td>
+        <td>PORTOGALLO</td>
+
+        <td class="good">
+            91,47
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            91,47
+        </td>
+
+        <td>0,47</td>
+        <td>2030-10-18</td>
+
+        <td>
+            0,52
+        </td>
+
+        <td>
+            1106
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005445306</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            95,89
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,89
+        </td>
+
+        <td>0,50</td>
+        <td>2028-07-15</td>
+
+        <td>
+            0,52
+        </td>
+
+        <td>
+            1052
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001102440</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            96,92
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,92
+        </td>
+
+        <td>0,50</td>
+        <td>2028-02-15</td>
+
+        <td>
+            0,52
+        </td>
+
+        <td>
+            1041
         </td>
     </tr>
     <tr>
@@ -9197,7 +12328,57 @@
         </td>
 
         <td>
-            47
+            1257
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005467482</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            94,46
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,46
+        </td>
+
+        <td>0,45</td>
+        <td>2029-02-15</td>
+
+        <td>
+            0,48
+        </td>
+
+        <td>
+            1070
+        </td>
+    </tr>
+    <tr>
+        <td>XS2234571425</td>
+        <td>BULGARIA</td>
+
+        <td class="good">
+            89,90
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            89,90
+        </td>
+
+        <td>0,38</td>
+        <td>2030-09-23</td>
+
+        <td>
+            0,42
+        </td>
+
+        <td>
+            1118
         </td>
     </tr>
     <tr>
@@ -9222,7 +12403,7 @@
         </td>
 
         <td>
-            26
+            1166
         </td>
     </tr>
     <tr>
@@ -9247,7 +12428,32 @@
         </td>
 
         <td>
-            27
+            1167
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005387052</td>
+        <td>ITALYi</td>
+
+        <td class="good">
+            98,50
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            98,50
+        </td>
+
+        <td>0,40</td>
+        <td>2030-05-15</td>
+
+        <td>
+            0,41
+        </td>
+
+        <td>
+            1031
         </td>
     </tr>
     <tr>
@@ -9272,7 +12478,32 @@
         </td>
 
         <td>
-            58
+            1425
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005425761</td>
+        <td>ITALY FUTURA</td>
+
+        <td class="good">
+            95,99
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,99
+        </td>
+
+        <td>0,35</td>
+        <td>2028-11-17</td>
+
+        <td>
+            0,36
+        </td>
+
+        <td>
+            1047
         </td>
     </tr>
     <tr>
@@ -9297,7 +12528,7 @@
         </td>
 
         <td>
-            36
+            1296
         </td>
     </tr>
     <tr>
@@ -9322,7 +12553,7 @@
         </td>
 
         <td>
-            19
+            1137
         </td>
     </tr>
     <tr>
@@ -9347,7 +12578,107 @@
         </td>
 
         <td>
-            83
+            1688
+        </td>
+    </tr>
+    <tr>
+        <td>NL0013332430</td>
+        <td>OLANDA</td>
+
+        <td class="good">
+            93,37
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            93,37
+        </td>
+
+        <td>0,25</td>
+        <td>2029-07-15</td>
+
+        <td>
+            0,27
+        </td>
+
+        <td>
+            1074
+        </td>
+    </tr>
+    <tr>
+        <td>IT0005433690</td>
+        <td>ITALY</td>
+
+        <td class="good">
+            96,10
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            96,10
+        </td>
+
+        <td>0,25</td>
+        <td>2028-03-15</td>
+
+        <td>
+            0,26
+        </td>
+
+        <td>
+            1044
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001102465</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            94,46
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            94,46
+        </td>
+
+        <td>0,25</td>
+        <td>2029-02-15</td>
+
+        <td>
+            0,26
+        </td>
+
+        <td>
+            1063
+        </td>
+    </tr>
+    <tr>
+        <td>DE0001102457</td>
+        <td>GERMANIA</td>
+
+        <td class="good">
+            95,54
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            95,54
+        </td>
+
+        <td>0,25</td>
+        <td>2028-08-15</td>
+
+        <td>
+            0,26
+        </td>
+
+        <td>
+            1050
         </td>
     </tr>
     <tr>
@@ -9372,7 +12703,32 @@
         </td>
 
         <td>
-            62
+            1445
+        </td>
+    </tr>
+    <tr>
+        <td>IE00BKFVC899</td>
+        <td>IRLANDA</td>
+
+        <td class="good">
+            90,12
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            90,12
+        </td>
+
+        <td>0,20</td>
+        <td>2030-10-18</td>
+
+        <td>
+            0,22
+        </td>
+
+        <td>
+            1108
         </td>
     </tr>
     <tr>
@@ -9397,7 +12753,7 @@
         </td>
 
         <td>
-            17
+            1283
         </td>
     </tr>
     <tr>
@@ -9422,7 +12778,57 @@
         </td>
 
         <td>
-            8
+            1137
+        </td>
+    </tr>
+    <tr>
+        <td>XS2181347183</td>
+        <td>ESTONIA</td>
+
+        <td class="good">
+            89,96
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            89,96
+        </td>
+
+        <td>0,12</td>
+        <td>2030-06-10</td>
+
+        <td>
+            0,14
+        </td>
+
+        <td>
+            1106
+        </td>
+    </tr>
+    <tr>
+        <td>XS2386583145</td>
+        <td>UNGHERIA</td>
+
+        <td class="good">
+            93,35
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            93,35
+        </td>
+
+        <td>0,12</td>
+        <td>2028-09-21</td>
+
+        <td>
+            0,13
+        </td>
+
+        <td>
+            1069
         </td>
     </tr>
     <tr>
@@ -9447,7 +12853,32 @@
         </td>
 
         <td>
-            6
+            1127
+        </td>
+    </tr>
+    <tr>
+        <td>BE0000349580</td>
+        <td>BELGIO</td>
+
+        <td class="good">
+            89,87
+        </td>
+
+        <td>EUR</td>
+
+        <td>
+            89,87
+        </td>
+
+        <td>0,10</td>
+        <td>2030-06-22</td>
+
+        <td>
+            0,11
+        </td>
+
+        <td>
+            1106
         </td>
     </tr>
     <tr>
@@ -9472,7 +12903,7 @@
         </td>
 
         <td>
-            8
+            1085
         </td>
     </tr>
     </tbody>
