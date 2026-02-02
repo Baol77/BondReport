@@ -233,12 +233,24 @@
         }
 
         function setDefaultMaturityFilters() {
-            const today = new Date();
-            const min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
-            const max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
+            var today = new Date();
 
-            document.getElementById("filterMinMat").value = min.toISOString().slice(0,10);
-            document.getElementById("filterMaxMat").value = max.toISOString().slice(0,10);
+            // Création des dates Min (A+5) et Max (A+30)
+            var min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
+            var max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
+
+            // Fonction de formatage compatible sans Template Literals
+            var formatDateLocal = function(date) {
+                var year = date.getFullYear();
+                // Utilisation de slice(-2) pour le padding, plus compatible que padStart sur vieux navigateurs
+                var month = ("0" + (date.getMonth() + 1)).slice(-2);
+                var day = ("0" + date.getDate()).slice(-2);
+
+                return year + "-" + month + "-" + day;
+            };
+
+            document.getElementById("filterMinMat").value = formatDateLocal(min);
+            document.getElementById("filterMaxMat").value = formatDateLocal(max);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
