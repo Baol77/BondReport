@@ -253,6 +253,16 @@
             document.getElementById("filterMaxMat").value = formatDateLocal(max);
         }
 
+        function clearColumnFilters() {
+            document.getElementById("filterIsin").value = "";
+            document.getElementById("filterIssuer").value = "";
+            document.getElementById("filterPrice").value = "";
+            document.getElementById("filterCurrency").value = "";
+            document.getElementById("filterMinYield").value = "";
+            document.getElementById("filterMinTotal").value = "";
+            filterTable();
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
             filterTable();
@@ -280,6 +290,8 @@
         to:
         <input id="filterMaxMat" type="date" onchange="filterTable()">
     </label>
+
+    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
@@ -309,7 +321,7 @@
         <th onclick="sortTable(4)">Price (${reportCurrency}) <span class="arrow"></span></th>
         <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
         <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
-        <th onclick="sortTable(7)">Curr. Yield %<span class="arrow"></span><br>
+        <th title="Supposing an investment of ${reportCurrency}100, what would the gain be?" onclick="sortTable(7)">Curr. Yield %<span class="arrow"></span><br>
             <input id="filterMinYield" type="number" step="0.5" placeholder="min" onclick="event.stopPropagation()"
                    oninput="filterTable()" style="width:70px;">
         </th>
