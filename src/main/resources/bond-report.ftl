@@ -156,7 +156,7 @@
         }
 
        function exportCSV() {
-            const rows = document.querySelectorAll("#bondTable tr");
+            const rows = document.querySelectorAll("#bondTable tr:not([style*='display: none'])");
             let csv = [];
 
             rows.forEach(r => {
