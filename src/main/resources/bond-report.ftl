@@ -129,6 +129,7 @@
             const maxMat = document.getElementById("filterMaxMat").value;
             const minYield = parseFloat(document.getElementById("filterMinYield").value || "0");
             const minTotal = parseFloat(document.getElementById("filterMinTotal").value || "0");
+            const minScore = parseFloat(document.getElementById("filterScore").value || "0");
 
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -140,6 +141,7 @@
                 const mat = r.cells[6].innerText;
                 const currYield = parseNum(r.cells[7].innerText);
                 const totalYield = parseNum(r.cells[8].innerText);
+                const score = parseNum(r.cells[9].innerText);
 
                 let ok = true;
                 if (isin && isinCell.indexOf(isin) === -1) ok = false;
@@ -150,6 +152,7 @@
                 if (maxMat && mat > maxMat) ok = false;
                 if (currYield < minYield) ok = false;
                 if (totalYield < minTotal) ok = false;
+                if (score < minScore) ok = false;
 
                 r.style.display = ok ? "" : "none";
             });
@@ -203,6 +206,7 @@
             rows.forEach(r => {
                 const v = parseNum(r.cells[7].innerText); // Curr. Yield %
                 const w = parseNum(r.cells[8].innerText); // Total Yield to maturity
+                const y = parseNum(r.cells[9].innerText); // Score
 
                 let bg;
                 if (v <= 1) {
@@ -229,6 +233,17 @@
                 }
 
                 r.cells[8].style.backgroundColor = bg2;
+
+                let bg3;
+                if (y <= 0.16) {
+                    bg3 = lerpColor(red, yellow, y / 0.16);
+                } else if (y <= 0.30) {
+                    bg3 = lerpColor(yellow, green, (y - 0.16) / (0.30 - 0.16));
+                } else {
+                    bg3 = "rgb(" + green.join(",") + ")";
+                }
+
+                r.cells[9].style.backgroundColor = bg3;
             });
         }
 
@@ -260,13 +275,46 @@
             document.getElementById("filterCurrency").value = "";
             document.getElementById("filterMinYield").value = "";
             document.getElementById("filterMinTotal").value = "";
+            document.getElementById("filterScore").value = "";
             filterTable();
+        }
+
+        function normalize(v, min, max) {
+            if (max === min) return 0;
+            return (v - min) / (max - min);
+        }
+
+        function computeScore() {
+            const rows = document.querySelectorAll("#bondTable tbody tr");
+
+            const curr = Array.from(rows).map(r => parseNum(r.cells[7].innerText));
+            const tot  = Array.from(rows).map(r => parseNum(r.cells[8].innerText));
+
+            const minC = Math.min(...curr), maxC = Math.max(...curr);
+            const minT = Math.min(...tot),  maxT = Math.max(...tot);
+
+            const longTerm = document.getElementById("profileLongTerm")?.checked;
+            const alpha = longTerm ? 0.35 : 0.6;   // ✔ règle demandée
+
+            rows.forEach((r, i) => {
+                const c = curr[i];
+                const t = tot[i];
+
+                const score =
+                    alpha * normalize(c, minC, maxC) +
+                    (1 - alpha) * normalize(t, minT, maxT);
+
+                r.cells[9].innerText = score.toFixed(3);
+            });
+
+            sortTable(9, true);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
             filterTable();
-            sortTable(8, true);
+            computeScore();
+            sortTable(9, true);
             applyHeatmap();
         });
     </script>
@@ -292,6 +340,11 @@
     </label>
 
     <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
+
+    <label title="Long-term profile: prioritizes Tot. Yield (alpha = 0.35). Unchecked: prioritizes Curr. Yield (alpha = 0.6).">
+        <input type="checkbox" id="profileLongTerm" checked onchange="computeScore(); applyHeatmap();">
+        Long-term profile
+    </label>
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
@@ -328,6 +381,10 @@
         <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
             <input id="filterMinTotal" type="number" step="500" placeholder="min" onclick="event.stopPropagation()"
                    oninput="filterTable()" style="width:80px;">
+        </th>
+        <th onclick="sortTable(9)" title="Combined score of Current Yield and Total Yield (= 0.45·norm(CurrentYield) + 0.55·norm(TotalYield))">Score<span class="arrow"></span><br>
+            <input id="filterScore" type="number" step="0.1" placeholder="min" onclick="event.stopPropagation()"
+                   oninput="filterTable()" style="width:70px;">
         </th>
     </tr>
     </thead>
@@ -370,6 +427,7 @@
             ${b.totalYieldToMatChf()?string["0"]}
         </#if>
         </td>
+        <td class="score"></td>
     </tr>
     </#list>
     </tbody>

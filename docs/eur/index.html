@@ -129,6 +129,7 @@
             const maxMat = document.getElementById("filterMaxMat").value;
             const minYield = parseFloat(document.getElementById("filterMinYield").value || "0");
             const minTotal = parseFloat(document.getElementById("filterMinTotal").value || "0");
+            const minScore = parseFloat(document.getElementById("filterScore").value || "0");
 
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -140,6 +141,7 @@
                 const mat = r.cells[6].innerText;
                 const currYield = parseNum(r.cells[7].innerText);
                 const totalYield = parseNum(r.cells[8].innerText);
+                const score = parseNum(r.cells[9].innerText);
 
                 let ok = true;
                 if (isin && isinCell.indexOf(isin) === -1) ok = false;
@@ -150,6 +152,7 @@
                 if (maxMat && mat > maxMat) ok = false;
                 if (currYield < minYield) ok = false;
                 if (totalYield < minTotal) ok = false;
+                if (score < minScore) ok = false;
 
                 r.style.display = ok ? "" : "none";
             });
@@ -203,6 +206,7 @@
             rows.forEach(r => {
                 const v = parseNum(r.cells[7].innerText); // Curr. Yield %
                 const w = parseNum(r.cells[8].innerText); // Total Yield to maturity
+                const y = parseNum(r.cells[9].innerText); // Score
 
                 let bg;
                 if (v <= 1) {
@@ -229,6 +233,17 @@
                 }
 
                 r.cells[8].style.backgroundColor = bg2;
+
+                let bg3;
+                if (y <= 0.16) {
+                    bg3 = lerpColor(red, yellow, y / 0.16);
+                } else if (y <= 0.30) {
+                    bg3 = lerpColor(yellow, green, (y - 0.16) / (0.30 - 0.16));
+                } else {
+                    bg3 = "rgb(" + green.join(",") + ")";
+                }
+
+                r.cells[9].style.backgroundColor = bg3;
             });
         }
 
@@ -260,13 +275,46 @@
             document.getElementById("filterCurrency").value = "";
             document.getElementById("filterMinYield").value = "";
             document.getElementById("filterMinTotal").value = "";
+            document.getElementById("filterScore").value = "";
             filterTable();
+        }
+
+        function normalize(v, min, max) {
+            if (max === min) return 0;
+            return (v - min) / (max - min);
+        }
+
+        function computeScore() {
+            const rows = document.querySelectorAll("#bondTable tbody tr");
+
+            const curr = Array.from(rows).map(r => parseNum(r.cells[7].innerText));
+            const tot  = Array.from(rows).map(r => parseNum(r.cells[8].innerText));
+
+            const minC = Math.min(...curr), maxC = Math.max(...curr);
+            const minT = Math.min(...tot),  maxT = Math.max(...tot);
+
+            const longTerm = document.getElementById("profileLongTerm")?.checked;
+            const alpha = longTerm ? 0.35 : 0.6;   // ✔ règle demandée
+
+            rows.forEach((r, i) => {
+                const c = curr[i];
+                const t = tot[i];
+
+                const score =
+                    alpha * normalize(c, minC, maxC) +
+                    (1 - alpha) * normalize(t, minT, maxT);
+
+                r.cells[9].innerText = score.toFixed(3);
+            });
+
+            sortTable(9, true);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
             filterTable();
-            sortTable(8, true);
+            computeScore();
+            sortTable(9, true);
             applyHeatmap();
         });
     </script>
@@ -276,7 +324,7 @@
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-02 20:38
+        — 📅 2026-02-02 23:38
     </span>
 </h2>
 
@@ -292,6 +340,11 @@
     </label>
 
     <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
+
+    <label title="Long-term profile: prioritizes Tot. Yield (alpha = 0.35). Unchecked: prioritizes Curr. Yield (alpha = 0.6).">
+        <input type="checkbox" id="profileLongTerm" checked onchange="computeScore(); applyHeatmap();">
+        Long-term profile
+    </label>
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
@@ -330,6 +383,10 @@
             <input id="filterMinTotal" type="number" step="500" placeholder="min" onclick="event.stopPropagation()"
                    oninput="filterTable()" style="width:80px;">
         </th>
+        <th onclick="sortTable(9)" title="Combined score of Current Yield and Total Yield (= 0.45·norm(CurrentYield) + 0.55·norm(TotalYield))">Score<span class="arrow"></span><br>
+            <input id="filterScore" type="number" step="0.1" placeholder="min" onclick="event.stopPropagation()"
+                   oninput="filterTable()" style="width:70px;">
+        </th>
     </tr>
     </thead>
 
@@ -358,6 +415,7 @@
         <td>
             1101
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US900123AT75</td>
@@ -383,6 +441,7 @@
         <td>
             1583
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US900123BB58</td>
@@ -408,6 +467,7 @@
         <td>
             1935
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>SE0009496367</td>
@@ -433,6 +493,7 @@
         <td>
             1194
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2571924070</td>
@@ -458,6 +519,7 @@
         <td>
             2985
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2999564581</td>
@@ -483,6 +545,7 @@
         <td>
             1761
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US445545AF36</td>
@@ -508,6 +571,7 @@
         <td>
             1995
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2571923007</td>
@@ -533,6 +597,7 @@
         <td>
             1370
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2571922884</td>
@@ -558,6 +623,7 @@
         <td>
             1108
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3114897633</td>
@@ -583,6 +649,7 @@
         <td>
             1698
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US77586TAE64</td>
@@ -608,6 +675,7 @@
         <td>
             2289
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2756521303</td>
@@ -633,6 +701,7 @@
         <td>
             1466
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1837994794</td>
@@ -658,6 +727,7 @@
         <td>
             2742
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2485249523</td>
@@ -683,6 +753,7 @@
         <td>
             1537
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2908633683</td>
@@ -708,6 +779,7 @@
         <td>
             1621
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2201851685</td>
@@ -733,6 +805,7 @@
         <td>
             2986
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2756521212</td>
@@ -758,6 +831,7 @@
         <td>
             1102
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3114901336</td>
@@ -783,6 +857,7 @@
         <td>
             1229
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US857524AE20</td>
@@ -808,6 +883,7 @@
         <td>
             1319
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3021378388</td>
@@ -833,6 +909,7 @@
         <td>
             1736
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US465410CC03</td>
@@ -858,6 +935,7 @@
         <td>
             2829
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3200176298</td>
@@ -883,6 +961,7 @@
         <td>
             2143
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US465410BZ07</td>
@@ -908,6 +987,7 @@
         <td>
             2644
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2538441598</td>
@@ -933,6 +1013,7 @@
         <td>
             1082
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US465410BG26</td>
@@ -958,6 +1039,7 @@
         <td>
             1363
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2890436087</td>
@@ -983,6 +1065,7 @@
         <td>
             1671
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2908645265</td>
@@ -1008,6 +1091,7 @@
         <td>
             2071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3198384813</td>
@@ -1033,6 +1117,7 @@
         <td>
             1612
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2689948078</td>
@@ -1058,6 +1143,7 @@
         <td>
             1317
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2999552909</td>
@@ -1083,6 +1169,7 @@
         <td>
             1392
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2829810923</td>
@@ -1108,6 +1195,7 @@
         <td>
             1615
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1968706876</td>
@@ -1133,6 +1221,7 @@
         <td>
             2454
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2770921315</td>
@@ -1158,6 +1247,7 @@
         <td>
             1531
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3021378032</td>
@@ -1183,6 +1273,7 @@
         <td>
             1264
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135143</td>
@@ -1208,6 +1299,7 @@
         <td>
             1016
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000011868</td>
@@ -1233,6 +1325,7 @@
         <td>
             1003
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3198384573</td>
@@ -1258,6 +1351,7 @@
         <td>
             1334
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2689949399</td>
@@ -1283,6 +1377,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0001444378</td>
@@ -1308,6 +1403,7 @@
         <td>
             1102
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000291972</td>
@@ -1333,6 +1429,7 @@
         <td>
             1033
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2770920937</td>
@@ -1358,6 +1455,7 @@
         <td>
             1198
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2829209720</td>
@@ -1383,6 +1481,7 @@
         <td>
             1260
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0000571218</td>
@@ -1408,6 +1507,7 @@
         <td>
             1055
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2109813142</td>
@@ -1433,6 +1533,7 @@
         <td>
             2472
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2680932907</td>
@@ -1458,6 +1559,7 @@
         <td>
             1272
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2999533271</td>
@@ -1483,6 +1585,7 @@
         <td>
             1136
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0000187635</td>
@@ -1508,6 +1611,7 @@
         <td>
             1129
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0003256820</td>
@@ -1533,6 +1637,7 @@
         <td>
             1125
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2908644615</td>
@@ -1558,6 +1663,7 @@
         <td>
             1202
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012411</td>
@@ -1583,6 +1689,7 @@
         <td>
             1121
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2971937672</td>
@@ -1608,6 +1715,7 @@
         <td>
             1678
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3269555234</td>
@@ -1633,6 +1741,7 @@
         <td>
             1569
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135176</td>
@@ -1658,6 +1767,7 @@
         <td>
             1049
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0001278511</td>
@@ -1683,6 +1793,7 @@
         <td>
             1046
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000124C5</td>
@@ -1708,6 +1819,7 @@
         <td>
             1020
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1892127470</td>
@@ -1733,6 +1845,7 @@
         <td>
             1754
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0004889033</td>
@@ -1758,6 +1871,7 @@
         <td>
             1029
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135085</td>
@@ -1783,6 +1897,7 @@
         <td>
             1028
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2716887844</td>
@@ -1808,6 +1923,7 @@
         <td>
             1348
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0003535157</td>
@@ -1833,6 +1949,7 @@
         <td>
             1225
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005668238</td>
@@ -1858,6 +1975,7 @@
         <td>
             2232
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0004532559</td>
@@ -1883,6 +2001,7 @@
         <td>
             1483
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0004286966</td>
@@ -1908,6 +2027,7 @@
         <td>
             1439
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2971936948</td>
@@ -1933,6 +2053,7 @@
         <td>
             1330
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000304130</td>
@@ -1958,6 +2079,7 @@
         <td>
             1254
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000124H4</td>
@@ -1983,6 +2105,7 @@
         <td>
             1610
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005534141</td>
@@ -2008,6 +2131,7 @@
         <td>
             2141
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1313004928</td>
@@ -2033,6 +2157,7 @@
         <td>
             1491
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0010870956</td>
@@ -2058,6 +2183,7 @@
         <td>
             2544
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0004923998</td>
@@ -2083,6 +2209,7 @@
         <td>
             1679
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005611741</td>
@@ -2108,6 +2235,7 @@
         <td>
             2207
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000120N0</td>
@@ -2133,6 +2261,7 @@
         <td>
             1460
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0010070060</td>
@@ -2158,6 +2287,7 @@
         <td>
             1277
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0010171975</td>
@@ -2183,6 +2313,7 @@
         <td>
             2295
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2890435600</td>
@@ -2208,6 +2339,7 @@
         <td>
             1761
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3124393367</td>
@@ -2233,6 +2365,7 @@
         <td>
             1829
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2586944147</td>
@@ -2258,6 +2391,7 @@
         <td>
             1715
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2536817484</td>
@@ -2283,6 +2417,7 @@
         <td>
             1247
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3269554690</td>
@@ -2308,6 +2443,7 @@
         <td>
             1287
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005530032</td>
@@ -2333,6 +2469,7 @@
         <td>
             1658
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0010773192</td>
@@ -2358,6 +2495,7 @@
         <td>
             1558
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000121S7</td>
@@ -2383,6 +2521,7 @@
         <td>
             1513
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2746103014</td>
@@ -2408,6 +2547,7 @@
         <td>
             1728
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0138018842</td>
@@ -2433,6 +2573,7 @@
         <td>
             2184
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2364200514</td>
@@ -2458,6 +2599,7 @@
         <td>
             1979
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1768074319</td>
@@ -2483,6 +2625,7 @@
         <td>
             1692
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2579483319</td>
@@ -2508,6 +2651,7 @@
         <td>
             1171
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135226</td>
@@ -2533,6 +2677,7 @@
         <td>
             1176
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2010026214</td>
@@ -2558,6 +2703,7 @@
         <td>
             1172
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2434895806</td>
@@ -2583,6 +2729,7 @@
         <td>
             1407
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005631608</td>
@@ -2608,6 +2755,7 @@
         <td>
             1810
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0128017747</td>
@@ -2633,6 +2781,7 @@
         <td>
             1417
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2716887760</td>
@@ -2658,6 +2807,7 @@
         <td>
             1132
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3063879442</td>
@@ -2683,6 +2833,7 @@
         <td>
             1473
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012M93</td>
@@ -2708,6 +2859,7 @@
         <td>
             2152
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005518128</td>
@@ -2733,6 +2885,7 @@
         <td>
             1199
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005363111</td>
@@ -2758,6 +2911,7 @@
         <td>
             1974
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0138015814</td>
@@ -2783,6 +2937,7 @@
         <td>
             1566
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000320292</td>
@@ -2808,6 +2963,7 @@
         <td>
             1548
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005544082</td>
@@ -2833,6 +2989,7 @@
         <td>
             1201
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000361700</td>
@@ -2858,6 +3015,7 @@
         <td>
             2298
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135366</td>
@@ -2883,6 +3041,7 @@
         <td>
             1381
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400OHF4</td>
@@ -2908,6 +3067,7 @@
         <td>
             2346
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000128E2</td>
@@ -2933,6 +3093,7 @@
         <td>
             2731
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005582421</td>
@@ -2958,6 +3119,7 @@
         <td>
             1478
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2330514899</td>
@@ -2983,6 +3145,7 @@
         <td>
             1906
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000126D8</td>
@@ -3008,6 +3171,7 @@
         <td>
             2489
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124039737</td>
@@ -3033,6 +3197,7 @@
         <td>
             1201
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2922764191</td>
@@ -3058,6 +3223,7 @@
         <td>
             1524
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005560948</td>
@@ -3083,6 +3249,7 @@
         <td>
             1244
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000358672</td>
@@ -3108,6 +3275,7 @@
         <td>
             2254
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2536817211</td>
@@ -3133,6 +3301,7 @@
         <td>
             1065
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GB00B3KJDS62</td>
@@ -3158,6 +3327,7 @@
         <td>
             1569
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005217390</td>
@@ -3183,6 +3353,7 @@
         <td>
             2885
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012932</td>
@@ -3208,6 +3379,7 @@
         <td>
             1315
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005565400</td>
@@ -3233,6 +3405,7 @@
         <td>
             1028
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005566408</td>
@@ -3258,6 +3431,7 @@
         <td>
             1029
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEBOE0020</td>
@@ -3283,6 +3457,7 @@
         <td>
             1689
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2201851172</td>
@@ -3308,6 +3483,7 @@
         <td>
             1280
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0010371401</td>
@@ -3333,6 +3509,7 @@
         <td>
             1437
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005596470</td>
@@ -3358,6 +3535,7 @@
         <td>
             1385
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2753429047</td>
@@ -3383,6 +3561,7 @@
         <td>
             1087
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000331406</td>
@@ -3408,6 +3587,7 @@
         <td>
             1768
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400FTH3</td>
@@ -3433,6 +3613,7 @@
         <td>
             2302
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1970549561</td>
@@ -3458,6 +3639,7 @@
         <td>
             1400
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005635583</td>
@@ -3483,6 +3665,7 @@
         <td>
             1537
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3109460959</td>
@@ -3508,6 +3691,7 @@
         <td>
             1416
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTE3OE0025</td>
@@ -3533,6 +3717,7 @@
         <td>
             2130
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0133011248</td>
@@ -3558,6 +3743,7 @@
         <td>
             1341
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2610236445</td>
@@ -3583,6 +3769,7 @@
         <td>
             1193
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005273013</td>
@@ -3608,6 +3795,7 @@
         <td>
             1940
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A0U299</td>
@@ -3633,6 +3821,7 @@
         <td>
             2347
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0003934657</td>
@@ -3658,6 +3847,7 @@
         <td>
             1338
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2258400162</td>
@@ -3683,6 +3873,7 @@
         <td>
             1843
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTE5OE0007</td>
@@ -3708,6 +3899,7 @@
         <td>
             1343
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A04967</td>
@@ -3733,6 +3925,7 @@
         <td>
             1329
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005508590</td>
@@ -3758,6 +3951,7 @@
         <td>
             1288
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GB00BN65R313</td>
@@ -3783,6 +3977,7 @@
         <td>
             1883
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>SI0002104873</td>
@@ -3808,6 +4003,7 @@
         <td>
             2174
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135325</td>
@@ -3833,6 +4029,7 @@
         <td>
             1366
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2532370231</td>
@@ -3858,6 +4055,7 @@
         <td>
             1167
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005561888</td>
@@ -3883,6 +4081,7 @@
         <td>
             1094
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400WYO4</td>
@@ -3908,6 +4107,7 @@
         <td>
             1647
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012L60</td>
@@ -3933,6 +4133,7 @@
         <td>
             1457
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005542359</td>
@@ -3958,6 +4159,7 @@
         <td>
             1127
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000326356</td>
@@ -3983,6 +4185,7 @@
         <td>
             1157
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2722876609</td>
@@ -4008,6 +4211,7 @@
         <td>
             1076
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0114033583</td>
@@ -4033,6 +4237,7 @@
         <td>
             1040
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2586944659</td>
@@ -4058,6 +4263,7 @@
         <td>
             1219
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124035693</td>
@@ -4083,6 +4289,7 @@
         <td>
             1067
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005607970</td>
@@ -4108,6 +4315,7 @@
         <td>
             1256
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0128015725</td>
@@ -4133,6 +4341,7 @@
         <td>
             1167
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005584856</td>
@@ -4158,6 +4367,7 @@
         <td>
             1252
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005083057</td>
@@ -4183,6 +4393,7 @@
         <td>
             1852
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0000102234</td>
@@ -4208,6 +4419,7 @@
         <td>
             1281
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005519787</td>
@@ -4233,6 +4445,7 @@
         <td>
             1063
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005548315</td>
@@ -4258,6 +4471,7 @@
         <td>
             1038
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400NEF3</td>
@@ -4283,6 +4497,7 @@
         <td>
             2023
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0011461037</td>
@@ -4308,6 +4523,7 @@
         <td>
             1807
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000359688</td>
@@ -4333,6 +4549,7 @@
         <td>
             1681
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEROE0014</td>
@@ -4358,6 +4575,7 @@
         <td>
             1089
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000340498</td>
@@ -4383,6 +4601,7 @@
         <td>
             2870
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A1XML2</td>
@@ -4408,6 +4627,7 @@
         <td>
             4743
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000364738</td>
@@ -4433,6 +4653,7 @@
         <td>
             1633
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3268043554</td>
@@ -4458,6 +4679,7 @@
         <td>
             1370
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135275</td>
@@ -4483,6 +4705,7 @@
         <td>
             1266
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2178857954</td>
@@ -4508,6 +4731,7 @@
         <td>
             1146
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005441883</td>
@@ -4533,6 +4757,7 @@
         <td>
             3074
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012K95</td>
@@ -4558,6 +4783,7 @@
         <td>
             1660
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GB00B84Z9V04</td>
@@ -4583,6 +4809,7 @@
         <td>
             1834
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012O75</td>
@@ -4608,6 +4835,7 @@
         <td>
             1522
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005631590</td>
@@ -4633,6 +4861,7 @@
         <td>
             1301
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A33SK7</td>
@@ -4658,6 +4887,7 @@
         <td>
             2077
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2975276143</td>
@@ -4683,6 +4913,7 @@
         <td>
             1268
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0009446418</td>
@@ -4708,6 +4939,7 @@
         <td>
             1481
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005648149</td>
@@ -4733,6 +4965,7 @@
         <td>
             1304
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124041758</td>
@@ -4758,6 +4991,7 @@
         <td>
             1298
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2746102479</td>
@@ -4783,6 +5017,7 @@
         <td>
             1228
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005542797</td>
@@ -4808,6 +5043,7 @@
         <td>
             1099
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>US465410BY32</td>
@@ -4833,6 +5069,7 @@
         <td>
             1142
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000566294</td>
@@ -4858,6 +5095,7 @@
         <td>
             2186
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00080U68D3</td>
@@ -4883,6 +5121,7 @@
         <td>
             2128
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2890420834</td>
@@ -4908,6 +5147,7 @@
         <td>
             1179
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2726911931</td>
@@ -4933,6 +5173,7 @@
         <td>
             1106
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000343526</td>
@@ -4958,6 +5199,7 @@
         <td>
             2433
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0014012II5</td>
@@ -4983,6 +5225,7 @@
         <td>
             1309
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013154028</td>
@@ -5008,6 +5251,7 @@
         <td>
             2885
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3063879368</td>
@@ -5033,6 +5277,7 @@
         <td>
             1267
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEZOE0014</td>
@@ -5058,6 +5303,7 @@
         <td>
             1403
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005676504</td>
@@ -5083,6 +5329,7 @@
         <td>
             1309
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTE4OE0008</td>
@@ -5108,6 +5355,7 @@
         <td>
             1501
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400L834</td>
@@ -5133,6 +5381,7 @@
         <td>
             1219
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000586284</td>
@@ -5158,6 +5407,7 @@
         <td>
             1716
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012L78</td>
@@ -5183,6 +5433,7 @@
         <td>
             1202
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3124345631</td>
@@ -5208,6 +5459,7 @@
         <td>
             1314
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2434896010</td>
@@ -5233,6 +5485,7 @@
         <td>
             1285
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124042764</td>
@@ -5258,6 +5511,7 @@
         <td>
             1345
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005496770</td>
@@ -5283,6 +5537,7 @@
         <td>
             1443
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000366758</td>
@@ -5308,6 +5563,7 @@
         <td>
             1333
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005580094</td>
@@ -5333,6 +5589,7 @@
         <td>
             1134
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005024234</td>
@@ -5358,6 +5615,7 @@
         <td>
             1099
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012M51</td>
@@ -5383,6 +5641,7 @@
         <td>
             1064
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005162828</td>
@@ -5408,6 +5667,7 @@
         <td>
             1906
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000128C6</td>
@@ -5433,6 +5693,7 @@
         <td>
             1809
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A0VRQ6</td>
@@ -5458,6 +5719,7 @@
         <td>
             1668
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012N35</td>
@@ -5483,6 +5745,7 @@
         <td>
             1243
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005398406</td>
@@ -5508,6 +5771,7 @@
         <td>
             2071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005377152</td>
@@ -5533,6 +5797,7 @@
         <td>
             1543
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005358806</td>
@@ -5558,6 +5823,7 @@
         <td>
             1297
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124040743</td>
@@ -5583,6 +5849,7 @@
         <td>
             1257
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005595803</td>
@@ -5608,6 +5875,7 @@
         <td>
             1135
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005521981</td>
@@ -5633,6 +5901,7 @@
         <td>
             1043
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012B47</td>
@@ -5658,6 +5927,7 @@
         <td>
             1908
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015001RG8</td>
@@ -5683,6 +5953,7 @@
         <td>
             1578
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012Q08</td>
@@ -5708,6 +5979,7 @@
         <td>
             1326
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2D012</td>
@@ -5733,6 +6005,7 @@
         <td>
             2096
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A3D3Q8</td>
@@ -5758,6 +6031,7 @@
         <td>
             1445
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135432</td>
@@ -5783,6 +6057,7 @@
         <td>
             1525
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005584849</td>
@@ -5808,6 +6083,7 @@
         <td>
             1070
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2740429076</td>
@@ -5833,6 +6109,7 @@
         <td>
             1221
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005594483</td>
@@ -5858,6 +6135,7 @@
         <td>
             1090
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005480980</td>
@@ -5883,6 +6161,7 @@
         <td>
             2169
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1208856341</td>
@@ -5908,6 +6187,7 @@
         <td>
             1318
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEDOE0010</td>
@@ -5933,6 +6213,7 @@
         <td>
             1314
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012P33</td>
@@ -5958,6 +6239,7 @@
         <td>
             1291
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012M85</td>
@@ -5983,6 +6265,7 @@
         <td>
             1244
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005668220</td>
@@ -6008,6 +6291,7 @@
         <td>
             1180
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005647265</td>
@@ -6033,6 +6317,7 @@
         <td>
             1176
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A1PEF7</td>
@@ -6058,6 +6343,7 @@
         <td>
             3443
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE000GVLBXU6</td>
@@ -6083,6 +6369,7 @@
         <td>
             1603
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005321325</td>
@@ -6108,6 +6395,7 @@
         <td>
             1453
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A3RVH9</td>
@@ -6133,6 +6421,7 @@
         <td>
             1310
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012O67</td>
@@ -6158,6 +6447,7 @@
         <td>
             1287
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012H58</td>
@@ -6183,6 +6473,7 @@
         <td>
             2956
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2849767202</td>
@@ -6208,6 +6499,7 @@
         <td>
             1126
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000363722</td>
@@ -6233,6 +6525,7 @@
         <td>
             1295
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005689994</td>
@@ -6258,6 +6551,7 @@
         <td>
             1216
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005583486</td>
@@ -6283,6 +6577,7 @@
         <td>
             1085
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3109446610</td>
@@ -6308,6 +6603,7 @@
         <td>
             1184
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2922763896</td>
@@ -6333,6 +6629,7 @@
         <td>
             1151
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012L52</td>
@@ -6358,6 +6655,7 @@
         <td>
             1204
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005619546</td>
@@ -6383,6 +6681,7 @@
         <td>
             1141
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE000O6GBYC9</td>
@@ -6408,6 +6707,7 @@
         <td>
             1305
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400CMX2</td>
@@ -6433,6 +6733,7 @@
         <td>
             1710
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0010721999</td>
@@ -6458,6 +6759,7 @@
         <td>
             1721
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400QMF9</td>
@@ -6483,6 +6785,7 @@
         <td>
             1266
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2D004</td>
@@ -6508,6 +6811,7 @@
         <td>
             2032
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012N43</td>
@@ -6533,6 +6837,7 @@
         <td>
             1130
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000356650</td>
@@ -6558,6 +6863,7 @@
         <td>
             1486
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400H7V7</td>
@@ -6583,6 +6889,7 @@
         <td>
             1218
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000587415</td>
@@ -6608,6 +6915,7 @@
         <td>
             1280
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEAOE0005</td>
@@ -6633,6 +6941,7 @@
         <td>
             1279
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000333428</td>
@@ -6658,6 +6967,7 @@
         <td>
             1248
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000571104</td>
@@ -6683,6 +6993,7 @@
         <td>
             1241
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000357666</td>
@@ -6708,6 +7019,7 @@
         <td>
             1208
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012P74</td>
@@ -6733,6 +7045,7 @@
         <td>
             1173
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000550249</td>
@@ -6758,6 +7071,7 @@
         <td>
             1202
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000046545</td>
@@ -6783,6 +7097,7 @@
         <td>
             1591
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A3HU25</td>
@@ -6808,6 +7123,7 @@
         <td>
             1274
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2975280509</td>
@@ -6833,6 +7149,7 @@
         <td>
             1076
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1382696398</td>
@@ -6858,6 +7175,7 @@
         <td>
             1046
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1960361720</td>
@@ -6883,6 +7201,7 @@
         <td>
             2002
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1619568139</td>
@@ -6908,6 +7227,7 @@
         <td>
             1908
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005611055</td>
@@ -6933,6 +7253,7 @@
         <td>
             1072
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005365165</td>
@@ -6958,6 +7279,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2259191430</td>
@@ -6983,6 +7305,7 @@
         <td>
             2196
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013257524</td>
@@ -7008,6 +7331,7 @@
         <td>
             1960
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000546528</td>
@@ -7033,6 +7357,7 @@
         <td>
             1412
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000360694</td>
@@ -7058,6 +7383,7 @@
         <td>
             1258
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012K46</td>
@@ -7083,6 +7409,7 @@
         <td>
             2101
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1892141620</td>
@@ -7108,6 +7435,7 @@
         <td>
             1100
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A39UW5</td>
@@ -7133,6 +7461,7 @@
         <td>
             1235
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005637399</td>
@@ -7158,6 +7487,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTESOE0021</td>
@@ -7183,6 +7513,7 @@
         <td>
             1242
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0138017836</td>
@@ -7208,6 +7539,7 @@
         <td>
             2075
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z064</td>
@@ -7233,6 +7565,7 @@
         <td>
             1288
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS3268040964</td>
@@ -7258,6 +7591,7 @@
         <td>
             1116
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1420357318</td>
@@ -7283,6 +7617,7 @@
         <td>
             1058
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A324S8</td>
@@ -7308,6 +7643,7 @@
         <td>
             1194
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102341</td>
@@ -7333,6 +7669,7 @@
         <td>
             1705
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A33SH3</td>
@@ -7358,6 +7695,7 @@
         <td>
             1066
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2HLC4</td>
@@ -7383,6 +7721,7 @@
         <td>
             4375
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005671273</td>
@@ -7408,6 +7747,7 @@
         <td>
             1108
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001135481</td>
@@ -7433,6 +7773,7 @@
         <td>
             1624
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005634800</td>
@@ -7458,6 +7799,7 @@
         <td>
             1193
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000557525</td>
@@ -7483,6 +7825,7 @@
         <td>
             1068
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1508566558</td>
@@ -7508,6 +7851,7 @@
         <td>
             1855
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEQOE0023</td>
@@ -7533,6 +7877,7 @@
         <td>
             1180
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2F009</td>
@@ -7558,6 +7903,7 @@
         <td>
             1496
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2447602793</td>
@@ -7583,6 +7929,7 @@
         <td>
             1190
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005425233</td>
@@ -7608,6 +7955,7 @@
         <td>
             2091
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1956050923</td>
@@ -7633,6 +7981,7 @@
         <td>
             1235
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A3NY15</td>
@@ -7658,6 +8007,7 @@
         <td>
             1162
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005495731</td>
@@ -7683,6 +8033,7 @@
         <td>
             1072
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005340929</td>
@@ -7708,6 +8059,7 @@
         <td>
             1043
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL00150012X2</td>
@@ -7733,6 +8085,7 @@
         <td>
             2016
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1713475306</td>
@@ -7758,6 +8111,7 @@
         <td>
             1077
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000348574</td>
@@ -7783,6 +8137,7 @@
         <td>
             2034
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400PM68</td>
@@ -7808,6 +8163,7 @@
         <td>
             1101
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400HI98</td>
@@ -7833,6 +8189,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000037635</td>
@@ -7858,6 +8215,7 @@
         <td>
             1040
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005654642</td>
@@ -7883,6 +8241,7 @@
         <td>
             1107
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012O00</td>
@@ -7908,6 +8267,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1713462668</td>
@@ -7933,6 +8293,7 @@
         <td>
             1044
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE000LQ7YWY4</td>
@@ -7958,6 +8319,7 @@
         <td>
             1240
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000362716</td>
@@ -7983,6 +8345,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2013678086</td>
@@ -8008,6 +8371,7 @@
         <td>
             1998
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z056</td>
@@ -8033,6 +8397,7 @@
         <td>
             1257
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000591862</td>
@@ -8058,6 +8423,7 @@
         <td>
             1165
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z031</td>
@@ -8083,6 +8449,7 @@
         <td>
             1220
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005641029</td>
@@ -8108,6 +8475,7 @@
         <td>
             1044
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1346201889</td>
@@ -8133,6 +8501,7 @@
         <td>
             1329
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2Y8G4</td>
@@ -8158,6 +8527,7 @@
         <td>
             1893
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z015</td>
@@ -8183,6 +8553,7 @@
         <td>
             1187
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1768067297</td>
@@ -8208,6 +8579,7 @@
         <td>
             1144
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012K61</td>
@@ -8233,6 +8605,7 @@
         <td>
             1174
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000365743</td>
@@ -8258,6 +8631,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000355645</td>
@@ -8283,6 +8657,7 @@
         <td>
             2157
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005672024</td>
@@ -8308,6 +8683,7 @@
         <td>
             1150
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005494239</td>
@@ -8333,6 +8709,7 @@
         <td>
             1186
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015002F72</td>
@@ -8358,6 +8735,7 @@
         <td>
             1265
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013404969</td>
@@ -8383,6 +8761,7 @@
         <td>
             2029
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102614</td>
@@ -8408,6 +8787,7 @@
         <td>
             1990
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005240350</td>
@@ -8433,6 +8813,7 @@
         <td>
             1224
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015001XZ6</td>
@@ -8458,6 +8839,7 @@
         <td>
             1230
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z049</td>
@@ -8483,6 +8865,7 @@
         <td>
             1253
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU3Z047</td>
@@ -8508,6 +8891,7 @@
         <td>
             1252
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001030757</td>
@@ -8533,6 +8917,7 @@
         <td>
             1983
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015001AM2</td>
@@ -8558,6 +8943,7 @@
         <td>
             1194
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BV8C9186</td>
@@ -8583,6 +8969,7 @@
         <td>
             1691
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0010071189</td>
@@ -8608,6 +8995,7 @@
         <td>
             1164
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005177909</td>
@@ -8633,6 +9021,7 @@
         <td>
             1361
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0011883966</td>
@@ -8658,6 +9047,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU27014</td>
@@ -8683,6 +9073,7 @@
         <td>
             1153
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A10683</td>
@@ -8708,6 +9099,7 @@
         <td>
             1239
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015073TQ2</td>
@@ -8733,6 +9125,7 @@
         <td>
             1100
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000577952</td>
@@ -8758,6 +9151,7 @@
         <td>
             1098
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25067</td>
@@ -8783,6 +9177,7 @@
         <td>
             1120
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015001DQ7</td>
@@ -8808,6 +9203,7 @@
         <td>
             1070
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A3EPP2</td>
@@ -8833,6 +9229,7 @@
         <td>
             1070
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25034</td>
@@ -8858,6 +9255,7 @@
         <td>
             1067
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000338476</td>
@@ -8883,6 +9281,7 @@
         <td>
             1873
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000128Q6</td>
@@ -8908,6 +9307,7 @@
         <td>
             1211
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005647273</td>
@@ -8933,6 +9333,7 @@
         <td>
             1695
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2234571771</td>
@@ -8958,6 +9359,7 @@
         <td>
             2016
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2330503694</td>
@@ -8983,6 +9385,7 @@
         <td>
             1335
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005689960</td>
@@ -9008,6 +9411,7 @@
         <td>
             1073
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU27006</td>
@@ -9033,6 +9437,7 @@
         <td>
             1096
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BJ38CR43</td>
@@ -9058,6 +9463,7 @@
         <td>
             1096
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25042</td>
@@ -9083,6 +9489,7 @@
         <td>
             1093
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012O59</td>
@@ -9108,6 +9515,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25018</td>
@@ -9133,6 +9541,7 @@
         <td>
             1041
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEWOE0017</td>
@@ -9158,6 +9567,7 @@
         <td>
             1240
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2027596530</td>
@@ -9183,6 +9593,7 @@
         <td>
             1220
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>SI0002104121</td>
@@ -9208,6 +9619,7 @@
         <td>
             3008
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005421703</td>
@@ -9233,6 +9645,7 @@
         <td>
             1588
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005660052</td>
@@ -9258,6 +9671,7 @@
         <td>
             1048
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012P90</td>
@@ -9283,6 +9697,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z007</td>
@@ -9308,6 +9723,7 @@
         <td>
             1183
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU3Z005</td>
@@ -9333,6 +9749,7 @@
         <td>
             1183
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0004545890</td>
@@ -9358,6 +9775,7 @@
         <td>
             1252
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2109812508</td>
@@ -9383,6 +9801,7 @@
         <td>
             1238
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BH3SQB22</td>
@@ -9408,6 +9827,7 @@
         <td>
             1892
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU2Z023</td>
@@ -9433,6 +9853,7 @@
         <td>
             1219
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005438004</td>
@@ -9458,6 +9879,7 @@
         <td>
             1769
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000336454</td>
@@ -9483,6 +9905,7 @@
         <td>
             1436
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005547812</td>
@@ -9508,6 +9931,7 @@
         <td>
             1232
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2487342649</td>
@@ -9533,6 +9957,7 @@
         <td>
             1182
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013234333</td>
@@ -9558,6 +9983,7 @@
         <td>
             1499
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25059</td>
@@ -9583,6 +10009,7 @@
         <td>
             1096
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A1K9F1</td>
@@ -9608,6 +10035,7 @@
         <td>
             1784
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005692410</td>
@@ -9633,6 +10061,7 @@
         <td>
             1045
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000353624</td>
@@ -9658,6 +10087,7 @@
         <td>
             2687
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>SI0002103677</td>
@@ -9683,6 +10113,7 @@
         <td>
             1506
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25000</td>
@@ -9708,6 +10139,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2181689659</td>
@@ -9733,6 +10165,7 @@
         <td>
             1383
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0003745541</td>
@@ -9758,6 +10191,7 @@
         <td>
             1105
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2434895558</td>
@@ -9783,6 +10217,7 @@
         <td>
             1057
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400BKZ3</td>
@@ -9808,6 +10243,7 @@
         <td>
             1190
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEVOE0018</td>
@@ -9833,6 +10269,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102622</td>
@@ -9858,6 +10295,7 @@
         <td>
             1070
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU35025</td>
@@ -9883,6 +10321,7 @@
         <td>
             1067
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU25026</td>
@@ -9908,6 +10347,7 @@
         <td>
             1067
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000242870</td>
@@ -9933,6 +10373,7 @@
         <td>
             1787
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0128016731</td>
@@ -9958,6 +10399,7 @@
         <td>
             1296
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE000BU22122</td>
@@ -9983,6 +10425,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012E69</td>
@@ -10008,6 +10451,7 @@
         <td>
             1295
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2QQB6</td>
@@ -10033,6 +10477,7 @@
         <td>
             2557
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES00000127A2</td>
@@ -10058,6 +10503,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0138014809</td>
@@ -10083,6 +10529,7 @@
         <td>
             1307
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BV8C9B83</td>
@@ -10108,6 +10555,7 @@
         <td>
             1355
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEXOE0024</td>
@@ -10133,6 +10581,7 @@
         <td>
             1068
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0014001NN8</td>
@@ -10158,6 +10607,7 @@
         <td>
             2647
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005532723</td>
@@ -10183,6 +10633,7 @@
         <td>
             1016
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2364199757</td>
@@ -10208,6 +10659,7 @@
         <td>
             1159
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102432</td>
@@ -10233,6 +10685,7 @@
         <td>
             1760
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTECOE0037</td>
@@ -10258,6 +10711,7 @@
         <td>
             1956
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124038721</td>
@@ -10283,6 +10737,7 @@
         <td>
             1181
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012G00</td>
@@ -10308,6 +10763,7 @@
         <td>
             1908
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2161992511</td>
@@ -10333,6 +10789,7 @@
         <td>
             1229
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005648255</td>
@@ -10358,6 +10815,7 @@
         <td>
             1088
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000344532</td>
@@ -10383,6 +10841,7 @@
         <td>
             1387
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102606</td>
@@ -10408,6 +10867,7 @@
         <td>
             1158
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005094088</td>
@@ -10433,6 +10893,7 @@
         <td>
             1176
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005588881</td>
@@ -10458,6 +10919,7 @@
         <td>
             1161
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEYOE0031</td>
@@ -10483,6 +10945,7 @@
         <td>
             1167
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005402117</td>
@@ -10508,6 +10971,7 @@
         <td>
             1344
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0014004J31</td>
@@ -10533,6 +10997,7 @@
         <td>
             2041
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005413171</td>
@@ -10558,6 +11023,7 @@
         <td>
             1116
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013480613</td>
@@ -10583,6 +11049,7 @@
         <td>
             1995
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012G42</td>
@@ -10608,6 +11075,7 @@
         <td>
             1512
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0014009O62</td>
@@ -10633,6 +11101,7 @@
         <td>
             1439
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEPOE0032</td>
@@ -10658,6 +11127,7 @@
         <td>
             1567
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000523238</td>
@@ -10683,6 +11153,7 @@
         <td>
             1177
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0012993103</td>
@@ -10708,6 +11179,7 @@
         <td>
             1142
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005497000</td>
@@ -10733,6 +11205,7 @@
         <td>
             1042
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005517195</td>
@@ -10758,6 +11231,7 @@
         <td>
             1011
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124036709</td>
@@ -10783,6 +11257,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013154044</td>
@@ -10808,6 +11283,7 @@
         <td>
             1349
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012J07</td>
@@ -10833,6 +11309,7 @@
         <td>
             1574
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012E51</td>
@@ -10858,6 +11335,7 @@
         <td>
             1072
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2262211076</td>
@@ -10883,6 +11361,7 @@
         <td>
             1116
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2EJ08</td>
@@ -10908,6 +11387,7 @@
         <td>
             1851
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013313582</td>
@@ -10933,6 +11413,7 @@
         <td>
             1261
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005543803</td>
@@ -10958,6 +11439,7 @@
         <td>
             1019
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BFZRPZ02</td>
@@ -10983,6 +11465,7 @@
         <td>
             1195
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BFZRQ242</td>
@@ -11008,6 +11491,7 @@
         <td>
             1124
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012B88</td>
@@ -11033,6 +11517,7 @@
         <td>
             1048
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005383309</td>
@@ -11058,6 +11543,7 @@
         <td>
             1105
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012B39</td>
@@ -11083,6 +11569,7 @@
         <td>
             1045
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000346552</td>
@@ -11108,6 +11595,7 @@
         <td>
             1204
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012G34</td>
@@ -11133,6 +11621,7 @@
         <td>
             1111
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000306758</td>
@@ -11158,6 +11647,7 @@
         <td>
             1237
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005246134</td>
@@ -11183,6 +11673,7 @@
         <td>
             1010
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102598</td>
@@ -11208,6 +11699,7 @@
         <td>
             1362
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005433195</td>
@@ -11233,6 +11725,7 @@
         <td>
             1374
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005138828</td>
@@ -11258,6 +11751,7 @@
         <td>
             1059
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005415291</td>
@@ -11283,6 +11777,7 @@
         <td>
             1105
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>SI0002103842</td>
@@ -11308,6 +11803,7 @@
         <td>
             1062
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2210006339</td>
@@ -11333,6 +11829,7 @@
         <td>
             1851
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1843434876</td>
@@ -11358,6 +11855,7 @@
         <td>
             1077
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BH3SQ895</td>
@@ -11383,6 +11881,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012I24</td>
@@ -11408,6 +11907,7 @@
         <td>
             1368
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTENOE0034</td>
@@ -11433,6 +11933,7 @@
         <td>
             1283
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000335449</td>
@@ -11458,6 +11959,7 @@
         <td>
             1139
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005657348</td>
@@ -11483,6 +11985,7 @@
         <td>
             1045
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005466013</td>
@@ -11508,6 +12011,7 @@
         <td>
             1178
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005449969</td>
@@ -11533,6 +12037,7 @@
         <td>
             1155
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2434393968</td>
@@ -11558,6 +12063,7 @@
         <td>
             1142
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1958534528</td>
@@ -11583,6 +12089,7 @@
         <td>
             1074
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS1508566392</td>
@@ -11608,6 +12115,7 @@
         <td>
             1053
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005403396</td>
@@ -11633,6 +12141,7 @@
         <td>
             1112
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2WSC8</td>
@@ -11658,6 +12167,7 @@
         <td>
             1159
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005422891</td>
@@ -11683,6 +12193,7 @@
         <td>
             1138
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000347568</td>
@@ -11708,6 +12219,7 @@
         <td>
             1076
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005442097</td>
@@ -11733,6 +12245,7 @@
         <td>
             1299
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0014002JM6</td>
@@ -11758,6 +12271,7 @@
         <td>
             1622
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BDHDPR44</td>
@@ -11783,6 +12297,7 @@
         <td>
             1044
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005466351</td>
@@ -11808,6 +12323,7 @@
         <td>
             1179
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012K53</td>
@@ -11833,6 +12349,7 @@
         <td>
             1078
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000517677</td>
@@ -11858,6 +12375,7 @@
         <td>
             1541
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BMQ5JM72</td>
@@ -11883,6 +12401,7 @@
         <td>
             1462
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>GR0124037715</td>
@@ -11908,6 +12427,7 @@
         <td>
             1140
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000345547</td>
@@ -11933,6 +12453,7 @@
         <td>
             1049
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000148630</td>
@@ -11958,6 +12479,7 @@
         <td>
             1131
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013515806</td>
@@ -11983,6 +12505,7 @@
         <td>
             1477
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012K20</td>
@@ -12008,6 +12531,7 @@
         <td>
             1165
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013341682</td>
@@ -12033,6 +12557,7 @@
         <td>
             1059
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013286192</td>
@@ -12058,6 +12583,7 @@
         <td>
             1049
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0012818504</td>
@@ -12083,6 +12609,7 @@
         <td>
             1048
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR001400AIN5</td>
@@ -12108,6 +12635,7 @@
         <td>
             1044
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A1ZGE4</td>
@@ -12133,6 +12661,7 @@
         <td>
             1043
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0013552060</td>
@@ -12158,6 +12687,7 @@
         <td>
             1401
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005436693</td>
@@ -12183,6 +12713,7 @@
         <td>
             1146
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000350596</td>
@@ -12208,6 +12739,7 @@
         <td>
             1459
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012F43</td>
@@ -12233,6 +12765,7 @@
         <td>
             1083
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2259191273</td>
@@ -12258,6 +12791,7 @@
         <td>
             1140
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012I32</td>
@@ -12283,6 +12817,7 @@
         <td>
             1146
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0015000RP1</td>
@@ -12308,6 +12843,7 @@
         <td>
             1161
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012F76</td>
@@ -12333,6 +12869,7 @@
         <td>
             1100
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000348727</td>
@@ -12358,6 +12895,7 @@
         <td>
             1054
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FR0013407236</td>
@@ -12383,6 +12921,7 @@
         <td>
             1076
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000369467</td>
@@ -12408,6 +12947,7 @@
         <td>
             1080
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A269M8</td>
@@ -12433,6 +12973,7 @@
         <td>
             1067
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTELOE0028</td>
@@ -12458,6 +12999,7 @@
         <td>
             1106
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005445306</td>
@@ -12483,6 +13025,7 @@
         <td>
             1052
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102440</td>
@@ -12508,6 +13051,7 @@
         <td>
             1041
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BKFVC345</td>
@@ -12533,6 +13077,7 @@
         <td>
             1256
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005467482</td>
@@ -12558,6 +13103,7 @@
         <td>
             1071
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2234571425</td>
@@ -12583,6 +13129,7 @@
         <td>
             1115
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000354630</td>
@@ -12608,6 +13155,7 @@
         <td>
             1167
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BMD03L28</td>
@@ -12633,6 +13181,7 @@
         <td>
             1172
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005387052</td>
@@ -12658,6 +13207,7 @@
         <td>
             1034
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000440557</td>
@@ -12683,6 +13233,7 @@
         <td>
             1428
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005425761</td>
@@ -12708,6 +13259,7 @@
         <td>
             1047
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>AT0000A2T198</td>
@@ -12733,6 +13285,7 @@
         <td>
             1297
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>PTOTEOOE0033</td>
@@ -12758,6 +13311,7 @@
         <td>
             1137
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000480488</td>
@@ -12783,6 +13337,7 @@
         <td>
             1690
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>NL0013332430</td>
@@ -12808,6 +13363,7 @@
         <td>
             1075
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005433690</td>
@@ -12833,6 +13389,7 @@
         <td>
             1045
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102465</td>
@@ -12858,6 +13415,7 @@
         <td>
             1064
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>DE0001102457</td>
@@ -12883,6 +13441,7 @@
         <td>
             1050
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005436701</td>
@@ -12908,6 +13467,7 @@
         <td>
             1447
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IE00BKFVC899</td>
@@ -12933,6 +13493,7 @@
         <td>
             1106
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000415153</td>
@@ -12958,6 +13519,7 @@
         <td>
             1284
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2181347183</td>
@@ -12983,6 +13545,7 @@
         <td>
             1109
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>FI4000507231</td>
@@ -13008,6 +13571,7 @@
         <td>
             1137
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>XS2386583145</td>
@@ -13033,6 +13597,7 @@
         <td>
             1066
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>ES0000012H41</td>
@@ -13058,6 +13623,7 @@
         <td>
             1128
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>BE0000349580</td>
@@ -13083,6 +13649,7 @@
         <td>
             1104
         </td>
+        <td class="score"></td>
     </tr>
     <tr>
         <td>IT0005482994</td>
@@ -13108,6 +13675,7 @@
         <td>
             1089
         </td>
+        <td class="score"></td>
     </tr>
     </tbody>
 </table>
