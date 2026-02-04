@@ -26,22 +26,20 @@ The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts 
 - If $\lambda = 0$: No currency penalty is applied.
 - If $\lambda$ is high: Foreign bonds are heavily penalized, favoring local currency bonds.
 
-**Dynamic Calculation:** In `BondApp.java`, $\lambda$ is automatically calibrated at **80% of the market's winsorized average base score**. This ensures the penalty is always proportional to the yields currently available on the market.
-
 #### A. Calibration of $\lambda_{base}$
-In `BondApp.java`, the system calculates a global $\lambda_{base}$ representing 80% of the market's average "Balanced" score:
-$$\lambda_{base} = 0.8 \cdot \text{Average}\left( 0.55 \cdot Norm_{Yield} + 0.45 \cdot Norm_{Tot.Gain} \right)$$
+In `BondApp.java`, the system computes λ_base as the **60th percentile of the market BALANCED base score distribution**:
+
+$$
+\lambda_{base} = Q_{60\%}\left( 0.55 \cdot Norm(CurrentYield) + 0.45 \cdot Norm(TotalYield) \right)
+$$
 
 #### B. Profile Scaling
 This base value is then adjusted by a `lambdaFactor` specific to each investor profile:
 $$\lambda_{final} = \lambda_{base} \cdot Factor_{profile}$$
 *(e.g., 1.3 for INCOME, 0.5 for OPPORTUNISTIC)*
 
-### 3. Base Profile Score
-Each investor profile (Income, Balanced, Growth) uses a weight $\alpha$ to balance Current Yield vs. Total Gain at maturity:
-$$Score_{base} = (\alpha \cdot Norm_{Yield}) + ((1 - \alpha) \cdot Norm_{Tot.Gain})$$
 
-### 4. Dynamic FX Penalty
+### 3. Dynamic FX Penalty
 For bonds not denominated in the reporting currency, a penalty is applied based on the **Square Root of Time** rule and historical volatility ($\sigma$):
 $$Penalty_{FX} = \lambda \cdot (1 - e^{-\sigma \cdot \sqrt{T} \cdot Sensitivity})$$
 *Where:*
@@ -51,7 +49,7 @@ $$Penalty_{FX} = \lambda \cdot (1 - e^{-\sigma \cdot \sqrt{T} \cdot Sensitivity}
 
 
 
-### t. Elastic Trust Adjustment
+### 4. Elastic Trust Adjustment
 The issuer's credit quality (Trust) is adjusted based on the investor's **Risk Aversion** ($RA$):
 $$Score_{final} = (Score_{base} - Penalty_{FX}) \cdot [1 - ((1 - Trust_{issuer}) \cdot RA_{profile})]$$
 - **High Risk Aversion (Income)**: The full credit penalty is applied.

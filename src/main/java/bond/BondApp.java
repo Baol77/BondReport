@@ -87,9 +87,9 @@ public class BondApp {
                 : b.totalYieldToMat())
             .toList();
 
-        // 2. lambda dynamique = 80% du score BALANCED moyen
-        double lambdaBase = bonds.stream()
-            .mapToDouble(b -> {
+        // 2. lambda dynamique = quantile 60% du score BALANCED
+        List<Double> baseScores = bonds.stream()
+            .map(b -> {
                 double c = reportCurrency.equals("CHF")
                     ? b.currentYieldPctChf()
                     : b.currentYieldPct();
@@ -102,8 +102,16 @@ public class BondApp {
 
                 return 0.55 * normC + 0.45 * normT;
             })
-            .average()
-            .orElse(0.5) * 0.8;
+            .sorted()
+            .toList();
+
+        double lambdaBase;
+        if (baseScores.isEmpty()) {
+            lambdaBase = 0.5;
+        } else {
+            int idx = (int) Math.floor(0.60 * (baseScores.size() - 1));
+            lambdaBase = baseScores.get(idx);
+        }
 
         // 3. construction des rows
         return bonds.stream()
