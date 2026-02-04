@@ -18,7 +18,8 @@ The `BondScoreEngine` evaluates bonds using a multi-factor approach. Here are th
 
 ### 1. Market Normalization
 To compare bonds fairly while being robust to outliers, yields are normalized using the 5th and 95th percentiles of the market distribution:
-$$\text{Norm}_{\text{Winsorized}}(x) = \max(0, \min(1, \frac{x - Q_{5}}{Q_{95} - Q_{5}}))$$
+
+$$\text{Norm}_{\text{Winsorized}}(x) = \max \left( 0, \min \left( 1, \frac{x - Q_{5}}{Q_{95} - Q_{5}} \right) \right)$$
 
 ### 2. The $\lambda$ (Lambda) Parameter: FX Risk Gravity
 The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts as a scaling factor:
