@@ -329,9 +329,11 @@
                 // Score background
                 let bg3;
                 if (y <= 0.2) {
-                    bg3 = lerpColor(red, yellow, y / 0.2);
-                } else if (y <= 0.35) {
-                    bg3 = lerpColor(yellow, green, (y - 0.2) / 0.15);
+                    bg3 = "rgb(" + red.join(",") + ")";
+                } else if (y <= 0.5) {
+                    bg3 = lerpColor(red, yellow, (y - 0.2) / 0.3);   // rouge → jaune
+                } else if (y <= 0.8) {
+                    bg3 = lerpColor(yellow, green, (y - 0.5) / 0.3); // jaune → vert
                 } else {
                     bg3 = "rgb(" + green.join(",") + ")";
                 }

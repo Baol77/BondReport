@@ -36,8 +36,8 @@ public class BondScoreEngine {
 
     public Map<String, Double> score(Bond bond,
                                      String reportCurrency,
-                                     double minCurr, double maxCurr,
-                                     double minTot, double maxTot,
+                                     List<Double> marketCurrYields,
+                                     List<Double> marketTotalYields,
                                      double lambdaBase) {
 
         double currYield = reportCurrency.equals("CHF")
@@ -48,8 +48,8 @@ public class BondScoreEngine {
             ? bond.totalYieldToMatChf()
             : bond.totalYieldToMat();
 
-        double normC = norm(currYield, minCurr, maxCurr);
-        double normT = norm(totalYield, minTot, maxTot);
+        double normC = MathLibrary.normWinsorized (currYield, marketCurrYields);
+        double normT = MathLibrary.normWinsorized(totalYield, marketTotalYields);
 
         double capitalYield = Math.max(0, totalYield - currYield);
         double capitalWeight = totalYield > 0 ? capitalYield / totalYield : 0;

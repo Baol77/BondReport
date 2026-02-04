@@ -6,6 +6,7 @@ import bond.model.Bond;
 import bond.report.BondReportRow;
 import bond.report.HtmlReportWriter;
 import bond.scoring.IssuerManager;
+import bond.scoring.MathLibrary;
 import bond.scrape.BondScraper;
 import bond.scoring.BondScoreEngine;
 
@@ -59,13 +60,13 @@ public class BondApp {
                 lines.addAll(unknowns); // Ajoute tous les noms du Set
                 Files.write(alertPath, lines);
 
-                System.out.println("⚠️ " + unknowns.size() + " unknown issuers found. Check docs/alerts.txt");
+                System.out.println("⚠" + unknowns.size() + " unknown issuers found. Check docs/alerts.txt");
             } else {
                 // Si tout est reconnu, on s'assure que l'ancien fichier est supprimé
                 Files.deleteIfExists(alertPath);
             }
         } catch (Exception e) {
-            System.err.println("❌ Could not manage alert file: " + e.getMessage());
+            System.err.println("Could not manage alert file: " + e.getMessage());
         }
     }
 
@@ -73,32 +74,20 @@ public class BondApp {
                                                  String reportCurrency,
                                                  BondScoreEngine engine) {
 
-        // 1. min / max sur la bonne devise
-        double minCurr = bonds.stream()
-            .mapToDouble(b -> reportCurrency.equals("CHF")
+        // 1. Collecte des distributions marché
+        List<Double> marketCurr = bonds.stream()
+            .map(b -> reportCurrency.equals("CHF")
                 ? b.currentYieldPctChf()
                 : b.currentYieldPct())
-            .min().orElse(0);
+            .toList();
 
-        double maxCurr = bonds.stream()
-            .mapToDouble(b -> reportCurrency.equals("CHF")
-                ? b.currentYieldPctChf()
-                : b.currentYieldPct())
-            .max().orElse(1);
-
-        double minTot = bonds.stream()
-            .mapToDouble(b -> reportCurrency.equals("CHF")
+        List<Double> marketTot = bonds.stream()
+            .map(b -> reportCurrency.equals("CHF")
                 ? b.totalYieldToMatChf()
                 : b.totalYieldToMat())
-            .min().orElse(0);
+            .toList();
 
-        double maxTot = bonds.stream()
-            .mapToDouble(b -> reportCurrency.equals("CHF")
-                ? b.totalYieldToMatChf()
-                : b.totalYieldToMat())
-            .max().orElse(1);
-
-        // 2. lambda dynamique = 80% de la moyenne des baseScores BALANCED
+        // 2. lambda dynamique = 80% du score BALANCED moyen
         double lambdaBase = bonds.stream()
             .mapToDouble(b -> {
                 double c = reportCurrency.equals("CHF")
@@ -107,9 +96,11 @@ public class BondApp {
                 double t = reportCurrency.equals("CHF")
                     ? b.totalYieldToMatChf()
                     : b.totalYieldToMat();
-                double normC = (maxCurr == minCurr) ? 1 : (c - minCurr) / (maxCurr - minCurr);
-                double normT = (maxTot == minTot) ? 1 : (t - minTot) / (maxTot - minTot);
-                return 0.55 * normC + 0.45 * normT; // BALANCED brut
+
+                double normC = MathLibrary.normWinsorized(c, marketCurr);
+                double normT = MathLibrary.normWinsorized(t, marketTot);
+
+                return 0.55 * normC + 0.45 * normT;
             })
             .average()
             .orElse(0.5) * 0.8;
@@ -118,7 +109,7 @@ public class BondApp {
         return bonds.stream()
             .map(b -> new BondReportRow(
                 b,
-                engine.score(b, reportCurrency, minCurr, maxCurr, minTot, maxTot, lambdaBase)
+                engine.score(b, reportCurrency, marketCurr, marketTot, lambdaBase)
             ))
             .sorted((a, b) ->
                 Double.compare(
