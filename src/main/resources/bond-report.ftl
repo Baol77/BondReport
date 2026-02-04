@@ -67,6 +67,34 @@
             min-width: 200px;
         }
 
+        .risk-scale {
+            width: 100%;
+            height: 6px;
+            /* Gradient du vert (Income) au rouge (Opportunistic) */
+            background: linear-gradient(to right, #28a745, #ffc107, #fd7e14, #dc3545);
+            border-radius: 3px;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .risk-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* On ajuste la box des profils pour empiler verticalement la barre et les radios */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            width: 380px; /* Ajuste selon tes besoins */
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -380,27 +408,38 @@
     <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
 
     <fieldset class="profile-box">
-        <legend>Scoring profile</legend>
+        <legend>Scoring profile & Risk appetite</legend>
 
-        <label class="profile-option" title="Focuses on high current income. Prioritizes coupon and yield over capital appreciation.">
-            <input type="radio" name="profile" value="INCOME" onchange="updateScores()">
-            <span>Income</span>
-        </label>
+        <div class="profile-container">
+            <div class="risk-scale"></div>
 
-        <label class="profile-option" title="Balanced trade-off between income, risk, and total return. Suitable for most investors." >
-            <input type="radio" name="profile" value="BALANCED" checked onchange="updateScores()">
-            <span>Balanced</span>
-        </label>
+            <div class="risk-labels">
+                <span>Lower Risk</span>
+                <span>Higher Risk</span>
+            </div>
 
-        <label class="profile-option" title="Targets higher long-term total return. Accepts more volatility and duration risk.">
-            <input type="radio" name="profile" value="GROWTH" onchange="updateScores()">
-            <span>Growth</span>
-        </label>
+            <div style="display: flex; justify-content: space-between;">
+                <label class="profile-option" title="Focuses on high current income. Prioritizes coupon and yield.">
+                    <input type="radio" name="profile" value="INCOME" onchange="updateScores()">
+                    <span>Income</span>
+                </label>
 
-        <label class="profile-option" title="Seeks maximum return opportunities. Tolerates higher credit, currency, and duration risk.">
-            <input type="radio" name="profile" value="OPPORTUNISTIC" onchange="updateScores()">
-            <span>Opportunistic</span>
-        </label>
+                <label class="profile-option" title="Balanced trade-off between income, risk, and total return.">
+                    <input type="radio" name="profile" value="BALANCED" checked onchange="updateScores()">
+                    <span>Balanced</span>
+                </label>
+
+                <label class="profile-option" title="Targets higher long-term total return. Accepts more volatility.">
+                    <input type="radio" name="profile" value="GROWTH" onchange="updateScores()">
+                    <span>Growth</span>
+                </label>
+
+                <label class="profile-option" title="Seeks maximum yield. Tolerates high credit and FX risk.">
+                    <input type="radio" name="profile" value="OPPORTUNISTIC" onchange="updateScores()">
+                    <span>Opportunistic</span>
+                </label>
+            </div>
+        </div>
     </fieldset>
 
     <div class="spacer"></div>
