@@ -29,7 +29,7 @@ The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts 
 
 #### A. Calibration of $\lambda_{base}$
 In `BondApp.java`, the system calculates a global $\lambda_{base}$ representing 80% of the market's average "Balanced" score:
-$$\lambda_{base} = 0.8 \cdot \text{Average}\left( 0.55 \cdot Norm_{Current} + 0.45 \cdot Norm_{Total} \right)$$
+$$\lambda_{base} = 0.8 \cdot \text{Average}\left( 0.55 \cdot Norm_{Yield} + 0.45 \cdot Norm_{Tot.Gain} \right)$$
 
 #### B. Profile Scaling
 This base value is then adjusted by a `lambdaFactor` specific to each investor profile:
@@ -37,8 +37,8 @@ $$\lambda_{final} = \lambda_{base} \cdot Factor_{profile}$$
 *(e.g., 1.2 for INCOME, 0.5 for OPPORTUNISTIC)*
 
 ### 3. Base Profile Score
-Each investor profile (Income, Balanced, Growth) uses a weight $\alpha$ to balance Current Yield vs. Total Yield:
-$$Score_{base} = (\alpha \cdot Norm_{Current}) + ((1 - \alpha) \cdot Norm_{Total})$$
+Each investor profile (Income, Balanced, Growth) uses a weight $\alpha$ to balance Current Yield vs. Total Gain at maturity:
+$$Score_{base} = (\alpha \cdot Norm_{Yield}) + ((1 - \alpha) \cdot Norm_{Tot.Gain})$$
 
 ### 4. Dynamic FX Penalty
 For bonds not denominated in the reporting currency, a penalty is applied based on the **Square Root of Time** rule and historical volatility ($\sigma$):
