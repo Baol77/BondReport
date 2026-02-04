@@ -1,6 +1,5 @@
 package bond.report;
 
-import bond.model.Bond;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 

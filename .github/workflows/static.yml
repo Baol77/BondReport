@@ -2,7 +2,7 @@ name: Build & Deploy Bond Report
 
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
   workflow_dispatch:
   schedule:
     - cron: "0 10 * * *"   # 10:00 GMT
@@ -35,6 +35,13 @@ jobs:
 
       - name: Build with Maven
         run: mvn -B package
+
+      - name: Check for Unknown Issuers
+        run: |
+          if [ -f docs/alerts.txt ]; then
+            echo "::warning title=Missing Issuers::Certains émetteurs n'ont pas été reconnus !"
+            cat docs/alerts.txt
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

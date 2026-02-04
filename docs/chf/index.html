@@ -132,7 +132,7 @@
         let currentSortDir = "desc";
 
         function parseValue(v) {
-            v = v.replace(/[€CHF%]/g, "").replace(",", ".").trim();
+            v = v.replace(/[�CHF%]/g, "").replace(",", ".").trim();
             const n = parseFloat(v);
             return isNaN(n) ? v : n;
         }
@@ -160,7 +160,7 @@
                 const s = h.querySelector(".arrow");
                 if (s) s.textContent = "";
             });
-            ths[col].querySelector(".arrow").textContent = dir === "asc" ? "▲" : "▼";
+            ths[col].querySelector(".arrow").textContent = dir === "asc" ? "?" : "?";
 
             rows.sort((a, b) => {
                 const x = parseValue(a.cells[col].innerText);
@@ -362,7 +362,7 @@
 <h2>
     Bond Yield Ranking (CHF)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-04 01:15
+        � ? 2026-02-04 10:04
     </span>
 </h2>
 
@@ -377,7 +377,7 @@
         <input id="filterMaxMat" type="date" onchange="filterTable()">
     </label>
 
-    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
+    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">? Clear column filters</button>
 
     <fieldset class="profile-box">
         <legend>Scoring profile</legend>
@@ -404,7 +404,7 @@
     </fieldset>
 
     <div class="spacer"></div>
-    <button onclick="exportCSV()">📥 Export CSV</button>
+    <button onclick="exportCSV()">? Export CSV</button>
 </div>
 
 <table id="bondTable">
@@ -675,6 +675,38 @@
 
     <td>
         2951
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,507"
+            data-scoreBALANCED="0,376"
+            data-scoreGROWTH="0,218"
+            data-scoreOPPORTUNISTIC="0,158"
+    >
+    <td>SE0009496367</td>
+    <td>SVEZIA</td>
+
+    <td class="good">
+        97,22
+    </td>
+
+    <td>SEK</td>
+
+    <td>
+        8,45
+    </td>
+
+    <td>0,75</td>
+    <td>2028-05-12</td>
+
+    <td>
+        8,87
+    </td>
+
+    <td>
+        1205
     </td>
 
     <td class="score-cell"></td>
@@ -995,38 +1027,6 @@
 
     <td>
         1642
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,406"
-            data-scoreBALANCED="0,324"
-            data-scoreGROWTH="0,201"
-            data-scoreOPPORTUNISTIC="0,155"
-    >
-    <td>SE0009496367</td>
-    <td>SVEZIA</td>
-
-    <td class="good">
-        97,22
-    </td>
-
-    <td>SEK</td>
-
-    <td>
-        8,45
-    </td>
-
-    <td>0,75</td>
-    <td>2028-05-12</td>
-
-    <td>
-        8,87
-    </td>
-
-    <td>
-        1205
     </td>
 
     <td class="score-cell"></td>
@@ -2440,6 +2440,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,239"
+            data-scoreBALANCED="0,236"
+            data-scoreGROWTH="0,239"
+            data-scoreOPPORTUNISTIC="0,246"
+    >
+    <td>FR001400NEF3</td>
+    <td>FRANCIA GREEN BOND</td>
+
+    <td class="good">
+        81,60
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        74,85
+    </td>
+
+    <td>3,00</td>
+    <td>2049-06-25</td>
+
+    <td>
+        4,01
+    </td>
+
+    <td>
+        2106
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,257"
             data-scoreBALANCED="0,234"
             data-scoreGROWTH="0,201"
@@ -3491,38 +3523,6 @@
 
     <td>
         2666
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,197"
-            data-scoreBALANCED="0,207"
-            data-scoreGROWTH="0,222"
-            data-scoreOPPORTUNISTIC="0,242"
-    >
-    <td>FR001400NEF3</td>
-    <td>FRANCIA GREEN BOND</td>
-
-    <td class="good">
-        81,60
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        74,85
-    </td>
-
-    <td>3,00</td>
-    <td>2049-06-25</td>
-
-    <td>
-        4,01
-    </td>
-
-    <td>
-        2106
     </td>
 
     <td class="score-cell"></td>
@@ -5352,6 +5352,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,167"
+            data-scoreBALANCED="0,181"
+            data-scoreGROWTH="0,203"
+            data-scoreOPPORTUNISTIC="0,223"
+    >
+    <td>XS1960361720</td>
+    <td>POLONIA GREEN BOND</td>
+
+    <td class="good">
+        67,50
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        61,92
+    </td>
+
+    <td>2,00</td>
+    <td>2049-03-08</td>
+
+    <td>
+        3,23
+    </td>
+
+    <td>
+        2068
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,210"
             data-scoreBALANCED="0,180"
             data-scoreGROWTH="0,145"
@@ -5475,6 +5507,70 @@
 
     <td>
         2060
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,166"
+            data-scoreBALANCED="0,178"
+            data-scoreGROWTH="0,202"
+            data-scoreOPPORTUNISTIC="0,216"
+    >
+    <td>DE0001030757</td>
+    <td>GERMANIA GREEN BOND</td>
+
+    <td class="good">
+        69,90
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        64,12
+    </td>
+
+    <td>1,80</td>
+    <td>2053-08-15</td>
+
+    <td>
+        2,81
+    </td>
+
+    <td>
+        2059
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,200"
+            data-scoreBALANCED="0,177"
+            data-scoreGROWTH="0,156"
+            data-scoreOPPORTUNISTIC="0,151"
+    >
+    <td>NL0015001RG8</td>
+    <td>OLANDA GREEN BOND</td>
+
+    <td class="good">
+        97,80
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        89,71
+    </td>
+
+    <td>3,25</td>
+    <td>2044-01-15</td>
+
+    <td>
+        3,62
+    </td>
+
+    <td>
+        1638
     </td>
 
     <td class="score-cell"></td>
@@ -5640,38 +5736,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,157"
-            data-scoreBALANCED="0,174"
-            data-scoreGROWTH="0,199"
-            data-scoreOPPORTUNISTIC="0,222"
-    >
-    <td>XS1960361720</td>
-    <td>POLONIA GREEN BOND</td>
-
-    <td class="good">
-        67,50
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        61,92
-    </td>
-
-    <td>2,00</td>
-    <td>2049-03-08</td>
-
-    <td>
-        3,23
-    </td>
-
-    <td>
-        2068
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,213"
             data-scoreBALANCED="0,174"
             data-scoreGROWTH="0,125"
@@ -5699,6 +5763,38 @@
 
     <td>
         1352
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,199"
+            data-scoreBALANCED="0,173"
+            data-scoreGROWTH="0,138"
+            data-scoreOPPORTUNISTIC="0,129"
+    >
+    <td>XS3109460959</td>
+    <td>POLONIA GREEN BOND</td>
+
+    <td class="bad">
+        100,26
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        91,97
+    </td>
+
+    <td>3,88</td>
+    <td>2037-07-07</td>
+
+    <td>
+        4,21
+    </td>
+
+    <td>
+        1461
     </td>
 
     <td class="score-cell"></td>
@@ -5736,6 +5832,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,166"
+            data-scoreBALANCED="0,172"
+            data-scoreGROWTH="0,187"
+            data-scoreOPPORTUNISTIC="0,197"
+    >
+    <td>AT0000A2Y8G4</td>
+    <td>AUSTRIA GREEN BOND</td>
+
+    <td class="good">
+        70,61
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        64,77
+    </td>
+
+    <td>1,85</td>
+    <td>2049-05-23</td>
+
+    <td>
+        2,86
+    </td>
+
+    <td>
+        1951
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,180"
             data-scoreBALANCED="0,172"
             data-scoreGROWTH="0,155"
@@ -5763,6 +5891,38 @@
 
     <td>
         1622
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,188"
+            data-scoreBALANCED="0,171"
+            data-scoreGROWTH="0,155"
+            data-scoreOPPORTUNISTIC="0,153"
+    >
+    <td>IE000GVLBXU6</td>
+    <td>IRLANDA GREEN BOND</td>
+
+    <td class="good">
+        93,49
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        85,76
+    </td>
+
+    <td>3,00</td>
+    <td>2043-10-18</td>
+
+    <td>
+        3,50
+    </td>
+
+    <td>
+        1660
     </td>
 
     <td class="score-cell"></td>
@@ -6019,38 +6179,6 @@
 
     <td>
         2152
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,188"
-            data-scoreBALANCED="0,166"
-            data-scoreGROWTH="0,135"
-            data-scoreOPPORTUNISTIC="0,128"
-    >
-    <td>XS3109460959</td>
-    <td>POLONIA GREEN BOND</td>
-
-    <td class="bad">
-        100,26
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        91,97
-    </td>
-
-    <td>3,88</td>
-    <td>2037-07-07</td>
-
-    <td>
-        4,21
-    </td>
-
-    <td>
-        1461
     </td>
 
     <td class="score-cell"></td>
@@ -6824,33 +6952,33 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,133"
+            data-scoreINCOME="0,175"
             data-scoreBALANCED="0,153"
-            data-scoreGROWTH="0,185"
-            data-scoreOPPORTUNISTIC="0,211"
+            data-scoreGROWTH="0,131"
+            data-scoreOPPORTUNISTIC="0,127"
     >
-    <td>DE0001030757</td>
-    <td>GERMANIA GREEN BOND</td>
+    <td>BE0000356650</td>
+    <td>BELGIO GREEN BOND</td>
 
     <td class="good">
-        69,90
+        90,62
     </td>
 
     <td>EUR</td>
 
     <td>
-        64,12
+        83,13
     </td>
 
-    <td>1,80</td>
-    <td>2053-08-15</td>
+    <td>2,75</td>
+    <td>2039-04-22</td>
 
     <td>
-        2,81
+        3,31
     </td>
 
     <td>
-        2059
+        1524
     </td>
 
     <td class="score-cell"></td>
@@ -6920,33 +7048,33 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,160"
+            data-scoreINCOME="0,203"
             data-scoreBALANCED="0,153"
-            data-scoreGROWTH="0,143"
-            data-scoreOPPORTUNISTIC="0,148"
+            data-scoreGROWTH="0,088"
+            data-scoreOPPORTUNISTIC="0,063"
     >
-    <td>NL0015001RG8</td>
-    <td>OLANDA GREEN BOND</td>
+    <td>XS2722876609</td>
+    <td>LETTONIA</td>
 
-    <td class="good">
-        97,80
+    <td class="bad">
+        104,05
     </td>
 
     <td>EUR</td>
 
     <td>
-        89,71
+        95,45
     </td>
 
-    <td>3,25</td>
-    <td>2044-01-15</td>
+    <td>3,88</td>
+    <td>2029-05-22</td>
 
     <td>
-        3,62
+        4,06
     </td>
 
     <td>
-        1638
+        1081
     </td>
 
     <td class="score-cell"></td>
@@ -7075,38 +7203,6 @@
 
     <td>
         1241
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,155"
-            data-scoreBALANCED="0,150"
-            data-scoreGROWTH="0,144"
-            data-scoreOPPORTUNISTIC="0,151"
-    >
-    <td>IE000GVLBXU6</td>
-    <td>IRLANDA GREEN BOND</td>
-
-    <td class="good">
-        93,49
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        85,76
-    </td>
-
-    <td>3,00</td>
-    <td>2043-10-18</td>
-
-    <td>
-        3,50
-    </td>
-
-    <td>
-        1660
     </td>
 
     <td class="score-cell"></td>
@@ -7331,38 +7427,6 @@
 
     <td>
         1094
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,133"
-            data-scoreBALANCED="0,148"
-            data-scoreGROWTH="0,172"
-            data-scoreOPPORTUNISTIC="0,193"
-    >
-    <td>AT0000A2Y8G4</td>
-    <td>AUSTRIA GREEN BOND</td>
-
-    <td class="good">
-        70,61
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        64,77
-    </td>
-
-    <td>1,85</td>
-    <td>2049-05-23</td>
-
-    <td>
-        2,86
-    </td>
-
-    <td>
-        1951
     </td>
 
     <td class="score-cell"></td>
@@ -8168,38 +8232,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,177"
-            data-scoreBALANCED="0,139"
-            data-scoreGROWTH="0,083"
-            data-scoreOPPORTUNISTIC="0,063"
-    >
-    <td>XS2722876609</td>
-    <td>LETTONIA</td>
-
-    <td class="bad">
-        104,05
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        95,45
-    </td>
-
-    <td>3,88</td>
-    <td>2029-05-22</td>
-
-    <td>
-        4,06
-    </td>
-
-    <td>
-        1081
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,173"
             data-scoreBALANCED="0,139"
             data-scoreGROWTH="0,100"
@@ -8611,38 +8643,6 @@
 
     <td>
         1300
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,144"
-            data-scoreBALANCED="0,135"
-            data-scoreGROWTH="0,122"
-            data-scoreOPPORTUNISTIC="0,125"
-    >
-    <td>BE0000356650</td>
-    <td>BELGIO GREEN BOND</td>
-
-    <td class="good">
-        90,62
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        83,13
-    </td>
-
-    <td>2,75</td>
-    <td>2039-04-22</td>
-
-    <td>
-        3,31
-    </td>
-
-    <td>
-        1524
     </td>
 
     <td class="score-cell"></td>
@@ -10184,6 +10184,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,162"
+            data-scoreBALANCED="0,118"
+            data-scoreGROWTH="0,066"
+            data-scoreOPPORTUNISTIC="0,047"
+    >
+    <td>AT0000A33SH3</td>
+    <td>AUSTRIA GREEN BOND</td>
+
+    <td class="bad">
+        101,90
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        93,47
+    </td>
+
+    <td>2,90</td>
+    <td>2029-05-23</td>
+
+    <td>
+        3,10
+    </td>
+
+    <td>
+        1074
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,147"
             data-scoreBALANCED="0,117"
             data-scoreGROWTH="0,086"
@@ -10280,6 +10312,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,122"
+            data-scoreBALANCED="0,114"
+            data-scoreGROWTH="0,110"
+            data-scoreOPPORTUNISTIC="0,113"
+    >
+    <td>FR0013234333</td>
+    <td>FRANCIA GREEN BOND</td>
+
+    <td class="good">
+        78,78
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        72,26
+    </td>
+
+    <td>1,75</td>
+    <td>2039-06-25</td>
+
+    <td>
+        2,42
+    </td>
+
+    <td>
+        1527
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,143"
             data-scoreBALANCED="0,114"
             data-scoreGROWTH="0,082"
@@ -10371,6 +10435,38 @@
 
     <td>
         1276
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,140"
+            data-scoreBALANCED="0,112"
+            data-scoreGROWTH="0,082"
+            data-scoreOPPORTUNISTIC="0,073"
+    >
+    <td>DE000BU3Z047</td>
+    <td>GERMANIA GREEN BOND</td>
+
+    <td class="good">
+        97,63
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        89,56
+    </td>
+
+    <td>2,50</td>
+    <td>2035-02-15</td>
+
+    <td>
+        2,79
+    </td>
+
+    <td>
+        1275
     </td>
 
     <td class="score-cell"></td>
@@ -11464,38 +11560,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,129"
-            data-scoreBALANCED="0,101"
-            data-scoreGROWTH="0,060"
-            data-scoreOPPORTUNISTIC="0,046"
-    >
-    <td>AT0000A33SH3</td>
-    <td>AUSTRIA GREEN BOND</td>
-
-    <td class="bad">
-        101,90
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        93,47
-    </td>
-
-    <td>2,90</td>
-    <td>2029-05-23</td>
-
-    <td>
-        3,10
-    </td>
-
-    <td>
-        1074
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,135"
             data-scoreBALANCED="0,101"
             data-scoreGROWTH="0,061"
@@ -11555,38 +11619,6 @@
 
     <td>
         1048
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,100"
-            data-scoreBALANCED="0,100"
-            data-scoreGROWTH="0,103"
-            data-scoreOPPORTUNISTIC="0,111"
-    >
-    <td>FR0013234333</td>
-    <td>FRANCIA GREEN BOND</td>
-
-    <td class="good">
-        78,78
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        72,26
-    </td>
-
-    <td>1,75</td>
-    <td>2039-06-25</td>
-
-    <td>
-        2,42
-    </td>
-
-    <td>
-        1527
     </td>
 
     <td class="score-cell"></td>
@@ -11816,6 +11848,70 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,129"
+            data-scoreBALANCED="0,099"
+            data-scoreGROWTH="0,058"
+            data-scoreOPPORTUNISTIC="0,044"
+    >
+    <td>XS1713475306</td>
+    <td>CROAZIA</td>
+
+    <td class="bad">
+        100,93
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        92,58
+    </td>
+
+    <td>2,75</td>
+    <td>2030-01-27</td>
+
+    <td>
+        2,97
+    </td>
+
+    <td>
+        1080
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,130"
+            data-scoreBALANCED="0,098"
+            data-scoreGROWTH="0,056"
+            data-scoreOPPORTUNISTIC="0,040"
+    >
+    <td>XS1713462668</td>
+    <td>CROAZIA</td>
+
+    <td class="bad">
+        100,95
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        92,60
+    </td>
+
+    <td>2,70</td>
+    <td>2028-06-15</td>
+
+    <td>
+        2,92
+    </td>
+
+    <td>
+        1049
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,136"
             data-scoreBALANCED="0,098"
             data-scoreGROWTH="0,055"
@@ -11912,6 +12008,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,126"
+            data-scoreBALANCED="0,097"
+            data-scoreGROWTH="0,067"
+            data-scoreOPPORTUNISTIC="0,057"
+    >
+    <td>DE000BU3Z005</td>
+    <td>GERMANIA GREEN BOND</td>
+
+    <td class="good">
+        97,97
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        89,87
+    </td>
+
+    <td>2,30</td>
+    <td>2033-02-15</td>
+
+    <td>
+        2,56
+    </td>
+
+    <td>
+        1199
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,110"
             data-scoreBALANCED="0,097"
             data-scoreGROWTH="0,076"
@@ -11971,38 +12099,6 @@
 
     <td>
         1259
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,112"
-            data-scoreBALANCED="0,097"
-            data-scoreGROWTH="0,076"
-            data-scoreOPPORTUNISTIC="0,072"
-    >
-    <td>DE000BU3Z047</td>
-    <td>GERMANIA GREEN BOND</td>
-
-    <td class="good">
-        97,63
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        89,56
-    </td>
-
-    <td>2,50</td>
-    <td>2035-02-15</td>
-
-    <td>
-        2,79
-    </td>
-
-    <td>
-        1275
     </td>
 
     <td class="score-cell"></td>
@@ -12195,70 +12291,6 @@
 
     <td>
         1165
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,121"
-            data-scoreBALANCED="0,095"
-            data-scoreGROWTH="0,057"
-            data-scoreOPPORTUNISTIC="0,044"
-    >
-    <td>XS1713475306</td>
-    <td>CROAZIA</td>
-
-    <td class="bad">
-        100,93
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        92,58
-    </td>
-
-    <td>2,75</td>
-    <td>2030-01-27</td>
-
-    <td>
-        2,97
-    </td>
-
-    <td>
-        1080
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,122"
-            data-scoreBALANCED="0,095"
-            data-scoreGROWTH="0,055"
-            data-scoreOPPORTUNISTIC="0,040"
-    >
-    <td>XS1713462668</td>
-    <td>CROAZIA</td>
-
-    <td class="bad">
-        100,95
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        92,60
-    </td>
-
-    <td>2,70</td>
-    <td>2028-06-15</td>
-
-    <td>
-        2,92
-    </td>
-
-    <td>
-        1049
     </td>
 
     <td class="score-cell"></td>
@@ -12744,38 +12776,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,101"
-            data-scoreBALANCED="0,084"
-            data-scoreGROWTH="0,061"
-            data-scoreOPPORTUNISTIC="0,056"
-    >
-    <td>DE000BU3Z005</td>
-    <td>GERMANIA GREEN BOND</td>
-
-    <td class="good">
-        97,97
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        89,87
-    </td>
-
-    <td>2,30</td>
-    <td>2033-02-15</td>
-
-    <td>
-        2,56
-    </td>
-
-    <td>
-        1199
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,079"
             data-scoreBALANCED="0,083"
             data-scoreGROWTH="0,093"
@@ -12936,6 +12936,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,113"
+            data-scoreBALANCED="0,082"
+            data-scoreGROWTH="0,046"
+            data-scoreOPPORTUNISTIC="0,034"
+    >
+    <td>DE000BU35025</td>
+    <td>GERMANIA GREEN BOND</td>
+
+    <td class="good">
+        99,57
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        91,34
+    </td>
+
+    <td>2,10</td>
+    <td>2029-04-12</td>
+
+    <td>
+        2,30
+    </td>
+
+    <td>
+        1073
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,098"
             data-scoreBALANCED="0,081"
             data-scoreGROWTH="0,060"
@@ -12995,6 +13027,38 @@
 
     <td>
         1459
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,072"
+            data-scoreBALANCED="0,081"
+            data-scoreGROWTH="0,099"
+            data-scoreOPPORTUNISTIC="0,111"
+    >
+    <td>ES0000012J07</td>
+    <td>SPAGNA GREEN BOND</td>
+
+    <td class="good">
+        66,29
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        60,81
+    </td>
+
+    <td>1,00</td>
+    <td>2042-07-30</td>
+
+    <td>
+        1,64
+    </td>
+
+    <td>
+        1600
     </td>
 
     <td class="score-cell"></td>
@@ -13192,38 +13256,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,062"
-            data-scoreBALANCED="0,074"
-            data-scoreGROWTH="0,094"
-            data-scoreOPPORTUNISTIC="0,110"
-    >
-    <td>ES0000012J07</td>
-    <td>SPAGNA GREEN BOND</td>
-
-    <td class="good">
-        66,29
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        60,81
-    </td>
-
-    <td>1,00</td>
-    <td>2042-07-30</td>
-
-    <td>
-        1,64
-    </td>
-
-    <td>
-        1600
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,093"
             data-scoreBALANCED="0,073"
             data-scoreGROWTH="0,044"
@@ -13347,38 +13379,6 @@
 
     <td>
         1074
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,090"
-            data-scoreBALANCED="0,070"
-            data-scoreGROWTH="0,042"
-            data-scoreOPPORTUNISTIC="0,033"
-    >
-    <td>DE000BU35025</td>
-    <td>GERMANIA GREEN BOND</td>
-
-    <td class="good">
-        99,57
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        91,34
-    </td>
-
-    <td>2,10</td>
-    <td>2029-04-12</td>
-
-    <td>
-        2,30
-    </td>
-
-    <td>
-        1073
     </td>
 
     <td class="score-cell"></td>
@@ -13800,6 +13800,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,037"
+            data-scoreBALANCED="0,057"
+            data-scoreGROWTH="0,090"
+            data-scoreOPPORTUNISTIC="0,107"
+    >
+    <td>FR0014002JM6</td>
+    <td>FRANCIA GREEN BOND</td>
+
+    <td class="good">
+        54,43
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        49,93
+    </td>
+
+    <td>0,50</td>
+    <td>2044-06-25</td>
+
+    <td>
+        1,00
+    </td>
+
+    <td>
+        1636
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,073"
             data-scoreBALANCED="0,057"
             data-scoreGROWTH="0,039"
@@ -13960,6 +13992,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,061"
+            data-scoreBALANCED="0,051"
+            data-scoreGROWTH="0,043"
+            data-scoreOPPORTUNISTIC="0,043"
+    >
+    <td>BE0000346552</td>
+    <td>BELGIO GREEN BOND</td>
+
+    <td class="good">
+        89,20
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        81,82
+    </td>
+
+    <td>1,25</td>
+    <td>2033-04-22</td>
+
+    <td>
+        1,53
+    </td>
+
+    <td>
+        1215
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,047"
             data-scoreBALANCED="0,051"
             data-scoreGROWTH="0,060"
@@ -13987,38 +14051,6 @@
 
     <td>
         1388
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,031"
-            data-scoreBALANCED="0,050"
-            data-scoreGROWTH="0,084"
-            data-scoreOPPORTUNISTIC="0,105"
-    >
-    <td>FR0014002JM6</td>
-    <td>FRANCIA GREEN BOND</td>
-
-    <td class="good">
-        54,43
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        49,93
-    </td>
-
-    <td>0,50</td>
-    <td>2044-06-25</td>
-
-    <td>
-        1,00
-    </td>
-
-    <td>
-        1636
     </td>
 
     <td class="score-cell"></td>
@@ -14083,6 +14115,38 @@
 
     <td>
         1076
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,063"
+            data-scoreBALANCED="0,048"
+            data-scoreGROWTH="0,033"
+            data-scoreOPPORTUNISTIC="0,030"
+    >
+    <td>IE00BFZRQ242</td>
+    <td>IRLANDA GREEN BOND</td>
+
+    <td class="good">
+        94,64
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        86,81
+    </td>
+
+    <td>1,35</td>
+    <td>2031-03-18</td>
+
+    <td>
+        1,56
+    </td>
+
+    <td>
+        1131
     </td>
 
     <td class="score-cell"></td>
@@ -14248,38 +14312,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,050"
-            data-scoreBALANCED="0,045"
-            data-scoreGROWTH="0,040"
-            data-scoreOPPORTUNISTIC="0,042"
-    >
-    <td>BE0000346552</td>
-    <td>BELGIO GREEN BOND</td>
-
-    <td class="good">
-        89,20
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        81,82
-    </td>
-
-    <td>1,25</td>
-    <td>2033-04-22</td>
-
-    <td>
-        1,53
-    </td>
-
-    <td>
-        1215
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,054"
             data-scoreBALANCED="0,045"
             data-scoreGROWTH="0,031"
@@ -14403,38 +14435,6 @@
 
     <td>
         1049
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,052"
-            data-scoreBALANCED="0,042"
-            data-scoreGROWTH="0,031"
-            data-scoreOPPORTUNISTIC="0,029"
-    >
-    <td>IE00BFZRQ242</td>
-    <td>IRLANDA GREEN BOND</td>
-
-    <td class="good">
-        94,64
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        86,81
-    </td>
-
-    <td>1,35</td>
-    <td>2031-03-18</td>
-
-    <td>
-        1,56
-    </td>
-
-    <td>
-        1131
     </td>
 
     <td class="score-cell"></td>
@@ -14760,6 +14760,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,042"
+            data-scoreBALANCED="0,032"
+            data-scoreGROWTH="0,020"
+            data-scoreOPPORTUNISTIC="0,017"
+    >
+    <td>XS1843434876</td>
+    <td>CROAZIA</td>
+
+    <td class="good">
+        96,03
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        88,09
+    </td>
+
+    <td>1,12</td>
+    <td>2029-06-19</td>
+
+    <td>
+        1,28
+    </td>
+
+    <td>
+        1078
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,035"
             data-scoreBALANCED="0,031"
             data-scoreGROWTH="0,029"
@@ -14792,38 +14824,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,040"
-            data-scoreBALANCED="0,031"
-            data-scoreGROWTH="0,020"
-            data-scoreOPPORTUNISTIC="0,017"
-    >
-    <td>XS1843434876</td>
-    <td>CROAZIA</td>
-
-    <td class="good">
-        96,03
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        88,09
-    </td>
-
-    <td>1,12</td>
-    <td>2029-06-19</td>
-
-    <td>
-        1,28
-    </td>
-
-    <td>
-        1078
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,014"
             data-scoreBALANCED="0,030"
             data-scoreGROWTH="0,057"
@@ -14851,6 +14851,38 @@
 
     <td>
         1469
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
+            data-scoreINCOME="0,018"
+            data-scoreBALANCED="0,030"
+            data-scoreGROWTH="0,051"
+            data-scoreOPPORTUNISTIC="0,063"
+    >
+    <td>NL0013552060</td>
+    <td>OLANDA GREEN BOND</td>
+
+    <td class="good">
+        69,02
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        63,31
+    </td>
+
+    <td>0,50</td>
+    <td>2040-01-15</td>
+
+    <td>
+        0,79
+    </td>
+
+    <td>
+        1412
     </td>
 
     <td class="score-cell"></td>
@@ -14984,6 +15016,38 @@
     <td class="score-cell"></td>
     </tr>
     <tr
+            data-scoreINCOME="0,036"
+            data-scoreBALANCED="0,027"
+            data-scoreGROWTH="0,018"
+            data-scoreOPPORTUNISTIC="0,016"
+    >
+    <td>XS1958534528</td>
+    <td>POLONIA GREEN BOND</td>
+
+    <td class="good">
+        95,64
+    </td>
+
+    <td>EUR</td>
+
+    <td>
+        87,73
+    </td>
+
+    <td>1,00</td>
+    <td>2029-03-07</td>
+
+    <td>
+        1,14
+    </td>
+
+    <td>
+        1078
+    </td>
+
+    <td class="score-cell"></td>
+    </tr>
+    <tr
             data-scoreINCOME="0,038"
             data-scoreBALANCED="0,026"
             data-scoreGROWTH="0,014"
@@ -15048,38 +15112,6 @@
     <td class="score-cell"></td>
     </tr>
     <tr
-            data-scoreINCOME="0,034"
-            data-scoreBALANCED="0,026"
-            data-scoreGROWTH="0,017"
-            data-scoreOPPORTUNISTIC="0,016"
-    >
-    <td>XS1958534528</td>
-    <td>POLONIA GREEN BOND</td>
-
-    <td class="good">
-        95,64
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        87,73
-    </td>
-
-    <td>1,00</td>
-    <td>2029-03-07</td>
-
-    <td>
-        1,14
-    </td>
-
-    <td>
-        1078
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
             data-scoreINCOME="0,031"
             data-scoreBALANCED="0,026"
             data-scoreGROWTH="0,022"
@@ -15107,38 +15139,6 @@
 
     <td>
         1143
-    </td>
-
-    <td class="score-cell"></td>
-    </tr>
-    <tr
-            data-scoreINCOME="0,014"
-            data-scoreBALANCED="0,026"
-            data-scoreGROWTH="0,047"
-            data-scoreOPPORTUNISTIC="0,062"
-    >
-    <td>NL0013552060</td>
-    <td>OLANDA GREEN BOND</td>
-
-    <td class="good">
-        69,02
-    </td>
-
-    <td>EUR</td>
-
-    <td>
-        63,31
-    </td>
-
-    <td>0,50</td>
-    <td>2040-01-15</td>
-
-    <td>
-        0,79
-    </td>
-
-    <td>
-        1412
     </td>
 
     <td class="score-cell"></td>

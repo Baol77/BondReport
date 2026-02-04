@@ -14,3 +14,4 @@
 
 # Logs
 *.log
+/docs/alerts.txt
