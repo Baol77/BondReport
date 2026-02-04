@@ -34,7 +34,7 @@ $$\lambda_{base} = 0.8 \cdot \text{Average}\left( 0.55 \cdot Norm_{Yield} + 0.45
 #### B. Profile Scaling
 This base value is then adjusted by a `lambdaFactor` specific to each investor profile:
 $$\lambda_{final} = \lambda_{base} \cdot Factor_{profile}$$
-*(e.g., 1.2 for INCOME, 0.5 for OPPORTUNISTIC)*
+*(e.g., 1.3 for INCOME, 0.5 for OPPORTUNISTIC)*
 
 ### 3. Base Profile Score
 Each investor profile (Income, Balanced, Growth) uses a weight $\alpha$ to balance Current Yield vs. Total Gain at maturity:
@@ -63,11 +63,11 @@ $$Score_{final} = (Score_{base} - Penalty_{FX}) \cdot [1 - ((1 - Trust_{issuer})
 Each profile in the engine is defined by four distinct parameters that control its behavior:
 
 | Profile | $\alpha$ (Income Weight) | $Factor_{\lambda}$ (FX Sensitivity) | $Sensitivity_{cap}$ (Cap. Risk) | $RA$ (Risk Aversion) | Objective |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **INCOME** | 0.75 | 1.2 | 0.15 | 1.0 | Immediate cash flow; maximum credit/FX safety. |
-| **BALANCED** | 0.55 | 1.0 | 0.30 | 0.7 | Standard total return with moderate protection. |
-| **GROWTH** | 0.30 | 0.7 | 0.45 | 0.4 | Capital gains from discounted bonds; lower safety. |
-| **OPPORTUNISTIC**| 0.20 | 0.5 | 0.60 | 0.1 | Maximum raw yield; ignores credit/FX penalties. |
+| :--- | :--- |:------------------------------------| :--- | :--- | :--- |
+| **INCOME** | 0.75 | 1.3                                 | 0.15 | 1.0 | Immediate cash flow; maximum credit/FX safety. |
+| **BALANCED** | 0.55 | 1.0                                 | 0.30 | 0.7 | Standard total return with moderate protection. |
+| **GROWTH** | 0.30 | 0.7                                 | 0.45 | 0.4 | Capital gains from discounted bonds; lower safety. |
+| **OPPORTUNISTIC**| 0.20 | 0.5                                 | 0.60 | 0.1 | Maximum raw yield; ignores credit/FX penalties. |
 
 ### 🔹 Column Definitions
 

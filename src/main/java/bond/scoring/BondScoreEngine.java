@@ -20,7 +20,7 @@ public class BondScoreEngine {
     );
 
     private static final Map<String, ProfileParams> PROFILES_PARAMS = Map.of(
-        INCOME, new ProfileParams(0.75, 1.2, 0.15, 1.0),
+        INCOME, new ProfileParams(0.75, 1.3, 0.15, 1.0),
         BALANCED, new ProfileParams(0.55, 1.0, 0.30, 0.7),
         GROWTH, new ProfileParams(0.30, 0.7, 0.45, 0.4),
         OPPORTUNISTIC, new ProfileParams(0.20, 0.5, 0.60, 0.1)
