@@ -5,42 +5,42 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import java.io.FileWriter;
-import java.nio.file.Files;
 import java.time.ZoneId;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HtmlReportWriter {
 
     private final Configuration cfg;
 
     public HtmlReportWriter() {
-        cfg = new Configuration(Configuration.VERSION_2_3_32);
+        cfg = new Configuration(Configuration.VERSION_2_3_34);
         cfg.setClassForTemplateLoading(getClass(), "/");
         cfg.setDefaultEncoding("UTF-8");
     }
 
-    public void writeEur(List<Bond> bonds, String file) throws Exception {
-        write(bonds, file, "EUR");
+    public void writeEur(List<BondReportRow> rows, String file) throws Exception {
+        write(rows, file, "EUR");
     }
 
-    public void writeChf(List<Bond> bonds, String file) throws Exception {
-        write(bonds, file, "CHF");
+    public void writeChf(List<BondReportRow> rows, String file) throws Exception {
+        write(rows, file, "CHF");
     }
 
-    private void write(List<Bond> bonds, String file, String reportCurrency) throws Exception {
+    private void write(List<BondReportRow> rows, String file, String reportCurrency) throws Exception {
         Template t = cfg.getTemplate("bond-report.ftl");
 
         Map<String, Object> model = new HashMap<>();
-        model.put("bonds", bonds);
+        model.put("rows", rows);
         model.put("reportCurrency", reportCurrency);
         model.put("generatedAt",
             java.time.LocalDateTime.now(ZoneId.of("Europe/Zurich"))
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
         // distinct currencies for dropdown
-        List<String> currencies = bonds.stream()
-            .map(Bond::currency)
+        List<String> currencies = rows.stream()
+            .map(r -> r.bond().currency())
             .distinct()
             .sorted()
             .toList();

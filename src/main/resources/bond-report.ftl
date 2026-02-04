@@ -13,6 +13,39 @@
             margin-bottom: 10px;
         }
 
+        .profile-box {
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 8px 12px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .profile-box legend {
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            padding: 0 6px;
+        }
+
+        .profile-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .profile-option input {
+            cursor: pointer;
+        }
+
+        .profile-option span {
+            border-bottom: 1px dotted #666;
+        }
+
         .controls {
             display: flex;
             gap: 12px;
@@ -64,15 +97,38 @@
             background: #eef6ff;
         }
 
-        /* Price coloring */
         .good { color: #006400; font-weight: bold; }
         .bad  { color: #b00020; font-weight: bold; }
 
         .arrow { font-size: 10px; margin-left: 4px; }
         button { cursor: pointer; }
+
+        .score-cell {
+            font-weight: bold;
+        }
     </style>
+
     <script>
-        let currentSortCol = 7;
+        /* =======================
+           Column mapping
+        ======================= */
+        const COL = {
+            ISIN: 0,
+            ISSUER: 1,
+            PRICE: 2,
+            CURRENCY: 3,
+            PRICE_R: 4,
+            COUPON: 5,
+            MATURITY: 6,
+            CURR_YIELD: 7,
+            TOTAL_YIELD: 8,
+            SCORE: 9
+        };
+
+        /* =======================
+           Sorting
+        ======================= */
+        let currentSortCol = COL.SCORE;
         let currentSortDir = "desc";
 
         function parseValue(v) {
@@ -120,6 +176,13 @@
             rows.forEach(r => tbody.appendChild(r));
         }
 
+        /* =======================
+           Filtering
+        ======================= */
+        function parseNum(s) {
+            return parseFloat(s.replace(",", "."));
+        }
+
         function filterTable() {
             const isin = document.getElementById("filterIsin").value.toLowerCase();
             const issuer = document.getElementById("filterIssuer").value.toLowerCase();
@@ -134,14 +197,14 @@
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
             rows.forEach(r => {
-                const isinCell = r.cells[0].innerText.toLowerCase();
-                const issuerCell = r.cells[1].innerText.toLowerCase();
-                const priceCell = parseNum(r.cells[2].innerText);
-                const currencyCell = r.cells[3].innerText;
-                const mat = r.cells[6].innerText;
-                const currYield = parseNum(r.cells[7].innerText);
-                const totalYield = parseNum(r.cells[8].innerText);
-                const score = parseNum(r.cells[9].innerText);
+                const isinCell = r.cells[COL.ISIN].innerText.toLowerCase();
+                const issuerCell = r.cells[COL.ISSUER].innerText.toLowerCase();
+                const priceCell = parseNum(r.cells[COL.PRICE].innerText);
+                const currencyCell = r.cells[COL.CURRENCY].innerText;
+                const mat = r.cells[COL.MATURITY].innerText;
+                const currYield = parseNum(r.cells[COL.CURR_YIELD].innerText);
+                const totalYield = parseNum(r.cells[COL.TOTAL_YIELD].innerText);
+                const score = parseNum(r.cells[COL.SCORE].innerText);
 
                 let ok = true;
                 if (isin && isinCell.indexOf(isin) === -1) ok = false;
@@ -158,7 +221,21 @@
             });
         }
 
-       function exportCSV() {
+        function clearColumnFilters() {
+            document.getElementById("filterIsin").value = "";
+            document.getElementById("filterIssuer").value = "";
+            document.getElementById("filterPrice").value = "";
+            document.getElementById("filterCurrency").value = "";
+            document.getElementById("filterMinYield").value = "";
+            document.getElementById("filterMinTotal").value = "";
+            document.getElementById("filterScore").value = "";
+            filterTable();
+        }
+
+        /* =======================
+           Export CSV
+        ======================= */
+        function exportCSV() {
             const rows = document.querySelectorAll("#bondTable tr:not([style*='display: none'])");
             let csv = [];
 
@@ -177,10 +254,11 @@
             a.download = "bond-report.csv";
             a.click();
             URL.revokeObjectURL(url);
-       }
+        }
 
-        /* ===== Gradient heatmap on Current Yield % ===== */
-
+        /* =======================
+           Heatmap
+        ======================= */
         function lerp(a, b, t) {
             return Math.round(a + (b - a) * t);
         }
@@ -192,133 +270,93 @@
                 lerp(c1[2], c2[2], t) + ")";
         }
 
-        function parseNum(s) {
-            return parseFloat(s.replace(",", "."));
-        }
-
         function applyHeatmap() {
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
-            const red    = [255, 215, 215];   // ~0–1%
-            const yellow = [255, 245, 190];   // ~3%
-            const green  = [215, 245, 215];   // ~5%+
+            const red    = [255, 215, 215];
+            const yellow = [255, 245, 190];
+            const green  = [215, 245, 215];
 
             rows.forEach(r => {
-                const v = parseNum(r.cells[7].innerText); // Curr. Yield %
-                const w = parseNum(r.cells[8].innerText); // Total Yield to maturity
-                const y = parseNum(r.cells[9].innerText); // Score
+                const v = parseNum(r.cells[COL.CURR_YIELD].innerText);
+                const w = parseNum(r.cells[COL.TOTAL_YIELD].innerText);
+                const y = parseNum(r.cells[COL.SCORE].innerText);
 
+                // Curr Yield
                 let bg;
-                if (v <= 1) {
-                    bg = "rgb(" + red.join(",") + ")";
-                } else if (v < 3) {
-                    bg = lerpColor(red, yellow, (v - 1) / 2);
-                } else if (v < 5) {
-                    bg = lerpColor(yellow, green, (v - 3) / 2);
-                } else {
-                    bg = "rgb(" + green.join(",") + ")";
-                }
+                if (v <= 1) bg = "rgb(" + red.join(",") + ")";
+                else if (v < 3) bg = lerpColor(red, yellow, (v - 1) / 2);
+                else if (v < 5) bg = lerpColor(yellow, green, (v - 3) / 2);
+                else bg = "rgb(" + green.join(",") + ")";
+                r.cells[COL.CURR_YIELD].style.backgroundColor = bg;
 
-                r.cells[7].style.backgroundColor = bg;
-
+                // Total Yield
                 let bg2;
-                if (w <= 1100) {
-                    bg2 = "rgb(" + red.join(",") + ")";
-                } else if (w < 1400) {
-                    bg2 = lerpColor(red, yellow, (w - 1100) / 300);
-                } else if (w < 1700) {
-                    bg2 = lerpColor(yellow, green, (w - 1500) / 200);
-                } else {
-                    bg2 = "rgb(" + green.join(",") + ")";
-                }
+                if (w <= 1100) bg2 = "rgb(" + red.join(",") + ")";
+                else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1100) / 300);
+                else if (w < 1700) bg2 = lerpColor(yellow, green, (w - 1500) / 200);
+                else bg2 = "rgb(" + green.join(",") + ")";
+                r.cells[COL.TOTAL_YIELD].style.backgroundColor = bg2;
 
-                r.cells[8].style.backgroundColor = bg2;
-
+                // Score background
                 let bg3;
-                if (y <= 0.16) {
-                    bg3 = lerpColor(red, yellow, y / 0.16);
-                } else if (y <= 0.30) {
-                    bg3 = lerpColor(yellow, green, (y - 0.16) / (0.30 - 0.16));
+                if (y <= 0.2) {
+                    bg3 = lerpColor(red, yellow, y / 0.2);
+                } else if (y <= 0.35) {
+                    bg3 = lerpColor(yellow, green, (y - 0.2) / 0.15);
                 } else {
                     bg3 = "rgb(" + green.join(",") + ")";
                 }
-
-                r.cells[9].style.backgroundColor = bg3;
+                r.cells[COL.SCORE].style.backgroundColor = bg3;
             });
         }
 
-        function setDefaultMaturityFilters() {
-            var today = new Date();
-
-            // Création des dates Min (A+5) et Max (A+30)
-            var min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
-            var max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
-
-            // Fonction de formatage compatible sans Template Literals
-            var formatDateLocal = function(date) {
-                var year = date.getFullYear();
-                // Utilisation de slice(-2) pour le padding, plus compatible que padStart sur vieux navigateurs
-                var month = ("0" + (date.getMonth() + 1)).slice(-2);
-                var day = ("0" + date.getDate()).slice(-2);
-
-                return year + "-" + month + "-" + day;
-            };
-
-            document.getElementById("filterMinMat").value = formatDateLocal(min);
-            document.getElementById("filterMaxMat").value = formatDateLocal(max);
-        }
-
-        function clearColumnFilters() {
-            document.getElementById("filterIsin").value = "";
-            document.getElementById("filterIssuer").value = "";
-            document.getElementById("filterPrice").value = "";
-            document.getElementById("filterCurrency").value = "";
-            document.getElementById("filterMinYield").value = "";
-            document.getElementById("filterMinTotal").value = "";
-            document.getElementById("filterScore").value = "";
-            filterTable();
-        }
-
-        function normalize(v, min, max) {
-            if (max === min) return 0;
-            return (v - min) / (max - min);
-        }
-
-        function computeScore() {
+        /* =======================
+           Profile selector
+        ======================= */
+        function updateScores() {
+            const profile = document.querySelector("input[name='profile']:checked").value.toLowerCase();
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
-            const curr = Array.from(rows).map(r => parseNum(r.cells[7].innerText));
-            const tot  = Array.from(rows).map(r => parseNum(r.cells[8].innerText));
-
-            const minC = Math.min(...curr), maxC = Math.max(...curr);
-            const minT = Math.min(...tot),  maxT = Math.max(...tot);
-
-            const longTerm = document.getElementById("profileLongTerm")?.checked;
-            const alpha = longTerm ? 0.35 : 0.6;   // ✔ règle demandée
-
-            rows.forEach((r, i) => {
-                const c = curr[i];
-                const t = tot[i];
-
-                const score =
-                    alpha * normalize(c, minC, maxC) +
-                    (1 - alpha) * normalize(t, minT, maxT);
-
-                r.cells[9].innerText = score.toFixed(3);
+            rows.forEach(r => {
+                const cell = r.querySelector(".score-cell");
+                const raw = r.dataset["score" + profile];
+                const num = parseFloat(raw.replace(",", "."));
+                cell.innerText = isNaN(num) ? "" : num.toFixed(3);
             });
 
-            sortTable(9, true);
+            sortTable(COL.SCORE, true);
+            applyHeatmap();
+        }
+
+
+        /* =======================
+           Maturity defaults
+        ======================= */
+        function setDefaultMaturityFilters() {
+            const today = new Date();
+            const min = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate());
+            const max = new Date(today.getFullYear() + 30, today.getMonth(), today.getDate());
+
+            function formatDate(d) {
+                const y = d.getFullYear();
+                const m = ("0" + (d.getMonth() + 1)).slice(-2);
+                const day = ("0" + d.getDate()).slice(-2);
+                return y + "-" + m + "-" + day;
+            }
+
+            document.getElementById("filterMinMat").value = formatDate(min);
+            document.getElementById("filterMaxMat").value = formatDate(max);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
             filterTable();
-            computeScore();
-            sortTable(9, true);
-            applyHeatmap();
+            updateScores();
         });
     </script>
 </head>
+
 <body>
 
 <h2>
@@ -341,10 +379,29 @@
 
     <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
 
-    <label title="Long-term profile: prioritizes Tot. Yield (alpha = 0.35). Unchecked: prioritizes Curr. Yield (alpha = 0.6).">
-        <input type="checkbox" id="profileLongTerm" checked onchange="computeScore(); applyHeatmap();">
-        Long-term profile
-    </label>
+    <fieldset class="profile-box">
+        <legend>Scoring profile</legend>
+
+        <label class="profile-option" title="Focuses on high current income. Prioritizes coupon and yield over capital appreciation.">
+            <input type="radio" name="profile" value="INCOME" onchange="updateScores()">
+            <span>Income</span>
+        </label>
+
+        <label class="profile-option" title="Balanced trade-off between income, risk, and total return. Suitable for most investors." >
+            <input type="radio" name="profile" value="BALANCED" checked onchange="updateScores()">
+            <span>Balanced</span>
+        </label>
+
+        <label class="profile-option" title="Targets higher long-term total return. Accepts more volatility and duration risk.">
+            <input type="radio" name="profile" value="GROWTH" onchange="updateScores()">
+            <span>Growth</span>
+        </label>
+
+        <label class="profile-option" title="Seeks maximum return opportunities. Tolerates higher credit, currency, and duration risk.">
+            <input type="radio" name="profile" value="OPPORTUNISTIC" onchange="updateScores()">
+            <span>Opportunistic</span>
+        </label>
+    </fieldset>
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
@@ -353,17 +410,19 @@
 <table id="bondTable">
     <thead>
     <tr>
-        <th onclick="sortTable(0)">ISIN<span class="arrow"></span><br>
-            <input id="filterIsin" type="text" placeholder="e.g. US900123AT75" onclick="event.stopPropagation()" oninput="filterTable()">
+        <th onclick="sortTable(COL.ISIN)">ISIN<span class="arrow"></span><br>
+            <input id="filterIsin" type="text" placeholder="e.g. US900123AT75"
+                   onclick="event.stopPropagation()" oninput="filterTable()">
         </th>
-        <th onclick="sortTable(1)">Issuer<span class="arrow"></span><br>
-            <input id="filterIssuer" type="text" placeholder="e.g. Romania" onclick="event.stopPropagation()" oninput="filterTable()">
+        <th onclick="sortTable(COL.ISSUER)">Issuer<span class="arrow"></span><br>
+            <input id="filterIssuer" type="text" placeholder="e.g. Romania"
+                   onclick="event.stopPropagation()" oninput="filterTable()">
         </th>
-        <th onclick="sortTable(2)">Price <span class="arrow"></span><br>
-            <input id="filterPrice" type="number" step="10" placeholder="max" onclick="event.stopPropagation()"
-                   oninput="filterTable()" style="width:60px;">
+        <th onclick="sortTable(COL.PRICE)">Price<span class="arrow"></span><br>
+            <input id="filterPrice" type="number" step="10" placeholder="max"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:60px;">
         </th>
-        <th onclick="sortTable(3)">Currency<span class="arrow"></span><br>
+        <th onclick="sortTable(COL.CURRENCY)">Currency<span class="arrow"></span><br>
             <select id="filterCurrency" onchange="filterTable()" onclick="event.stopPropagation()">
                 <option value="">All</option>
                 <#list currencies as c>
@@ -371,63 +430,76 @@
             </#list>
             </select>
         </th>
-        <th onclick="sortTable(4)">Price (${reportCurrency}) <span class="arrow"></span></th>
-        <th onclick="sortTable(5)">Coupon % <span class="arrow"></span></th>
-        <th onclick="sortTable(6)">Maturity <span class="arrow"></span></th>
-        <th title="Supposing an investment of ${reportCurrency}100, what would the gain be?" onclick="sortTable(7)">Curr. Yield %<span class="arrow"></span><br>
-            <input id="filterMinYield" type="number" step="0.5" placeholder="min" onclick="event.stopPropagation()"
-                   oninput="filterTable()" style="width:70px;">
+        <th onclick="sortTable(COL.PRICE_R)">Price (${reportCurrency})<span class="arrow"></span></th>
+        <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
+        <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
+        <th title="Supposing an investment of ${reportCurrency}100, what would the gain be?"
+            onclick="sortTable(COL.CURR_YIELD)">
+            Curr. Yield %<span class="arrow"></span><br>
+            <input id="filterMinYield" type="number" step="0.5" placeholder="min"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
-        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?" onclick="sortTable(8)">Tot. Yield to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
-            <input id="filterMinTotal" type="number" step="500" placeholder="min" onclick="event.stopPropagation()"
-                   oninput="filterTable()" style="width:80px;">
+        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?"
+            onclick="sortTable(COL.TOTAL_YIELD)">
+            Tot. Yield to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
+            <input id="filterMinTotal" type="number" step="500" placeholder="min"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
-        <th onclick="sortTable(9)" title="Combined score of Current Yield and Total Yield (= 0.45·norm(CurrentYield) + 0.55·norm(TotalYield))">Score<span class="arrow"></span><br>
-            <input id="filterScore" type="number" step="0.1" placeholder="min" onclick="event.stopPropagation()"
-                   oninput="filterTable()" style="width:70px;">
+        <th onclick="sortTable(COL.SCORE)" title="Profile-based composite score">
+            Score<span class="arrow"></span><br>
+            <input id="filterScore" type="number" step="0.1" placeholder="min"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
     </tr>
     </thead>
 
     <tbody>
-    <#list bonds as b>
-    <tr>
-        <td>${b.isin()}</td>
-        <td>${b.issuer()}</td>
+    <#list rows as r>
+    <#assign b = r.bond()>
+    <#assign s = r.scores()>
+    <tr
+            data-scoreINCOME="${s['INCOME']?string['0.000']}"
+            data-scoreBALANCED="${s['BALANCED']?string['0.000']}"
+            data-scoreGROWTH="${s['GROWTH']?string['0.000']}"
+            data-scoreOPPORTUNISTIC="${s['OPPORTUNISTIC']?string['0.000']}"
+    >
+    <td>${b.isin()}</td>
+    <td>${b.issuer()}</td>
 
-        <td class="<#if (b.price() <= 100)>good<#else>bad</#if>">
-            ${b.price()?string["0.00"]}
-        </td>
+    <td class="<#if (b.price() <= 100)>good<#else>bad</#if>">
+        ${b.price()?string["0.00"]}
+    </td>
 
-        <td>${b.currency()}</td>
+    <td>${b.currency()}</td>
 
-        <td>
-            <#if reportCurrency == "EUR">
-            ${b.priceEur()?string["0.00"]}
-            <#else>
-            ${b.priceChf()?string["0.00"]}
-        </#if>
-        </td>
+    <td>
+        <#if reportCurrency == "EUR">
+        ${b.priceEur()?string["0.00"]}
+        <#else>
+        ${b.priceChf()?string["0.00"]}
+    </#if>
+    </td>
 
-        <td>${b.couponPct()?string["0.00"]}</td>
-        <td>${b.maturity()}</td>
+    <td>${b.couponPct()?string["0.00"]}</td>
+    <td>${b.maturity()}</td>
 
-        <td>
-            <#if reportCurrency == "EUR">
-            ${b.currentYieldPct()?string["0.00"]}
-            <#else>
-            ${b.currentYieldPctChf()?string["0.00"]}
-        </#if>
-        </td>
+    <td>
+        <#if reportCurrency == "EUR">
+        ${b.currentYieldPct()?string["0.00"]}
+        <#else>
+        ${b.currentYieldPctChf()?string["0.00"]}
+    </#if>
+    </td>
 
-        <td>
-            <#if reportCurrency == "EUR">
-            ${b.totalYieldToMat()?string["0"]}
-            <#else>
-            ${b.totalYieldToMatChf()?string["0"]}
-        </#if>
-        </td>
-        <td class="score"></td>
+    <td>
+        <#if reportCurrency == "EUR">
+        ${b.totalYieldToMat()?string["0"]}
+        <#else>
+        ${b.totalYieldToMatChf()?string["0"]}
+    </#if>
+    </td>
+
+    <td class="score-cell"></td>
     </tr>
     </#list>
     </tbody>
