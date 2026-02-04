@@ -30,7 +30,7 @@ The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts 
 In `BondApp.java`, the system computes λ_base as the **60th percentile of the market BALANCED base score distribution**:
 
 $$
-\lambda_{base} = Q_{60}\left( 0.55 \cdot Norm(CurrentYield) + 0.45 \cdot Norm(TotalYield) \right)
+\lambda_{base} = Q_{60\%}\left( 0.55 \cdot Norm(CurrentYield) + 0.45 \cdot Norm(TotalYield) \right)
 $$
 
 
