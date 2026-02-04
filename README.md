@@ -69,7 +69,15 @@ Each profile in the engine is defined by four distinct parameters that control i
 | **GROWTH** | 0.30 | 0.7 | 0.45 | 0.4 | Capital gains from discounted bonds; lower safety. |
 | **OPPORTUNISTIC**| 0.20 | 0.5 | 0.60 | 0.1 | Maximum raw yield; ignores credit/FX penalties. |
 
+### 🔹 Column Definitions
 
+| Column | Meaning | Financial Interpretation | Effect in the Model |
+|--------|---------|--------------------------|---------------------|
+| **Profile** | Investment style name | Defines the investor’s objective (income, balance, growth, speculation) | Selects the parameter set used during scoring |
+| **α (Income Weight)** | Weight of current yield vs total yield | Higher = prefers coupons; lower = prefers discounted bonds with capital gains | Used in base score: `α·Norm(Current) + (1−α)·Norm(Total)` |
+| **$Factor_{\lambda}$ (FX Sensitivity)** | Multiplier applied to λ (FX penalty strength) | Higher = strong aversion to currency risk | Scales FX penalty: `λ_final = λ_base × Factorₗ` |
+| **$Sensitivity_{cap}$ (Capital Risk)** | Sensitivity to capital-gain-driven returns | Higher = dislikes bonds whose return depends on price appreciation | Amplifies FX penalty when capital gains dominate |
+| **$RA$ (Risk Aversion)** | Credit risk aversion coefficient | Higher = strongly penalizes weaker sovereign issuers | Adjusts issuer trust: `(1 − ((1 − Trust) × RA))` |
 
 ---
 
