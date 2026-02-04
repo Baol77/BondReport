@@ -81,6 +81,18 @@ Each profile in the engine is defined by four distinct parameters that control i
 
 ---
 
+### ⚠️ Automated Alerting System (CI/CD)
+The system is designed to "self-heal" and notify developers when new, unrecognized issuers appear in the data feed:
+
+1. **Detection:** During the scoring process, any issuer not matching the internal rules is assigned a default trust score ($0.80$) and added to the `UNKNOWN_ISSUERS` set.
+2. **Reporting:** If unknown issuers are detected, the system generates a `docs/alerts.txt` file.
+3. **CI Integration:** The GitHub Actions workflow triggers a **Warning** in the build summary and logs the missing issuers in the console.
+4. **Direct Access:** You can check the current status of unrecognized issuers here:  
+   👉 **[Current Unknown Issuers List](https://baol77.github.io/BondReport/alerts.txt)** *(Note: This link returns a 404 if the database is 100% up to date).*
+5. **Resolution:** Adding the missing keywords to `IssuerManager.java` and pushing the change will automatically resolve the alert and remove the file in the next build.
+
+---
+
 ## 🛠 Prerequisites & Setup
 
 1. **Java 17+** is required.
