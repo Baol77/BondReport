@@ -17,15 +17,15 @@ The project follows a clean, modular architecture:
 The `BondScoreEngine` evaluates bonds using a multi-factor approach. Here are the key formulas integrated into the code:
 
 ### 1. Market Normalization
-To compare bonds fairly, yields are normalized between 0 and 1 based on the current market universe (Min/Max):
-$$Norm(x) = \frac{x - Min_{market}}{Max_{market} - Min_{market}}$$
+To compare bonds fairly while being robust to outliers, yields are normalized using the 5th and 95th percentiles of the market distribution:
+$$\text{Norm}_{\text{Winsorized}}(x) = \max(0, \min(1, \frac{x - Q_{5}}{Q_{95} - Q_{5}}))$$
 
 ### 2. The $\lambda$ (Lambda) Parameter: FX Risk Gravity
 The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts as a scaling factor:
 - If $\lambda = 0$: No currency penalty is applied.
 - If $\lambda$ is high: Foreign bonds are heavily penalized, favoring local currency bonds.
 
-**Dynamic Calculation:** In `BondApp.java`, $\lambda$ is automatically calibrated at **80% of the market's average base score**. This ensures the penalty is always proportional to the yields currently available on the market.
+**Dynamic Calculation:** In `BondApp.java`, $\lambda$ is automatically calibrated at **80% of the market's winsorized average base score**. This ensures the penalty is always proportional to the yields currently available on the market.
 
 #### A. Calibration of $\lambda_{base}$
 In `BondApp.java`, the system calculates a global $\lambda_{base}$ representing 80% of the market's average "Balanced" score:
