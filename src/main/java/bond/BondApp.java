@@ -8,6 +8,7 @@ import bond.report.HtmlReportWriter;
 import bond.scoring.IssuerManager;
 import bond.scoring.MathLibrary;
 import bond.scrape.BondScraper;
+import bond.scrape.SovereignSpreadScraper;
 import bond.scoring.BondScoreEngine;
 
 import java.nio.file.Files;
@@ -15,54 +16,74 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * Main application class.
+ *
+ * Enhancements:
+ * - Loads sovereign spreads for dynamic trust calculation
+ * - Generates scoring reports in EUR and CHF
+ * - Tracks unknown issuers and generates alerts
+ */
 public class BondApp {
 
     public static void main(String[] args) throws Exception {
+        System.out.println("🚀 Starting Sovereign Bond Analytics...\n");
+
+        // --- Load FX rates ---
         FxService fxService = new FxService();
         Map<String, Double> fx = fxService.loadFxRates();
 
+        // --- Scrape bonds ---
         BondCalculator calculator = new BondCalculator();
         BondScraper scraper = new BondScraper(calculator);
-
         List<Bond> bonds = scraper.scrape(fx);
         bonds.removeIf(Objects::isNull);
 
+        System.out.println("📊 Loaded " + bonds.size() + " bonds\n");
+
+        // === NEW: Load sovereign spreads for dynamic trust ===
+        System.out.println("📈 Loading sovereign spreads...");
+        Map<String, Double> sovereignSpreads = SovereignSpreadScraper.fetchSpreads();
+        System.out.println("✅ Spreads loaded: " + sovereignSpreads.size() + " countries\n");
+
         BondScoreEngine engine = new BondScoreEngine();
 
-        List<BondReportRow> eurRows = buildRows(bonds, "EUR", engine);
-        List<BondReportRow> chfRows = buildRows(bonds, "CHF", engine);
+        // --- Generate reports ---
+        List<BondReportRow> eurRows = buildRows(bonds, "EUR", engine, sovereignSpreads);
+        List<BondReportRow> chfRows = buildRows(bonds, "CHF", engine, sovereignSpreads);
 
         HtmlReportWriter w = new HtmlReportWriter();
         w.writeEur(eurRows, "docs/eur/index.html");
         w.writeChf(chfRows, "docs/chf/index.html");
 
-        // --- NOUVELLE LOGIQUE D'ALERTE ---
+        // --- Handle unknown issuers alerting ---
         handleUnknownIssuers();
 
-        System.out.println("✅ Reports generated:");
+        System.out.println("\n✅ Reports generated:");
         System.out.println(" - docs/eur/index.html");
         System.out.println(" - docs/chf/index.html");
     }
 
-    /* -------------------------------------------------------- */
+    /* ========================================================= */
 
+    /**
+     * Handles detection and alerting of unknown issuers.
+     */
     private static void handleUnknownIssuers() {
         try {
             Path alertPath = Paths.get("docs/alerts.txt");
             Set<String> unknowns = IssuerManager.getUnknownIssuers();
 
             if (!unknowns.isEmpty()) {
-                // On écrit les émetteurs inconnus (un par ligne)
                 List<String> lines = new ArrayList<>();
                 lines.add("--- UNKNOWN ISSUERS REPORT ---");
                 lines.add("Generated on: " + java.time.LocalDateTime.now());
                 lines.add("");
-                lines.addAll(unknowns); // Ajoute tous les noms du Set
+                lines.addAll(unknowns);
                 Files.write(alertPath, lines);
 
-                System.out.println("⚠" + unknowns.size() + " unknown issuers found. Check docs/alerts.txt");
+                System.out.println("\n⚠  " + unknowns.size() + " unknown issuers found. Check docs/alerts.txt");
             } else {
-                // Si tout est reconnu, on s'assure que l'ancien fichier est supprimé
                 Files.deleteIfExists(alertPath);
             }
         } catch (Exception e) {
@@ -70,11 +91,23 @@ public class BondApp {
         }
     }
 
+    /* ========================================================= */
+
+    /**
+     * Builds report rows for a given reporting currency.
+     *
+     * @param bonds List of all bonds
+     * @param reportCurrency EUR or CHF
+     * @param engine Scoring engine
+     * @param sovereignSpreads Map of country → spread (bps)
+     * @return Sorted list of BondReportRows
+     */
     private static List<BondReportRow> buildRows(List<Bond> bonds,
                                                  String reportCurrency,
-                                                 BondScoreEngine engine) {
+                                                 BondScoreEngine engine,
+                                                 Map<String, Double> sovereignSpreads) {
 
-        // 1. Collecte des distributions marché
+        // 1. Collect market yield distributions
         List<Double> marketCurr = bonds.stream()
             .map(b -> reportCurrency.equals("CHF")
                 ? b.currentYieldPctChf()
@@ -87,7 +120,7 @@ public class BondApp {
                 : b.totalYieldToMat())
             .toList();
 
-        // 2. lambda dynamique = quantile 60% du score BALANCED
+        // 2. Calculate lambdaBase from BALANCED profile distribution (60th percentile)
         List<Double> baseScores = bonds.stream()
             .map(b -> {
                 double c = reportCurrency.equals("CHF")
@@ -105,19 +138,15 @@ public class BondApp {
             .sorted()
             .toList();
 
-        double lambdaBase;
-        if (baseScores.isEmpty()) {
-            lambdaBase = 0.5;
-        } else {
-            int idx = (int) Math.floor(0.60 * (baseScores.size() - 1));
-            lambdaBase = baseScores.get(idx);
-        }
+        double lambdaBase = calculateLambdaBase(baseScores);
 
-        // 3. construction des rows
+        System.out.println("  - " + reportCurrency + " lambdaBase: " + String.format("%.4f", lambdaBase));
+
+        // 3. Build rows with scores
         return bonds.stream()
             .map(b -> new BondReportRow(
                 b,
-                engine.score(b, reportCurrency, marketCurr, marketTot, lambdaBase)
+                engine.score(b, reportCurrency, marketCurr, marketTot, lambdaBase, sovereignSpreads)
             ))
             .sorted((a, b) ->
                 Double.compare(
@@ -126,5 +155,16 @@ public class BondApp {
                 )
             )
             .toList();
+    }
+
+    /**
+     * Calculates lambdaBase as the 60th percentile of balanced base scores.
+     */
+    private static double calculateLambdaBase(List<Double> sortedScores) {
+        if (sortedScores.isEmpty()) {
+            return 0.5;
+        }
+        int idx = (int) Math.floor(0.60 * (sortedScores.size() - 1));
+        return sortedScores.get(idx);
     }
 }

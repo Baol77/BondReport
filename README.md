@@ -1,102 +1,263 @@
 # Sovereign Bond Analytics & Scoring System 📈
 
-A professional-grade Java application designed to scrape, analyze, and score European sovereign bonds. The system fetches real-time data, applies advanced financial modeling to account for FX risk and credit trust, and generates interactive HTML reports.
+A professional-grade Java application designed to scrape, normalize, score, and rank sovereign bonds across multiple currencies and maturities.  
+The system blends **yield attractiveness**, **FX risk**, and **dynamic sovereign credit trust** into a single interpretable score and generates interactive HTML reports.
+
+---
 
 ## 🏗 System Architecture
 
 The project follows a clean, modular architecture:
-- **`bond.scrape`**: Real-time data retrieval using Jsoup.
-- **`bond.fx`**: Daily exchange rate integration via ECB API.
-- **`bond.scoring`**: The core logic engine applying risk-adjusted algorithms.
-- **`bond.report`**: Dashboard generation using FreeMarker templates.
+
+- **`bond.scrape`** – Real-time data retrieval using Jsoup (bond listings, sovereign spreads).
+- **`bond.fx`** – Daily exchange rate integration via ECB API.
+- **`bond.scoring`** – Core scoring engine with FX risk, yield normalization, and trust modeling.
+- **`bond.report`** – Dashboard generation using FreeMarker templates.
 
 ---
 
-## 🧠 The Scoring Logic & Formulas
+## 🧠 The Scoring Logic
 
-The `BondScoreEngine` evaluates bonds using a multi-factor approach. Here are the key formulas integrated into the code:
+Each bond receives a **profile-dependent score** (INCOME, BALANCED, GROWTH, OPPORTUNISTIC).  
+The score is not just yield-based — it is **risk-adjusted** using:
 
-### 1. Market Normalization
-To compare bonds fairly while being robust to outliers, yields are normalized using the 5th and 95th percentiles of the market distribution:
+1. **Relative Yield Attractiveness**
+2. **FX Capital Risk**
+3. **Dynamic Sovereign Credit Trust**
 
-$$\text{Norm}_{\text{Winsorized}}(x) = \max \left( 0, \min \left( 1, \frac{x - Q_{5}}{Q_{95} - Q_{5}} \right) \right)$$
+### 1️⃣ Yield Normalization
 
-### 2. The $\lambda$ (Lambda) Parameter: FX Risk Gravity
-The $\lambda$ parameter represents the **intensity of the FX penalty**. It acts as a scaling factor:
-- If $\lambda = 0$: No currency penalty is applied.
-- If $\lambda$ is high: Foreign bonds are heavily penalized, favoring local currency bonds.
+Two yields are considered:
 
-#### A. Calibration of $\lambda_{base}$
-In `BondApp.java`, the system computes λ_base as the **60th percentile of the market BALANCED base score distribution**:
+- **Current yield** → income attractiveness
+- **Yield-to-maturity (YTM)** → total return attractiveness
 
-$$
-\lambda_{base} = Q_{60}\left( 0.55 \cdot Norm(CurrentYield) + 0.45 \cdot Norm(TotalYield) \right)
-$$
+Each is normalized against the market distribution using winsorized percentiles:
 
+```
+normC = normalized(currentYield)
+normT = normalized(totalYield)
+```
 
-#### B. Profile Scaling
-This base value is then adjusted by a `lambdaFactor` specific to each investor profile:
-$$\lambda_{final} = \lambda_{base} \cdot Factor_{profile}$$
-*(e.g., 1.3 for INCOME, 0.5 for OPPORTUNISTIC)*
+They are blended:
 
+```
+baseScore = α · normC + (1 − α) · normT
+```
 
-### 3. Dynamic FX Penalty
-For bonds not denominated in the reporting currency, a penalty is applied based on the **Square Root of Time** rule and historical volatility ($\sigma$):
-$$Penalty_{FX} = \lambda \cdot (1 - e^{-\sigma \cdot \sqrt{T} \cdot Sensitivity})$$
-*Where:*
-- $\sigma$: Annualized volatility of the currency pair (e.g., 0.09 for USD/EUR).
-- $T$: Years to maturity.
-- $Sensitivity$: Increases if the yield is heavily dependent on capital gains ($1 + CapitalWeight \cdot Sensitivity_{profile}$).
+Where α depends on the profile:
 
-
-
-### 4. Elastic Trust Adjustment
-The issuer's credit quality (Trust) is adjusted based on the investor's **Risk Aversion** ($RA$):
-$$Score_{final} = (Score_{base} - Penalty_{FX}) \cdot [1 - ((1 - Trust_{issuer}) \cdot RA_{profile})]$$
-- **High Risk Aversion (Income)**: The full credit penalty is applied.
-- **Low Risk Aversion (Opportunistic)**: The credit penalty is nearly ignored to highlight raw yield.
+| Profile | α (Income Weight) |
+|---------|------------------|
+| INCOME | 0.75 |
+| BALANCED | 0.55 |
+| GROWTH | 0.30 |
+| OPPORTUNISTIC | 0.20 |
 
 ---
 
-## 👤 Investor Profiles (Technical Parameters)
+### 2️⃣ FX Capital Risk Penalty
 
-Each profile in the engine is defined by four distinct parameters that control its behavior:
+If the bond currency ≠ report currency, a capital-risk penalty is applied:
 
-| Profile | $\alpha$ (Income Weight) | $Factor_{\lambda}$ (FX Sensitivity) | $Sensitivity_{cap}$ (Cap. Risk) | $RA$ (Risk Aversion) | Objective |
-| :--- | :--- |:------------------------------------| :--- | :--- | :--- |
-| **INCOME** | 0.75 | 1.3                                 | 0.15 | 1.0 | Immediate cash flow; maximum credit/FX safety. |
-| **BALANCED** | 0.55 | 1.0                                 | 0.30 | 0.7 | Standard total return with moderate protection. |
-| **GROWTH** | 0.30 | 0.7                                 | 0.45 | 0.4 | Capital gains from discounted bonds; lower safety. |
-| **OPPORTUNISTIC**| 0.20 | 0.5                                 | 0.60 | 0.1 | Maximum raw yield; ignores credit/FX penalties. |
+```
+penalty = λ · (1 − exp(−σ · √years · (1 + capitalWeight · capitalSensitivity)))
+```
 
-### 🔹 Column Definitions
+Where:
+- σ = historical FX volatility for the currency pair
+- years = years to maturity
+- capitalWeight = capital gain proportion in total yield
+- λ = profile-dependent FX risk aversion
 
-| Column | Meaning | Financial Interpretation | Effect in the Model |
-|--------|---------|--------------------------|---------------------|
-| **Profile** | Investment style name | Defines the investor’s objective (income, balance, growth, speculation) | Selects the parameter set used during scoring |
-| **α (Income Weight)** | Weight of current yield vs total yield | Higher = prefers coupons; lower = prefers discounted bonds with capital gains | Used in base score: `α·Norm(Current) + (1−α)·Norm(Total)` |
-| **$Factor_{\lambda}$ (FX Sensitivity)** | Multiplier applied to λ (FX penalty strength) | Higher = strong aversion to currency risk | Scales FX penalty: `λ_final = λ_base × Factorₗ` |
-| **$Sensitivity_{cap}$ (Capital Risk)** | Sensitivity to capital-gain-driven returns | Higher = dislikes bonds whose return depends on price appreciation | Amplifies FX penalty when capital gains dominate |
-| **$RA$ (Risk Aversion)** | Credit risk aversion coefficient | Higher = strongly penalizes weaker sovereign issuers | Adjusts issuer trust: `(1 − ((1 − Trust) × RA))` |
+This ensures that:
+- Long maturities → more FX risk
+- Capital-heavy bonds → more FX risk
+- Income bonds → less FX risk
 
 ---
 
-### ⚠️ Automated Alerting System (CI/CD)
-The system is designed to "self-heal" and notify developers when new, unrecognized issuers appear in the data feed:
+### 3️⃣ Dynamic Sovereign Credit Trust
 
-1. **Detection:** During the scoring process, any issuer not matching the internal rules is assigned a default trust score ($0.80$) and added to the `UNKNOWN_ISSUERS` set.
-2. **Reporting:** If unknown issuers are detected, the system generates a `docs/alerts.txt` file.
-3. **CI Integration:** The GitHub Actions workflow triggers a **Warning** in the build summary and logs the missing issuers in the console.
-4. **Direct Access:** You can check the current status of unrecognized issuers here:  
-   👉 **[Current Unknown Issuers List](https://baol77.github.io/BondReport/alerts.txt)** *(Note: This link returns a 404 if the database is 100% up to date).*
-5. **Resolution:** Adding the missing keywords to `IssuerManager.java` and pushing the change will automatically resolve the alert and remove the file in the next build.
+Each issuer starts with a **baseline trust score** from `IssuerManager` (e.g., Germany ≈ 0.95, Italy ≈ 0.85, Romania ≈ 0.65).
+
+This baseline is **dynamically adjusted** using real-time sovereign spreads:
+
+```
+trust = baselineTrust − (spread / 600)
+trust is clamped to [0.15, 0.95]
+```
+
+Then a **logistic (non-linear) transformation** is applied:
+
+```
+logisticTrust = 1 / (1 + exp(−k · (trust − midpoint)))
+```
+(Default: k = 10, midpoint = 0.50)
+
+This creates:
+- Flat response for high-quality issuers
+- Steep penalty when trust deteriorates past critical levels
+
+Finally, trust is adjusted by investor profile risk aversion:
+
+```
+adjustedTrust = 1 − (1 − logisticTrust) · riskAversion
+```
+
+Where:
+
+| Profile | Risk Aversion |
+|---------|---------------|
+| INCOME | 1.0 |
+| BALANCED | 0.7 |
+| GROWTH | 0.4 |
+| OPPORTUNISTIC | 0.1 |
+
+---
+
+## 🔢 Real Numerical Examples
+
+### Example 1 — German Bund vs Italian BTP (EUR investor)
+
+| Bond | Curr Yield | YTM | Spread | Maturity |
+|------|------------|-----|--------|----------|
+| Germany 2032 | 2.2% | 2.3% | 0 bp | 7y |
+| Italy 2032 | 3.6% | 3.9% | 160 bp | 7y |
+
+Assume market normalization gives:
+
+```
+Germany: normC = 0.35, normT = 0.40
+Italy:   normC = 0.70, normT = 0.75
+```
+
+#### BALANCED profile
+
+```
+baseScore_DE = 0.55·0.35 + 0.45·0.40 = 0.372
+baseScore_IT = 0.55·0.70 + 0.45·0.75 = 0.722
+```
+
+FX penalty = 0 (EUR investor).
+
+Trust calculation:
+```
+Germany: trust ≈ 0.95 → logistic ≈ 0.98 → adjustedTrust ≈ 0.986
+Italy:   trust ≈ 0.85 − 160/600 ≈ 0.58 → logistic ≈ 0.69 → adjustedTrust ≈ 0.783
+```
+
+Final scores:
+```
+Germany: 0.372 · 0.986 ≈ 0.367
+Italy:   0.722 · 0.783 ≈ 0.565
+```
+
+➡️ Italy still ranks higher due to yield, but the credit risk meaningfully compresses the advantage.
+
+---
+
+### Example 2 — Romania vs France (CHF investor)
+
+| Bond | Curr Yield | YTM | Spread | Maturity | Currency |
+|------|------------|-----|--------|----------|----------|
+| France 2031 | 2.5% | 2.7% | 35 bp | 6y | EUR |
+| Romania 2031 | 6.2% | 6.6% | 280 bp | 6y | EUR |
+
+Assume normalization:
+
+```
+France:  normC = 0.45, normT = 0.50
+Romania: normC = 0.92, normT = 0.95
+```
+
+Capital weight ≈ 0.40, σ(EUR/CHF)=0.07, λ(BALANCED)=1.0.
+
+FX penalty ≈ 0.06.
+
+Trust:
+```
+France: 0.90 − 35/600 ≈ 0.84 → logistic ≈ 0.86 → adjustedTrust ≈ 0.90
+Romania: 0.65 − 280/600 ≈ 0.18 → logistic ≈ 0.13 → adjustedTrust ≈ 0.39
+```
+
+Final scores:
+```
+France:  (0.55·0.45 + 0.45·0.50 − 0.06) · 0.90 ≈ 0.32
+Romania: (0.55·0.92 + 0.45·0.95 − 0.06) · 0.39 ≈ 0.36
+```
+
+➡️ Despite extremely weak credit, Romania can still edge France for **risk-tolerant profiles**, but will collapse sharply under INCOME.
+
+---
+
+### Example 3 — Same Italian bond, different profiles
+
+Italian BTP score ≈ 0.72 (base), FX penalty 0, logisticTrust ≈ 0.69.
+
+| Profile | Risk Aversion | Final Score |
+|---------|---------------|-------------|
+| INCOME | 1.0 | 0.72 × 0.69 ≈ 0.50 |
+| BALANCED | 0.7 | 0.72 × 0.78 ≈ 0.56 |
+| GROWTH | 0.4 | 0.72 × 0.88 ≈ 0.63 |
+| OPPORTUNISTIC | 0.1 | 0.72 × 0.97 ≈ 0.70 |
+
+➡️ Same bond, radically different attractiveness depending on investor profile.
+
+---
+
+## 🎯 How to Interpret Scores
+
+- **Primarily ordinal**: scores are best used for **ranking within the same universe**.
+- **Thresholds are possible**, but relative:
+   - `>0.65` → Strong buy candidate
+   - `0.45–0.65` → Acceptable / neutral
+   - `<0.45` → Weak / defensive
+
+Thresholds depend on market regime and should be interpreted **within the distribution**, not absolutely.
+
+---
+
+## 🚨 Issuer Coverage & Alerts
+
+1. **Detection:** If an issuer is not recognized, it is logged automatically.
+2. **Reporting:** Unknown issuers generate a `docs/alerts.txt` file.
+3. **CI Integration:** GitHub Actions publishes missing issuers in build logs.
+4. **Direct Access:**  
+   👉 **[Current Unknown Issuers List](https://baol77.github.io/BondReport/alerts.html)**  
+   *(404 means database is fully aligned.)*
+5. **Resolution:** Add issuer keywords to `IssuerManager` to resolve.
 
 ---
 
 ## 🛠 Prerequisites & Setup
 
-1. **Java 17+** is required.
-2. **Dependencies**: Jsoup (Scraping) and FreeMarker (Templating).
-3. **Run the Application**:
+1. **Java 17+**
+2. **Dependencies:** Jsoup, FreeMarker
+3. **Run the Application:**
    ```bash
    java bond.BondApp
+   ```
+
+---
+
+## 🚀 Design Philosophy
+
+This engine is designed to behave like a **real portfolio manager**:
+
+- Yield is attractive, but never blindly.
+- FX risk matters more for long maturities and capital-heavy bonds.
+- Credit risk is **non-linear** — markets forgive small deterioration, but punish stress brutally.
+- Profiles map directly to real investor psychology.
+
+---
+
+## 📌 Next Calibration Steps
+
+If you want to improve further:
+
+- **Calibrate `exp(−spread/600)`** using historical default/spread data.
+- **Tune logistic midpoint (0.50–0.60)** to optimize stress sensitivity.
+- **Improve λ base calculation** beyond percentile heuristics (e.g., volatility regime detection).
+
+---
