@@ -1,6 +1,5 @@
-package bond;
+package bond.scoring;
 
-import bond.scoring.IssuerManager;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;

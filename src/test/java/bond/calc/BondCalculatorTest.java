@@ -1,6 +1,5 @@
-package bond;
+package bond.calc;
 
-import bond.calc.BondCalculator;
 import bond.model.Bond;
 import org.junit.Before;
 import org.junit.Test;
