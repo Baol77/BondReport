@@ -1,0 +1,109 @@
+defaultTrust: 0.80
+noTrust: 0.0
+
+rules:
+  # Tier 1: Core (Spread 0–30 bps)
+  - keywords: [GERMANIA, DEUTSCHLAND, BUND, GERMANY]
+    score: 1.00
+    spreadBps: 0.0
+
+  - keywords: [FINLANDIA, FINLAND]
+    score: 1.00
+    spreadBps: 5.0
+
+  - keywords: [OLANDA, NETHERLANDS]
+    score: 1.00
+    spreadBps: 10.0
+
+  - keywords: [AUSTRIA]
+    score: 1.00
+    spreadBps: 12.0
+
+  - keywords: [SVEZIA, SWEDEN]
+    score: 1.00
+    spreadBps: 30.0
+
+  - keywords: [NORVEGIA, NORWAY]
+    score: 1.00
+    spreadBps: 35.0
+
+  # Tier 2: Strong (20–60 bps)
+  - keywords: [FRANCIA, FRANCE]
+    score: 0.97
+    spreadBps: 20.0
+
+  - keywords: [BELGIO, BELGIUM]
+    score: 0.97
+    spreadBps: 35.0
+
+  - keywords: [IRLANDA, IRELAND]
+    score: 0.97
+    spreadBps: 40.0
+
+  - keywords: [REGNO UNITO, UK, UNITED KINGDOM]
+    score: 0.97
+    spreadBps: 60.0
+
+  # Tier 3: Moderate (45–90 bps)
+  - keywords: [ESTONIA]
+    score: 0.92
+    spreadBps: 45.0
+
+  - keywords: [SLOVENIA]
+    score: 0.92
+    spreadBps: 65.0
+
+  - keywords: [PORTOGALLO, PORTUGAL]
+    score: 0.92
+    spreadBps: 75.0
+
+  - keywords: [LETTONIA, LATVIA]
+    score: 0.92
+    spreadBps: 80.0
+
+  - keywords: [SPAGNA, SPAIN]
+    score: 0.92
+    spreadBps: 85.0
+
+  # Tier 4: Higher Risk (110–160 bps)
+  - keywords: [LITUANIA, LITHUANIA]
+    score: 0.85
+    spreadBps: 70.0
+
+  - keywords: [BULGARIA]
+    score: 0.85
+    spreadBps: 110.0
+
+  - keywords: [POLONIA, POLAND]
+    score: 0.85
+    spreadBps: 115.0
+
+  - keywords: [CROAZIA, CROATIA]
+    score: 0.85
+    spreadBps: 140.0
+
+  - keywords: [ITALY, ITALIA, REPUBBLICA ITALIANA, BTP]
+    score: 0.85
+    spreadBps: 160.0
+
+  # Tier 5: Speculative (200–300 bps)
+  - keywords: [CIPRO, CYPRUS]
+    score: 0.78
+    spreadBps: 200.0
+
+  - keywords: [ROMANIA]
+    score: 0.78
+    spreadBps: 280.0
+
+  - keywords: [UNGHERIA, HUNGARY]
+    score: 0.78
+    spreadBps: 290.0
+
+  # Tier 6: High Risk (300+ bps)
+  - keywords: [GRECIA, GREECE, REPUBBLICA GRECA]
+    score: 0.72
+    spreadBps: 320.0
+
+  - keywords: [TURCHIA, TURKEY]
+    score: 0.65
+    spreadBps: 450.0

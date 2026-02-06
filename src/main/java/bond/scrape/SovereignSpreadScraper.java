@@ -50,8 +50,8 @@ public class SovereignSpreadScraper {
         // Hard fallback
         System.out.println("ℹ Using IssuerManager fallback spreads");
         return IssuerManager.getTrustRules().stream()
-            .flatMap(rule -> rule.keywords().stream()
-                .map(k -> Map.entry(k.toUpperCase(), rule.spreadBps())))
+            .flatMap(rule -> rule.getKeywords().stream()
+                .map(k -> Map.entry(k.toUpperCase(), rule.getSpreadBps())))
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
