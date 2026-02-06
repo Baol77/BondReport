@@ -312,32 +312,32 @@
 
                 // Curr Yield
                 let bg;
-                if (v <= 1) bg = "rgb(" + red.join(",") + ")";
-                else if (v < 3) bg = lerpColor(red, yellow, (v - 1) / 2);
-                else if (v < 5) bg = lerpColor(yellow, green, (v - 3) / 2);
+                if (v <= 1.5) bg = "rgb(" + red.join(",") + ")";
+                else if (v < 3.0) bg = lerpColor(red, yellow, (v - 1.5) / 1.5);
+                else if (v < 5.0) bg = lerpColor(yellow, green, (v - 3.0) / 2.0);
                 else bg = "rgb(" + green.join(",") + ")";
                 r.cells[COL.CURR_YIELD].style.backgroundColor = bg;
 
                 // Total Yield
                 let bg2;
-                if (w <= 1100) bg2 = "rgb(" + red.join(",") + ")";
-                else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1100) / 300);
-                else if (w < 1700) bg2 = lerpColor(yellow, green, (w - 1500) / 200);
+                if (w <= 1150) bg2 = "rgb(" + red.join(",") + ")";
+                else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1150) / 250);
+                else if (w < 1650) bg2 = lerpColor(yellow, green, (w - 1400) / 250);
                 else bg2 = "rgb(" + green.join(",") + ")";
                 r.cells[COL.TOTAL_YIELD].style.backgroundColor = bg2;
 
                 // Score background
                 let bg3;
-                if (y <= 0.2) {
+                if (y <= 0.45) {
                     bg3 = "rgb(" + red.join(",") + ")";
-                } else if (y <= 0.5) {
-                    bg3 = lerpColor(red, yellow, (y - 0.2) / 0.3);   // rouge → jaune
-                } else if (y <= 0.8) {
-                    bg3 = lerpColor(yellow, green, (y - 0.5) / 0.3); // jaune → vert
+                } else if (y <= 0.65) {
+                    bg3 = lerpColor(red, yellow, (y - 0.45) / 0.20);   // red → yellow
+                } else if (y <= 0.85) {
+                    bg3 = lerpColor(yellow, green, (y - 0.65) / 0.20); // yellow → green
                 } else {
                     bg3 = "rgb(" + green.join(",") + ")";
                 }
-                r.cells[COL.SCORE].style.backgroundColor = bg3;
+                 r.cells[COL.SCORE].style.backgroundColor = bg3;
             });
         }
 
