@@ -9,8 +9,8 @@ import bond.scoring.BondProfileManager;
 import bond.scoring.IssuerManager;
 import bond.scoring.MathLibrary;
 import bond.scrape.BondScraper;
-import bond.scrape.SovereignSpreadScraper;
 import bond.scoring.BondScoreEngine;
+import bond.scrape.SovereignSpreadService;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +46,7 @@ public class BondApp {
 
         // === NEW: Load sovereign spreads for dynamic trust ===
         System.out.println("📈 Loading sovereign spreads...");
-        Map<String, Double> sovereignSpreads = SovereignSpreadScraper.fetchSpreads();
+        Map<String, Double> sovereignSpreads = SovereignSpreadService.fetchSpreads();
         System.out.println("✅ Spreads loaded: " + sovereignSpreads.size() + " countries\n");
 
         BondScoreEngine engine = new BondScoreEngine();

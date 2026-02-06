@@ -1,7 +1,7 @@
 package bond.scoring;
 
 import bond.model.Bond;
-import bond.scrape.SovereignSpreadScraper;
+import bond.scrape.SovereignSpreadService;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -85,7 +85,7 @@ public class BondScoreEngine {
         double capitalWeight = totalYield > 0 ? capitalYield / totalYield : 0;
 
         // --- Credit quality from sovereign spread ---
-        double spreadBps = SovereignSpreadScraper.getSpreadForIssuer(bond.issuer(), sovereignSpreads);
+        double spreadBps = SovereignSpreadService.getSpreadForIssuer(bond.issuer(), sovereignSpreads);
         double creditQuality = calculateCreditQualityFromSpread(spreadBps);
 
         Map<String, Double> scores = new LinkedHashMap<>();
