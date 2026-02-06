@@ -36,6 +36,10 @@ rules:
     score: 0.97
     spreadBps: 35.0
 
+  - keywords: [ ESTONIA ]
+    score: 0.97
+    spreadBps: 34.0
+
   - keywords: [IRLANDA, IRELAND]
     score: 0.97
     spreadBps: 40.0
@@ -45,10 +49,6 @@ rules:
     spreadBps: 60.0
 
   # Tier 3: Moderate (45–90 bps)
-  - keywords: [ESTONIA]
-    score: 0.92
-    spreadBps: 45.0
-
   - keywords: [SLOVENIA]
     score: 0.92
     spreadBps: 65.0
