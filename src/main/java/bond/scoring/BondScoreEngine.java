@@ -51,22 +51,6 @@ import java.util.Map;
  */
 public class BondScoreEngine {
 
-    public static final String INCOME = "INCOME";
-    public static final String BALANCED = "BALANCED";
-    public static final String GROWTH = "GROWTH";
-    public static final String OPPORTUNISTIC = "OPPORTUNISTIC";
-
-    public static final List<String> PROFILES = List.of(
-        INCOME, BALANCED, GROWTH, OPPORTUNISTIC
-    );
-
-    private static final Map<String, ProfileParams> PROFILES_PARAMS = Map.of(
-        INCOME, new ProfileParams(0.8, 1.5, 0.05, 1.0),
-        BALANCED, new ProfileParams(0.55, 0.8, 0.35, 0.65),
-        GROWTH, new ProfileParams(0.3, 0.4, 0.55, 0.30),
-        OPPORTUNISTIC, new ProfileParams(0.20, 0.2, 0.75, 0.05)
-    );
-
     private record ProfileParams(double alpha,
                                  double lambdaFactor,
                                  double capitalSensitivity,
@@ -106,11 +90,10 @@ public class BondScoreEngine {
 
         Map<String, Double> scores = new LinkedHashMap<>();
 
-        for (String profile : PROFILES) {
-            ProfileParams p = PROFILES_PARAMS.get(profile);
+        for (BondProfile profile : BondProfile.ordered()) {
 
-            double baseScore = p.alpha * normC + (1 - p.alpha) * normT;
-            double lambda = lambdaBase * p.lambdaFactor;
+            double baseScore = profile.getAlpha() * normC + (1 - profile.getAlpha()) * normT;
+            double lambda = lambdaBase * profile.getLambdaFactor();
 
             // --- FX-credit wrong-way correlation ---
             double correlationFactor = calculateFxCreditCorrelation(creditQuality);
@@ -120,17 +103,17 @@ public class BondScoreEngine {
                 reportCurrency,
                 yearsToMaturity(bond),
                 capitalWeight,
-                p.capitalSensitivity,
+                profile.getCapitalSensitivity(),
                 lambda,
                 correlationFactor
             );
 
             // --- Non-linear credit trust shaping ---
             double logisticQuality = applyLogisticTrust(creditQuality);
-            double adjustedQuality = Math.pow(logisticQuality, p.riskAversion);
+            double adjustedQuality = Math.pow(logisticQuality, profile.getRiskAversion());
 
             double finalScore = Math.max(0, (baseScore - penalty) * adjustedQuality);
-            scores.put(profile, finalScore);
+            scores.put(profile.getLabel(), finalScore);
         }
 
         return scores;

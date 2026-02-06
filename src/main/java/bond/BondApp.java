@@ -5,6 +5,7 @@ import bond.fx.FxService;
 import bond.model.Bond;
 import bond.report.BondReportRow;
 import bond.report.HtmlReportWriter;
+import bond.scoring.BondProfile;
 import bond.scoring.IssuerManager;
 import bond.scoring.MathLibrary;
 import bond.scrape.BondScraper;
@@ -149,8 +150,8 @@ public class BondApp {
             ))
             .sorted((a, b) ->
                 Double.compare(
-                    b.scores().get(BondScoreEngine.BALANCED),
-                    a.scores().get(BondScoreEngine.BALANCED)
+                    b.scores().get(BondProfile.BALANCED.getLabel()),
+                    a.scores().get(BondProfile.BALANCED.getLabel())
                 )
             )
             .toList();
