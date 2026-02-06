@@ -1,0 +1,24 @@
+profiles:
+  - name: INCOME
+    alpha: 0.80
+    lambdaFactor: 1.50
+    capitalSensitivity: 0.05
+    riskAversion: 1.0
+
+  - name: BALANCED
+    alpha: 0.55
+    lambdaFactor: 0.80
+    capitalSensitivity: 0.35
+    riskAversion: 0.65
+
+  - name: GROWTH
+    alpha: 0.30
+    lambdaFactor: 0.40
+    capitalSensitivity: 0.55
+    riskAversion: 0.30
+
+  - name: OPPORTUNISTIC
+    alpha: 0.20
+    lambdaFactor: 0.20
+    capitalSensitivity: 0.75
+    riskAversion: 0.05

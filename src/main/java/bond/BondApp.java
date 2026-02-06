@@ -5,7 +5,7 @@ import bond.fx.FxService;
 import bond.model.Bond;
 import bond.report.BondReportRow;
 import bond.report.HtmlReportWriter;
-import bond.scoring.BondProfile;
+import bond.scoring.BondProfileManager;
 import bond.scoring.IssuerManager;
 import bond.scoring.MathLibrary;
 import bond.scrape.BondScraper;
@@ -28,6 +28,9 @@ public class BondApp {
 
     public static void main(String[] args) throws Exception {
         System.out.println("🚀 Starting Sovereign Bond Analytics...\n");
+
+        // Load profiles
+        BondProfileManager.load();
 
         // --- Load FX rates ---
         FxService fxService = new FxService();
@@ -150,8 +153,8 @@ public class BondApp {
             ))
             .sorted((a, b) ->
                 Double.compare(
-                    b.scores().get(BondProfile.BALANCED.getLabel()),
-                    a.scores().get(BondProfile.BALANCED.getLabel())
+                    b.scores().get(BondProfileManager.BALANCED),
+                    a.scores().get(BondProfileManager.BALANCED)
                 )
             )
             .toList();

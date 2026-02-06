@@ -90,7 +90,7 @@ public class BondScoreEngine {
 
         Map<String, Double> scores = new LinkedHashMap<>();
 
-        for (BondProfile profile : BondProfile.ordered()) {
+        for (BondProfileManager.BondProfile profile : BondProfileManager.all()) {
 
             double baseScore = profile.getAlpha() * normC + (1 - profile.getAlpha()) * normT;
             double lambda = lambdaBase * profile.getLambdaFactor();
@@ -113,7 +113,7 @@ public class BondScoreEngine {
             double adjustedQuality = Math.pow(logisticQuality, profile.getRiskAversion());
 
             double finalScore = Math.max(0, (baseScore - penalty) * adjustedQuality);
-            scores.put(profile.getLabel(), finalScore);
+            scores.put(profile.getName(), finalScore);
         }
 
         return scores;
