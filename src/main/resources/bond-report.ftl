@@ -87,13 +87,14 @@
             COUPON: 5,
             MATURITY: 6,
             CURR_COUPON: 7,
-            CAPITAL_AT_MAT: 8
+            CAPITAL_AT_MAT: 8,
+            CAGR: 9
         };
 
         /* =======================
            Sorting
         ======================= */
-        let currentSortCol = COL.CAPITAL_AT_MAT;
+        let currentSortCol = COL.CAGR;
         let currentSortDir = "desc";
 
         function parseValue(v) {
@@ -157,6 +158,7 @@
             const maxMat = document.getElementById("filterMaxMat").value;
             const minCoupon = parseFloat(document.getElementById("filterMinCoupon").value || "0");
             const minCapitalAtMat = parseFloat(document.getElementById("filterMinCapitalAtMat").value || "0");
+            const minCagr = parseFloat(document.getElementById("filterMinCagr").value || "0");
 
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -168,6 +170,7 @@
                 const mat = r.cells[COL.MATURITY].innerText;
                 const currCoupon = parseNum(r.cells[COL.CURR_COUPON].innerText);
                 const capitalAtMat = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
+                const cagr = parseNum(r.cells[COL.CAGR].innerText);
 
                 let ok = true;
                 if (isin && isinCell.indexOf(isin) === -1) ok = false;
@@ -178,6 +181,7 @@
                 if (maxMat && mat > maxMat) ok = false;
                 if (currCoupon < minCoupon) ok = false;
                 if (capitalAtMat < minCapitalAtMat) ok = false;
+                if (cagr < minCagr) ok = false;
 
                 r.style.display = ok ? "" : "none";
             });
@@ -190,6 +194,7 @@
             document.getElementById("filterCurrency").value = "";
             document.getElementById("filterMinCoupon").value = "";
             document.getElementById("filterMinCapitalAtMat").value = "";
+            document.getElementById("filterMinCagr").value = "";
             filterTable();
         }
 
@@ -239,10 +244,8 @@
             const green  = [215, 245, 215];
 
             rows.forEach(r => {
+                // === Current Coupon (Yield at today's price) ===
                 const v = parseNum(r.cells[COL.CURR_COUPON].innerText);
-                const w = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
-
-                // Curr Yield
                 let bg;
                 if (v <= 1.5) bg = "rgb(" + red.join(",") + ")";
                 else if (v < 3.0) bg = lerpColor(red, yellow, (v - 1.5) / 1.5);
@@ -250,13 +253,43 @@
                 else bg = "rgb(" + green.join(",") + ")";
                 r.cells[COL.CURR_COUPON].style.backgroundColor = bg;
 
-                // Total Yield
+                // === Total Capital at Maturity (Absolute EUR amount) ===
+                const w = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
                 let bg2;
                 if (w <= 1150) bg2 = "rgb(" + red.join(",") + ")";
                 else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1150) / 250);
                 else if (w < 1650) bg2 = lerpColor(yellow, green, (w - 1400) / 250);
                 else bg2 = "rgb(" + green.join(",") + ")";
                 r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
+
+                // === CAGR (Annualized Growth Rate %) === [UPDATED]
+                // Based on actual data analysis: min 0.36%, max 4.80%, avg 2.91%
+                const cagr = parseNum(r.cells[COL.CAGR].innerText);
+                let bg3;
+                if (cagr <= 1.0) {
+                    // RED: < 1% (terrible - mostly FX currency bonds)
+                    bg3 = "rgb(" + red.join(",") + ")";
+
+                } else if (cagr <= 2.5) {
+                    // YELLOW: 1-2.5% (poor - needs improvement)
+                    bg3 = lerpColor(red, yellow, (cagr - 1.0) / 1.5);
+
+                } else if (cagr <= 3.5) {
+                    // GREEN: 2.5-3.5% (good - standard sovereign bonds)
+                    bg3 = lerpColor(yellow, green, (cagr - 2.5) / 1.0);
+
+                } else if (cagr <= 4.5) {
+                    // DARK GREEN: 3.5-4.5% (excellent - pick these)
+                    // Interpolate between green and a darker green
+                    const darkGreen = [100, 200, 100];  // Darker green
+                    bg3 = lerpColor(green, darkGreen, (cagr - 3.5) / 1.0);
+
+                } else {
+                    // BRIGHT GREEN: > 4.5% (best of the best - top opportunities)
+                    bg3 = "rgb(50, 180, 50)";  // Bright green for winners
+                }
+
+                r.cells[COL.CAGR].style.backgroundColor = bg3;
             });
         }
 
@@ -283,7 +316,7 @@
             setDefaultMaturityFilters();
             filterTable();
             applyHeatmap();
-            sortTable(COL.CAPITAL_AT_MAT,true);
+            sortTable(COL.CAGR,true);
         });
     </script>
 </head>
@@ -343,13 +376,19 @@
         <th title="Supposing an investment of EUR 100, what would the gain be?"
             onclick="sortTable(COL.CURR_COUPON)">
             Curr. Coupon %<span class="arrow"></span><br>
-            <input id="filterMinCoupon" type="number" step="0.5" placeholder="min"
+            <input id="filterMinCoupon" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
         <th title="Supposing an investment of EUR 1,000, what amount will you have at maturity?"
             onclick="sortTable(COL.CAPITAL_AT_MAT)">
             Tot. Capital to Maturity (per EUR 1,000)<span class="arrow"></span><br>
             <input id="filterMinCapitalAtMat" type="number" step="500" placeholder="min"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
+        </th>
+        <th title="Annual Growth % (Compound Annual Growth Rate)"
+            onclick="sortTable(COL.CAGR)">
+            CAGR (%)<span class="arrow"></span><br>
+            <input id="filterMinCagr" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
     </tr>
@@ -360,29 +399,24 @@
     <tr>
     <td>${b.getIsin()}</td>
     <td>${b.getIssuer()}</td>
-
     <td class="<#if (b.getPrice() <= 100)>good<#else>bad</#if>">
         ${b.getPrice()?string["0.00"]}
     </td>
-
     <td>${b.getCurrency()}</td>
-
     <td>
         ${b.getPriceEur()?string["0.00"]}
     </td>
-
     <td>${b.getCouponPct()?string["0.00"]}</td>
     <td>${b.getMaturity()}</td>
-
     <td>
         ${b.getCurrentCoupon()?string["0.00"]}
     </td>
-
     <td>
         ${b.getFinalCapitalToMat()?string["0"]}
     </td>
-
-    <td class="score-cell"></td>
+        <td>
+            ${b.getCagr()?string["0.00"]}
+        </td>
     </tr>
     </#list>
     </tbody>

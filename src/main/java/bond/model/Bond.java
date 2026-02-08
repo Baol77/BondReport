@@ -15,8 +15,8 @@ public class Bond {
     double couponPct;
     LocalDate maturity;
     double currentCoupon;
-
     double finalCapitalToMat;
+    double cagr;
 
     public Bond(String isin, String issuer, double price, String currency,
                 double priceEur, double couponPct,
@@ -28,6 +28,6 @@ public class Bond {
         this.priceEur = priceEur;
         this.couponPct = couponPct;
         this.maturity = maturity;
-        this.currentCoupon = couponPct * 100 / priceEur;;
+        this.currentCoupon = couponPct * 100 / priceEur;
     }
 }

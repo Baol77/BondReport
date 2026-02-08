@@ -22,8 +22,21 @@ public class BondScoreEngine {
         double totalCoupons = coupon * maturityYears;
 
         double finalAmount = totalCoupons + nominal;
-
         bond.setFinalCapitalToMat(finalAmount);
+    }
+
+    public void calculateCAGR(Bond bond, double years) {
+        // Use actual investment (bond price), not fixed 1000
+        double investment = 1000;
+
+        if (years <= 0) {
+            bond.setCagr(0);
+            return;
+        }
+
+        // CAGR based on actual price invested
+        double cagr = Math.pow(bond.getFinalCapitalToMat() / investment, 1.0 / years) - 1;
+        bond.setCagr(cagr * 100);  // Store as percentage (not decimal)
     }
 
     public void estimateFinalCapitalAtMaturity(List<Bond> bonds, String reportCurrency) {
@@ -31,10 +44,14 @@ public class BondScoreEngine {
             double maturityYears = yearsToMaturity(bond);
             double rate = getExchangeRate(bond.getCurrency(), reportCurrency);
 
-            expectedFinalValue(bond, 1000, maturityYears, rate);
+            // Step 1: Calculate expected final value
+            expectedFinalValue(bond, 1000, maturityYears, rate);  // ← Use actual price
 
-            // Apply downside value to bond
+            // Step 2: Apply FX downside
             applyFxDownside(bond, reportCurrency);
+
+            // Step 3: Calculate CAGR (after downside applied)
+            calculateCAGR(bond, maturityYears);  // ← Pass only years, use bond price internally
         }
     }
 
@@ -93,20 +110,17 @@ public class BondScoreEngine {
 
         String key = normalizePair(bondCurrency, reportCurrency);
 
-        double sigma = switch (key) {
+        return switch (key) {
             case "CHF_EUR" -> 0.07;
-            case "CHF_GBP" -> 0.10;
+            case "CHF_GBP", "GBP_USD" -> 0.10;
             case "CHF_USD" -> 0.11;
             case "EUR_GBP" -> 0.08;
             case "EUR_USD" -> 0.09;
-            case "GBP_USD" -> 0.10;
             case "EUR_SEK" -> 0.13;
             case "CHF_SEK" -> 0.15;
             case "USD_SEK" -> 0.14;
             default -> 0.12;
         };
-
-        return sigma;
     }
 
     /**
