@@ -33,7 +33,7 @@ public class BondApp {
         BondProfileManager.load();
 
         // --- Load FX rates ---
-        FxService fxService = new FxService();
+        FxService fxService = FxService.getInstance();
         Map<String, Double> fx = fxService.loadFxRates();
 
         // --- Scrape bonds ---
@@ -110,33 +110,33 @@ public class BondApp {
                                                  BondScoreEngine engine,
                                                  Map<String, Double> sovereignSpreads) {
 
-        // 1. Collect market yield distributions
-        List<Double> marketCurr = bonds.stream()
+        // 1. Collect market value distributions
+        List<Double> couponByBond = bonds.stream()
             .map(b -> reportCurrency.equals("CHF")
-                ? b.currentYieldPctChf()
-                : b.currentYieldPct())
+                ? b.currentCouponChf()
+                : b.currentCoupon())
             .toList();
 
-        List<Double> marketTot = bonds.stream()
+        List<Double> capitalByBond = bonds.stream()
             .map(b -> reportCurrency.equals("CHF")
-                ? b.totalYieldToMatChf()
-                : b.totalYieldToMat())
+                ? b.finalCapitalToMatChf()
+                : b.finalCapitalToMat())
             .toList();
 
         // 2. Calculate lambdaBase from BALANCED profile distribution (60th percentile)
         List<Double> baseScores = bonds.stream()
             .map(b -> {
                 double c = reportCurrency.equals("CHF")
-                    ? b.currentYieldPctChf()
-                    : b.currentYieldPct();
+                    ? b.currentCouponChf()
+                    : b.currentCoupon();
                 double t = reportCurrency.equals("CHF")
-                    ? b.totalYieldToMatChf()
-                    : b.totalYieldToMat();
+                    ? b.finalCapitalToMatChf()
+                    : b.finalCapitalToMat();
 
-                double normC = MathLibrary.normWinsorized(c, marketCurr);
-                double normT = MathLibrary.normWinsorized(t, marketTot);
+                double normCoupon = MathLibrary.normWinsorized(c, couponByBond);
+                double normFinalCapital = MathLibrary.normWinsorized(t, capitalByBond);
 
-                return 0.55 * normC + 0.45 * normT;
+                return 0.55 * normCoupon + 0.45 * normFinalCapital;
             })
             .sorted()
             .toList();
@@ -149,7 +149,7 @@ public class BondApp {
         return bonds.stream()
             .map(b -> new BondReportRow(
                 b,
-                engine.score(b, reportCurrency, marketCurr, marketTot, lambdaBase, sovereignSpreads)
+                engine.score(b, reportCurrency, couponByBond, capitalByBond, lambdaBase, sovereignSpreads)
             ))
             .sorted((a, b) ->
                 Double.compare(

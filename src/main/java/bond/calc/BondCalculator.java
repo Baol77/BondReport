@@ -9,17 +9,35 @@ public class BondCalculator {
 
     private static final double IT_TAX = 0.875;
 
+    private double calculateTotalAmountToMaturity(
+        double couponPct,
+        double price,
+        double priceRef,
+        double yearsToMaturity)
+    {
+        // Change rate
+        double rate = price / priceRef;
+        // How much I invest
+        double investedAmount = rate * 1000;
+        // How many bonds I buy for that price
+        double nBonds = investedAmount / price;
+        // Gain from bonds + capital gain (or loss if nominal value < 100)
+        double YieldToMRef = nBonds * couponPct * yearsToMaturity + nBonds * 100;
+        // Convert to refence currency
+        return YieldToMRef / rate;
+    }
+
     public Bond buildBond(String isin, String issuer, double price, double priceEur, double priceChf,
                           double couponPct, LocalDate maturity, String currency) {
 
         double years = Math.floor(ChronoUnit.DAYS.between(LocalDate.now(), maturity) / 365.25);
         if (years <= 1) return null;
 
-        double currentYield = 100 * couponPct / priceEur;
-        double YieldToM = 10 * currentYield * years + 1000 * (1 - (price - 100) / 100); // 1000 EUR investment
+        double currentYield = couponPct * 100 / priceEur;
+        double YieldToM = calculateTotalAmountToMaturity(couponPct, price, priceEur, years);
 
-        double currentYieldChf = 100 * couponPct / priceChf;
-        double YieldToMChf = 10 * currentYieldChf * years + 1000 * (1 - (price - 100) / 100); // 1000 CHF investment
+        double currentYieldChf =  couponPct * 100 / priceChf;
+        double YieldToMChf = YieldToM; // se il tasso di cambio rimane costante tra l'acquisto e la scadenza, l'effetto della valuta si annulla
 
         return new Bond(
             isin,

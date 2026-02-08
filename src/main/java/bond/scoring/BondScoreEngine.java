@@ -65,24 +65,21 @@ public class BondScoreEngine {
 
     public Map<String, Double> score(Bond bond,
                                      String reportCurrency,
-                                     List<Double> marketCurrYields,
-                                     List<Double> marketTotalYields,
+                                     List<Double> couponByBond,
+                                     List<Double> finalCapitalByBond,
                                      double lambdaBase,
                                      Map<String, Double> sovereignSpreads) {
 
-        double currYield = reportCurrency.equals("CHF")
-            ? bond.currentYieldPctChf()
-            : bond.currentYieldPct();
+        double currCoupon = reportCurrency.equals("CHF")
+            ? bond.currentCouponChf()
+            : bond.currentCoupon();
 
-        double totalYield = reportCurrency.equals("CHF")
-            ? bond.totalYieldToMatChf()
-            : bond.totalYieldToMat();
+        double currFinalCapital = reportCurrency.equals("CHF")
+            ? bond.finalCapitalToMatChf()
+            : bond.finalCapitalToMat();
 
-        double normC = MathLibrary.normWinsorized(currYield, marketCurrYields);
-        double normT = MathLibrary.normWinsorized(totalYield, marketTotalYields);
-
-        double capitalYield = Math.max(0, totalYield - currYield);
-        double capitalWeight = totalYield > 0 ? capitalYield / totalYield : 0;
+        double normC = MathLibrary.normWinsorized(currCoupon, couponByBond);
+        double normT = MathLibrary.normWinsorized(currFinalCapital, finalCapitalByBond);
 
         // --- Credit quality from sovereign spread ---
         double spreadBps = SovereignSpreadService.getSpreadForIssuer(bond.issuer(), sovereignSpreads);
@@ -102,7 +99,7 @@ public class BondScoreEngine {
                 bond.currency(),
                 reportCurrency,
                 yearsToMaturity(bond),
-                capitalWeight,
+                1,
                 profile.getCapitalSensitivity(),
                 lambda,
                 correlationFactor

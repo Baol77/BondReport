@@ -36,8 +36,8 @@ public class BondCalculatorTest {
         assertNotNull(b);
         assertEquals("IT0001234567", b.isin());
         assertEquals("Italy", b.issuer());
-        assertEquals(4.08, b.currentYieldPct(), 0.01); // 100*4/98
-        assertTrue(b.totalYieldToMat() > 0);
+        assertEquals(4.08, b.currentCoupon(), 0.01); // 100*4/98
+        assertTrue(b.finalCapitalToMat() > 0);
     }
 
     // ---------------------------------------------------
@@ -53,7 +53,7 @@ public class BondCalculatorTest {
             "X2", "Issuer", 110, 1100, 1100, 4,
             LocalDate.now().plusYears(10), "EUR");
 
-        assertTrue(cheap.currentYieldPct() > expensive.currentYieldPct());
+        assertTrue(cheap.currentCoupon() > expensive.currentCoupon());
     }
 
     // ---------------------------------------------------
@@ -72,8 +72,8 @@ public class BondCalculatorTest {
             "CHF"
         );
 
-        assertEquals(0.3, b.currentYieldPct(), 0.001);    // 100*3/1000
-        assertEquals(0.33, b.currentYieldPctChf(), 0.01); // 100*3/900
+        assertEquals(0.3, b.currentCoupon(), 0.001);    // 100*3/1000
+        assertEquals(0.33, b.currentCouponChf(), 0.01); // 100*3/900
     }
 
     // ---------------------------------------------------
@@ -101,7 +101,7 @@ public class BondCalculatorTest {
             "EUR"
         );
 
-        assertEquals(1.2, b.currentYieldPct(), 0.001);
+        assertEquals(1.2, b.currentCoupon(), 0.001);
     }
 
     // ---------------------------------------------------
@@ -113,7 +113,7 @@ public class BondCalculatorTest {
             "X5", "Issuer", 95, 950, 930, 4,
             LocalDate.now().plusYears(12), "EUR");
 
-        assertTrue(b.totalYieldToMat() > 1000);
+        assertTrue(b.finalCapitalToMat() > 1000);
     }
 
     // ---------------------------------------------------
@@ -127,7 +127,7 @@ public class BondCalculatorTest {
             "EUR"
         );
 
-        assertEquals(0.0, b.currentYieldPct(), 0.0001);
-        assertTrue(b.totalYieldToMat() > 1000);
+        assertEquals(0.0, b.currentCoupon(), 0.0001);
+        assertTrue(b.finalCapitalToMat() > 1000);
     }
 }

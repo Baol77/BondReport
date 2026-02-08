@@ -11,8 +11,8 @@ public record Bond(
     double priceChf,
     double couponPct,
     LocalDate maturity,
-    double currentYieldPct,
-    double totalYieldToMat,
-    double currentYieldPctChf,
-    double totalYieldToMatChf
+    double currentCoupon,
+    double finalCapitalToMat,
+    double currentCouponChf,
+    double finalCapitalToMatChf
 ) {}

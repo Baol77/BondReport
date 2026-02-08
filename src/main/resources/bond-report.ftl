@@ -476,13 +476,13 @@
         <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
         <th title="Supposing an investment of ${reportCurrency}100, what would the gain be?"
             onclick="sortTable(COL.CURR_YIELD)">
-            Curr. Yield %<span class="arrow"></span><br>
+            Curr. Coupon %<span class="arrow"></span><br>
             <input id="filterMinYield" type="number" step="0.5" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
         <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?"
             onclick="sortTable(COL.TOTAL_YIELD)">
-            Tot. Yield to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
+            Tot. Capital to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
             <input id="filterMinTotal" type="number" step="500" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
@@ -526,17 +526,17 @@
 
     <td>
         <#if reportCurrency == "EUR">
-        ${b.currentYieldPct()?string["0.00"]}
+        ${b.currentCoupon()?string["0.00"]}
         <#else>
-        ${b.currentYieldPctChf()?string["0.00"]}
+        ${b.currentCouponChf()?string["0.00"]}
     </#if>
     </td>
 
     <td>
         <#if reportCurrency == "EUR">
-        ${b.totalYieldToMat()?string["0"]}
+        ${b.finalCapitalToMat()?string["0"]}
         <#else>
-        ${b.totalYieldToMatChf()?string["0"]}
+        ${b.finalCapitalToMatChf()?string["0"]}
     </#if>
     </td>
 
