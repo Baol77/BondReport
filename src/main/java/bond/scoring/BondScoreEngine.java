@@ -8,17 +8,12 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static bond.fx.FxService.getExchangeRate;
+
 
 public class BondScoreEngine {
 
-    private void expectedFinalValue(
-        Bond bond,
-        double investment,    // 3.5% (Bund + Spread)
-        double maturityYears,
-        double initialFxRate,
-        String reportCurrency
-    ) {
-
+    private void expectedFinalValue(Bond bond, double investment, double maturityYears, double initialFxRate) {
         double capitalX = investment * initialFxRate;
         double nominal = capitalX / (bond.getPrice() / 100.0);
 
@@ -31,27 +26,17 @@ public class BondScoreEngine {
         bond.setFinalCapitalToMat(finalAmount);
     }
 
-    @SneakyThrows
-    private double getExchangeRate(String from, String to) {
-        if (to.equals("EUR")) {
-            return FxService.getInstance().loadFxRates().get("EUR");
-        } else {
-            return FxService.getInstance().loadFxRates().get(from) / FxService.getInstance().loadFxRates().get(to);
-        }
-    }
-
     public void estimateFinalCapitalAtMaturity(List<Bond> bonds, String reportCurrency) {
         for (Bond bond : bonds) {
             double maturityYears = yearsToMaturity(bond);
             double rate = getExchangeRate(bond.getCurrency(), reportCurrency);
 
-            expectedFinalValue(bond, 1000, maturityYears, rate, reportCurrency);
+            expectedFinalValue(bond, 1000, maturityYears, rate);
 
             // Apply downside value to bond
-            estimateFinalCapitalAtMaturity(bond, reportCurrency);
+            applyFxDownside(bond, reportCurrency);
         }
     }
-
 
     /**
      * Evaluates a bond and modifies the parameters finalCapitalToMat and finalCapitalToMatChf
@@ -62,7 +47,7 @@ public class BondScoreEngine {
      * - If bond is in different currency: applies downside scenario (95% CI lower bound)
      * - Downside = value / (1 + 1.96 * sigma_total)
      */
-    private void estimateFinalCapitalAtMaturity(Bond bond, String reportCurrency) {
+    private void applyFxDownside(Bond bond, String reportCurrency) {
         // FX parameters
         double yearsToMat = yearsToMaturity(bond);
         double fxSigmaAnnual = getSigma(bond.getCurrency(), reportCurrency);

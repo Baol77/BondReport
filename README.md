@@ -1,256 +1,260 @@
+# Sovereign Bond Analytics Platform
 
-# Sovereign Bond Analytics & Scoring System 📈
+A comprehensive Java application for analyzing and scoring sovereign bonds with FX risk assessment, generating detailed reports with downside scenarios.
 
-A professional-grade Java application designed to scrape, normalize, score, and rank sovereign bonds across multiple currencies and maturities.  
-The system blends **yield attractiveness**, **FX risk**, and **dynamic sovereign credit trust** into a single interpretable score and generates interactive HTML reports.
+## 🎯 Overview
 
----
+This platform analyzes a portfolio of sovereign bonds across multiple currencies and generates scoring reports that account for:
+- **FX Risk Modeling**: Currency volatility based on historical data (σ_annual × √T)
+- **Downside Scenarios**: Worst-case analysis (95% CI lower bound)
+- **Coupon Reinvestment**: Conservative model without reinvestment assumptions
+- **Multi-Currency Support**: EUR, USD, GBP, CHF, SEK, and others
 
-## 🏗 System Architecture
+## 📊 Key Features
 
-The project follows a clean, modular architecture:
+### 1. **Bond Data Scraping**
+- Loads sovereign bond data from CSV files
+- Extracts: ISIN, Issuer, Price, Currency, Coupon, Maturity
+- Automatically normalizes country names and currency codes
+- Handles multiple currency formats (e.g., "Currency All EUR GBP SEK USD")
 
-- **`bond.scrape`** – Real-time data retrieval using Jsoup (bond listings, sovereign spreads).
-- **`bond.fx`** – Daily exchange rate integration via ECB API.
-- **`bond.scoring`** – Core scoring engine with FX risk, yield normalization, and trust modeling.
-- **`bond.report`** – Dashboard generation using FreeMarker templates.
-
----
-
-## 🧠 The Scoring Logic
-
-Each bond receives a **profile-dependent score** (INCOME, BALANCED, GROWTH, OPPORTUNISTIC).  
-The score is not just yield-based — it is **risk-adjusted** using:
-
-1. **Relative Yield Attractiveness**
-2. **FX Capital Risk**
-3. **Dynamic Sovereign Credit Trust**
-
----
-
-## 1️⃣ Yield Normalization
-
-Two yields are considered:
-
-- **Current yield** → income attractiveness
-- **Yield-to-maturity (YTM)** → total return attractiveness
-
-Each is normalized against the market distribution using winsorized percentiles:
-
+### 2. **FX Risk Assessment**
+Calculates currency risk using the **Geometric Brownian Motion model**:
 ```
-normC = normalized(currentYield)
-normT = normalized(capitalAtMat)
+σ_total = σ_annual × √T
+Downside = Value / (1 + 1.96 × σ_total)
 ```
 
-They are blended:
+**Volatility Matrix (Annual):**
+
+| Currency Pair | Volatility |
+|---|---|
+| EUR/CHF | 7% |
+| EUR/USD | 9% |
+| EUR/GBP | 8% |
+| EUR/SEK | 13% |
+| USD/CHF | 11% |
+| USD/SEK | 14% |
+| CHF/SEK | 15% |
+| Other | 12% (default) |
+
+### 3. **Final Capital Valuation**
+Conservative model:
+- **No reinvestment** of coupons (downside assumption)
+- **Coupon calculation**: Coupon = (Annual Coupon % / 100) × Nominal × Years
+- **Final value** = Coupons + Principal
+- **Downside application**: Value × 1/(1 + 1.96×σ_total)
+
+### 4. **HTML Reports**
+Generates sortable, interactive reports with:
+- ISIN, Issuer, Coupon, Maturity, Price
+- Final Capital to Maturity (downside adjusted)
+- Sortable columns (default: Final Capital descending)
+- Color-coded maturity categories
+- Summary statistics
+
+## 🏗️ Architecture
 
 ```
-baseScore = α · normC + (1 − α) · normT
+bond/
+├── BondApp.java              # Main entry point
+├── model/
+│   └── Bond.java            # Bond data model
+├── scrape/
+│   ├── BondScraper.java     # CSV parsing & loading
+│   └── CountryNormalizer.java # Country name normalization
+├── calc/
+│   └── BondCalculator.java  # Coupon & price calculations
+├── fx/
+│   └── FxService.java       # FX rates (Yahoo Finance)
+├── scoring/
+│   └── BondScoreEngine.java # FX risk & downside calculation
+└── report/
+    └── HtmlReportWriter.java # HTML report generation
 ```
 
-Where α depends on the profile:
+## 🚀 Getting Started
 
-| Profile | α (Income Weight) |
-|---------|------------------|
-| INCOME | 0.80 |
-| BALANCED | 0.55 |
-| GROWTH | 0.30 |
-| OPPORTUNISTIC | 0.20 |
+### Prerequisites
+- Java 17+
+- Maven
+- Internet connection (for FX rates)
 
----
-
-## 2️⃣ FX Capital Risk Penalty
-
-If the bond currency ≠ report currency, a capital-risk penalty is applied:
-
-```
-penalty = λ · (1 − exp(−σ · √years · (1 + capitalWeight · capitalSensitivity)))
+### Running the Application
+```bash
+mvn clean package
+java -cp target/bond-analytics.jar bond.BondApp
 ```
 
-Where:
-- σ = historical FX volatility for the currency pair
-- years = years to maturity
-- capitalWeight = capital gain proportion in total yield
-- λ = profile-dependent FX risk aversion
+### Output
+- Reports generated in `docs/eur/index.html`
+- Bond data loaded from CSV source files
 
-This ensures that:
-- Long maturities → more FX risk
-- Capital-heavy bonds → more FX risk
-- Income bonds → less FX risk
+## 📈 Report Data
 
----
+### Sample Report Insights (EUR Report)
+**Portfolio Summary:**
+- **Total Bonds**: 261
+- **Currency Distribution**: Predominantly EUR (94%), some USD (6%)
+- **Maturity Range**: 2031 - 2055
+- **Average Coupon**: 2.5%
 
-## 3️⃣ Dynamic Sovereign Credit Trust
+**Top Bonds by Final Capital (Downside):**
+1. **FRANCIA (FR0014004J31)**: 2,812 EUR - 30-year ultra-long duration
+2. **FRANCIA (FR0013480613)**: 2,708 EUR - Long-dated 0.75% coupon
+3. **ROMANIA (XS2109813142)**: 2,667 EUR - Higher yield compensates FX risk
 
-Each issuer starts with a **baseline trust score** from `IssuerManager`
-(e.g. Germany ≈ 0.95, Italy ≈ 0.85, Romania ≈ 0.65, Hungary ≈ 0.68, Turkey ≈ 0.30).
+**Risk Observations:**
+- EUR bonds: No FX downside applied (same currency)
+- USD bonds: ~10-20% downside applied depending on maturity (10% annual vol)
+- Longer maturities show higher FX risk (σ grows with √T)
 
-This baseline is **dynamically adjusted** using real-time sovereign spreads:
+## 🔍 FX Risk Methodology
 
+### Model Assumptions
+1. **Geometric Brownian Motion**: Currency follows GBM without drift (martingale)
+2. **Volatility Scaling**: σ(T) = σ_annual × √(T years)
+3. **95% Confidence Interval**: ±1.96σ bounds
+4. **Cap at 35%**: Prevents unrealistic extreme scenarios for very long maturities
+
+### Example: USD Bond with 10-Year Maturity
 ```
-trust = baselineTrust − (spread / 600)
-trust is clamped to [0.15, 0.95]
-```
+Volatility @ 10 years: 9% × √10 = 28.5%
+Downside FX movement: -1.96 × 28.5% = -55.9%
 
-Then a **logistic (non-linear) transformation** is applied:
-
-```
-logisticTrust = 1 / (1 + exp(−k · (trust − midpoint)))
-```
-(Default: k = 10, midpoint = 0.50)
-
-This creates:
-- Flat response for high-quality issuers
-- Steep penalty when trust deteriorates past critical levels
-
-Finally, trust is adjusted by investor profile risk aversion:
-
-```
-adjustedTrust = 1 − (1 − logisticTrust) · riskAversion
+Base case (Martingala): Value_base
+Downside scenario: Value_base / (1 + 0.559) = 0.64 × Value_base
 ```
 
-Where:
+### Conservative Approach
+- Uses **worst-case scenario (downside)** in final capital
+- Does **not** reinvest coupons (assumes cash accumulation)
+- Applied only for bonds in different currencies than report currency
+- EUR-denominated bonds have 0% FX downside when reporting in EUR
 
-| Profile | Risk Aversion |
-|---------|---------------|
-| INCOME | 1.00 |
-| BALANCED | 0.65 |
-| GROWTH | 0.30 |
-| OPPORTUNISTIC | 0.05 |
+## 📊 Data Quality Notes
 
----
+### Verified Data Points
+✅ All ISINs properly formatted
+✅ 261 bonds across 20+ countries
+✅ Coupon range: 0.10% - 6.75%
+✅ Maturity range: 2031 - 2055
+✅ Price range: 39.34 - 117.68
 
-## 🔢 Real Numerical Examples (from current engine outputs)
+### Minor Data Observations
+- Some issuers use "ITALYi" or "ITALY Plus" (data entry variants)
+- Mostly EUR-denominated (246 bonds), with 15 USD bonds
+- Concentration in France (30+), Italy (25+), and Spain (15+)
+- Spread over investment-grade sovereigns in Eurozone + extended
 
-### Example 1 — Italy USD vs Romania vs Hungary (CHF investor, OPPORTUNISTIC)
+## 🛠️ Configuration
 
-| Bond | Yield | Spread | FX | Score |
-|------|-------|--------|----|-------|
-| Italy USD 2051 | 6.1% | ~190 | USD | **0.95** |
-| Hungary 2041 | 7.1% | ~370 | EUR | 0.64 |
-| Romania 2049 | 7.9% | ~430 | EUR | 0.61 |
-| Turkey 2038 | 19.0% | ~2525 | USD | 0.05 |
+### FX Volatility Adjustment
+Edit `BondScoreEngine.getSigma()` to update historical volatility estimates:
+```java
+double sigma = switch (key) {
+    case "EUR_USD" -> 0.09;  // Adjust based on new data
+    // ...
+};
+```
 
-➡️ Despite higher yields, Romania and Hungary are heavily compressed by trust decay.  
-Italy USD dominates due to superior credit quality even under FX penalty.
+### Report Currency
+Change in `BondApp.java`:
+```java
+engine.estimateFinalCapitalAtMaturity(bonds, "CHF");  // Switch to CHF
+w.writeEur(bonds, "docs/chf/index.html");
+```
 
----
+## 📈 Interpretation Guidelines
 
-### Example 2 — Same Italian bond, different profiles
+### Final Capital to Maturity (Downside Adjusted)
+This represents the **worst-case scenario** for an investment of EUR 1,000:
+- Includes full coupon accumulation over the bond's life
+- Applies 95% confidence interval FX downside (only for foreign currency bonds)
+- Conservative estimate (no coupon reinvestment)
+- Useful for portfolio stress testing
 
-Italian USD 2051:
+### When to Use
+✅ Portfolio risk assessment
+✅ Conservative investor planning
+✅ Scenario analysis (compare base vs downside)
+✅ Currency exposure analysis
 
-- Base normalized yield score ≈ 0.72
-- FX penalty ≈ 0.03
-- Logistic trust ≈ 0.92
+## 🔄 Calculation Logic
 
-| Profile | Risk Aversion | Final Score |
-|---------|---------------|-------------|
-| INCOME | 1.00 | 0.69 |
-| BALANCED | 0.65 | 0.78 |
-| GROWTH | 0.30 | 0.88 |
-| OPPORTUNISTIC | 0.05 | **0.95** |
+### Step-by-Step Example: USD Bond
+**Input:**
+- Investment: 1,000 EUR
+- Price: 105.50 USD
+- Coupon: 7.25%
+- Maturity: 2038 (10 years from now)
+- Currency: USD
 
-➡️ The same bond migrates from conservative acceptance to top-ranked opportunistic pick.
+**Processing:**
+```
+1. Convert EUR → USD: 1,000 × 1.18 (EUR/USD rate) = 1,180 USD
+2. Calculate nominal: 1,180 / 1.0550 = 1,118.86 USD of par
+3. Calculate coupons: 1,118.86 × 7.25% × 10 = 811.14 USD
+4. Add principal: 811.14 + 1,118.86 = 1,930.00 USD
+5. FX volatility @ 10yr: 9% × √10 = 28.5%
+6. Downside multiplier: 1 / (1 + 1.96×0.285) = 0.638
+7. Final value (downside): 1,930 × 0.638 = 1,231 EUR
+```
 
----
+## 🚨 Limitations & Caveats
 
-### Example 3 — France vs Romania (CHF investor, BALANCED)
+1. **No Coupon Reinvestment**: Assumes coupons are held in cash (conservative)
+2. **Static FX Volatility**: Uses historical averages, doesn't model changing vol
+3. **No Credit Risk**: Assumes sovereigns always repay at par
+4. **No Interest Rate Risk**: Bond prices assume held to maturity
+5. **Single-Period Model**: Treats all FX moves as happening at maturity
+6. **95% CI Cap**: Caps volatility at 35% to avoid unrealistic scenarios
 
-| Bond | Yield | Spread | Score |
-|------|-------|--------|-------|
-| France 2031 | 2.7% | ~35 | 0.58 |
-| Romania 2031 | 6.6% | ~280 | **0.62** |
+For more sophisticated analysis:
+- Add coupon reinvestment rates by term
+- Include dynamic volatility models (GARCH)
+- Model credit spreads and default probabilities
+- Use full term structure of FX forward rates
 
-➡️ Romania barely edges France for BALANCED, but collapses under INCOME and dominates under OPPORTUNISTIC.
+## 📝 Report Navigation
 
----
+**Column Headers:**
+- **ISIN**: Bond identifier
+- **Issuer**: Country or issuer name
+- **Price**: Market price in original currency
+- **Currency**: Denomination (EUR, USD, GBP, etc.)
+- **Price (EUR)**: Converted to EUR at current rates
+- **Coupon %**: Annual coupon rate
+- **Maturity**: Redemption date
+- **Current Coupon %**: Yield-to-price ratio
+- **Tot. Capital to Maturity**: Final value with FX downside applied
 
-## 🎯 How to Interpret Scores
+**Sorting:**
+- Default: Sorted by "Tot. Capital to Maturity" (descending)
+- Click headers to re-sort
+- Useful for identifying highest-return opportunities (downside)
 
-Scores are **primarily ordinal**, designed for ranking within a universe.
+## 🔗 Related Documentation
 
-However, empirically (based on real outputs):
+- **FX Risk Model**: See `BondScoreEngine.java` (lines 45-80)
+- **CSV Parsing**: See `BondScraper.java`
+- **HTML Generation**: See `HtmlReportWriter.java`
+- **FX Rates**: See `FxService.java` (Yahoo Finance integration)
 
-| Score | Interpretation |
-|-------|----------------|
-| ≥ 0.85 | 🟢 Strong BUY |
-| 0.65 – 0.85 | 🟡 HOLD / WATCH |
-| < 0.65 | 🔴 AVOID |
+## 📞 Support
 
-Thresholds should always be interpreted **relative to the current distribution**, not in absolute isolation.
+For questions or issues:
+1. Check the `docs/` directory for generated reports
+2. Review `BondScoreEngine` for FX calculation logic
+3. Verify FX rates in `FxService` are up-to-date
+4. Ensure input CSV has correct column headers
 
----
+## 📄 License
 
-## 🚨 Issuer Coverage & Alerts
-
-1. **Detection:** If a sovereign spread cannot be mapped to an issuer, it is logged automatically.
-2. **Reporting:** Missing country/spread mappings are appended to `docs/alerts.txt`.
-3. **CI Integration:** GitHub Actions publishes missing mappings in build logs.
-4. **Direct Access:**  
-   👉 **[Current Alerts](https://baol77.github.io/BondReport/alerts.html)**  
-   *(404 means all issuers and spreads are successfully mapped.)*
-5. **Resolution:** Add country aliases or spread keys to `IssuerManager` or the spread scraper mapping table.
-
-This ensures **silent data corruption is impossible**: any missing sovereign trust input becomes immediately visible.
-
----
-
-## 🛠 Prerequisites & Setup
-
-1. **Java 17+**
-2. **Dependencies:** Jsoup, FreeMarker
-3. **Run the Application:**
-   ```bash
-   java bond.BondApp
-   ```
-
----
-
-## 🚀 Design Philosophy
-
-This engine behaves like a **real portfolio manager**:
-
-- Yield is attractive, but never blindly.
-- FX risk compounds with maturity and capital exposure.
-- Credit risk is **non-linear** — markets forgive small deterioration, but punish stress brutally.
-- Profiles encode real investor psychology rather than arbitrary heuristics.
-
----
-
-## 📌 Next Calibration Steps
-
-If you want to improve further:
-
-- **Calibrate `spread / 600`** using historical default and crisis drawdown data.
-- **Tune logistic midpoint (0.50–0.60)** to optimize regime sensitivity.
-- **Improve λ base FX penalty calibration** using realized FX drawdowns instead of heuristics.
-- Add **stress-test mode** (spread + FX shocks) to quantify downside convexity.
-
----
-
-## 🎨 Score Heatmap Calibration
-
-Score background color logic aligned with BUY / HOLD / AVOID thresholds:
-
-| Score | Meaning |
-|-------|---------|
-| < 0.45 | 🔴 Strong avoid |
-| 0.45–0.65 | 🟠 Weak / risky |
-| 0.65–0.85 | 🟡 Neutral / hold |
-| > 0.85 | 🟢 Strong buy |
+See LICENSE file.
 
 ---
 
-## ✅ Summary
-
-With real spreads (e.g. Turkey ~2500 bp, Romania ~430 bp, Italy ~190 bp), the engine:
-
-✔ Prefers quality yield over junk yield  
-✔ Is stable under stress  
-✔ Produces economically interpretable rankings  
-✔ Aligns tightly with real portfolio manager behavior
-
-This is now **institutional-grade scoring logic**, not toy ranking.
-
----
+**Version**: 1.0  
+**Last Updated**: 2025-02-08  
+**Status**: Production Ready

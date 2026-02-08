@@ -1,5 +1,7 @@
 package bond.fx;
 
+import lombok.SneakyThrows;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.URL;
 import java.util.HashMap;
@@ -66,5 +68,18 @@ public class FxService {
      */
     public synchronized void refresh() {
         this.cachedRates = null;
+    }
+
+    @SneakyThrows
+    public static double getExchangeRate(String from, String to) {
+        if (from.equals(to)) return 1.0;  // No conversion needed
+
+        Map<String, Double> rates = FxService.getInstance().loadFxRates();
+
+        // All rates should be vs EUR in your system
+        double rateFrom = rates.getOrDefault(from, 1.0);  // EUR/FROM
+        double rateTo = rates.getOrDefault(to, 1.0);      // EUR/TO
+
+        return rateFrom / rateTo;  // Proper cross-rate calculation
     }
 }
