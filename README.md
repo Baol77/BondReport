@@ -39,7 +39,7 @@ Each is normalized against the market distribution using winsorized percentiles:
 
 ```
 normC = normalized(currentYield)
-normT = normalized(totalYield)
+normT = normalized(capitalAtMat)
 ```
 
 They are blended:

@@ -12,40 +12,6 @@
         h2 {
             margin-bottom: 10px;
         }
-
-        .profile-box {
-            border: 1px solid #bbb;
-            border-radius: 6px;
-            padding: 8px 12px;
-            background: #f9f9f9;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .profile-box legend {
-            font-size: 12px;
-            font-weight: bold;
-            color: #444;
-            padding: 0 6px;
-        }
-
-        .profile-option {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .profile-option input {
-            cursor: pointer;
-        }
-
-        .profile-option span {
-            border-bottom: 1px dotted #666;
-        }
-
         .controls {
             display: flex;
             gap: 12px;
@@ -65,34 +31,6 @@
         }
         .controls input[type="text"] {
             min-width: 200px;
-        }
-
-        .risk-scale {
-            width: 100%;
-            height: 6px;
-            /* Gradient du vert (Income) au rouge (Opportunistic) */
-            background: linear-gradient(to right, #28a745, #ffc107, #fd7e14, #dc3545);
-            border-radius: 3px;
-            margin-bottom: 4px;
-            position: relative;
-        }
-
-        .risk-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            font-weight: bold;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        /* On ajuste la box des profils pour empiler verticalement la barre et les radios */
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            width: 380px; /* Ajuste selon tes besoins */
         }
 
         table {
@@ -148,15 +86,14 @@
             PRICE_R: 4,
             COUPON: 5,
             MATURITY: 6,
-            CURR_YIELD: 7,
-            TOTAL_YIELD: 8,
-            SCORE: 9
+            CURR_COUPON: 7,
+            CAPITAL_AT_MAT: 8
         };
 
         /* =======================
            Sorting
         ======================= */
-        let currentSortCol = COL.SCORE;
+        let currentSortCol = COL.CAPITAL_AT_MAT;
         let currentSortDir = "desc";
 
         function parseValue(v) {
@@ -218,9 +155,8 @@
             const currency = document.getElementById("filterCurrency").value;
             const minMat = document.getElementById("filterMinMat").value;
             const maxMat = document.getElementById("filterMaxMat").value;
-            const minYield = parseFloat(document.getElementById("filterMinYield").value || "0");
-            const minTotal = parseFloat(document.getElementById("filterMinTotal").value || "0");
-            const minScore = parseFloat(document.getElementById("filterScore").value || "0");
+            const minCoupon = parseFloat(document.getElementById("filterMinCoupon").value || "0");
+            const minCapitalAtMat = parseFloat(document.getElementById("filterMinCapitalAtMat").value || "0");
 
             const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -230,9 +166,8 @@
                 const priceCell = parseNum(r.cells[COL.PRICE].innerText);
                 const currencyCell = r.cells[COL.CURRENCY].innerText;
                 const mat = r.cells[COL.MATURITY].innerText;
-                const currYield = parseNum(r.cells[COL.CURR_YIELD].innerText);
-                const totalYield = parseNum(r.cells[COL.TOTAL_YIELD].innerText);
-                const score = parseNum(r.cells[COL.SCORE].innerText);
+                const currCoupon = parseNum(r.cells[COL.CURR_COUPON].innerText);
+                const capitalAtMat = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
 
                 let ok = true;
                 if (isin && isinCell.indexOf(isin) === -1) ok = false;
@@ -241,9 +176,8 @@
                 if (currency && currencyCell !== currency) ok = false;
                 if (minMat && mat < minMat) ok = false;
                 if (maxMat && mat > maxMat) ok = false;
-                if (currYield < minYield) ok = false;
-                if (totalYield < minTotal) ok = false;
-                if (score < minScore) ok = false;
+                if (currCoupon < minCoupon) ok = false;
+                if (capitalAtMat < minCapitalAtMat) ok = false;
 
                 r.style.display = ok ? "" : "none";
             });
@@ -254,9 +188,8 @@
             document.getElementById("filterIssuer").value = "";
             document.getElementById("filterPrice").value = "";
             document.getElementById("filterCurrency").value = "";
-            document.getElementById("filterMinYield").value = "";
-            document.getElementById("filterMinTotal").value = "";
-            document.getElementById("filterScore").value = "";
+            document.getElementById("filterMinCoupon").value = "";
+            document.getElementById("filterMinCapitalAtMat").value = "";
             filterTable();
         }
 
@@ -306,9 +239,8 @@
             const green  = [215, 245, 215];
 
             rows.forEach(r => {
-                const v = parseNum(r.cells[COL.CURR_YIELD].innerText);
-                const w = parseNum(r.cells[COL.TOTAL_YIELD].innerText);
-                const y = parseNum(r.cells[COL.SCORE].innerText);
+                const v = parseNum(r.cells[COL.CURR_COUPON].innerText);
+                const w = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
 
                 // Curr Yield
                 let bg;
@@ -316,7 +248,7 @@
                 else if (v < 3.0) bg = lerpColor(red, yellow, (v - 1.5) / 1.5);
                 else if (v < 5.0) bg = lerpColor(yellow, green, (v - 3.0) / 2.0);
                 else bg = "rgb(" + green.join(",") + ")";
-                r.cells[COL.CURR_YIELD].style.backgroundColor = bg;
+                r.cells[COL.CURR_COUPON].style.backgroundColor = bg;
 
                 // Total Yield
                 let bg2;
@@ -324,41 +256,9 @@
                 else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1150) / 250);
                 else if (w < 1650) bg2 = lerpColor(yellow, green, (w - 1400) / 250);
                 else bg2 = "rgb(" + green.join(",") + ")";
-                r.cells[COL.TOTAL_YIELD].style.backgroundColor = bg2;
-
-                // Score background
-                let bg3;
-                if (y <= 0.45) {
-                    bg3 = "rgb(" + red.join(",") + ")";
-                } else if (y <= 0.65) {
-                    bg3 = lerpColor(red, yellow, (y - 0.45) / 0.20);   // red → yellow
-                } else if (y <= 0.85) {
-                    bg3 = lerpColor(yellow, green, (y - 0.65) / 0.20); // yellow → green
-                } else {
-                    bg3 = "rgb(" + green.join(",") + ")";
-                }
-                 r.cells[COL.SCORE].style.backgroundColor = bg3;
+                r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
             });
         }
-
-        /* =======================
-           Profile selector
-        ======================= */
-        function updateScores() {
-            const profile = document.querySelector("input[name='profile']:checked").value.toLowerCase();
-            const rows = document.querySelectorAll("#bondTable tbody tr");
-
-            rows.forEach(r => {
-                const cell = r.querySelector(".score-cell");
-                const raw = r.dataset["score" + profile];
-                const num = parseFloat(raw.replace(",", "."));
-                cell.innerText = isNaN(num) ? "" : num.toFixed(3);
-            });
-
-            sortTable(COL.SCORE, true);
-            applyHeatmap();
-        }
-
 
         /* =======================
            Maturity defaults
@@ -382,7 +282,8 @@
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
             filterTable();
-            updateScores();
+            applyHeatmap();
+            sortTable(COL.CAPITAL_AT_MAT,true);
         });
     </script>
 </head>
@@ -390,7 +291,7 @@
 <body>
 
 <h2>
-    Bond Yield Ranking (${reportCurrency})
+    Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
         — 📅 ${generatedAt}
     </span>
@@ -408,41 +309,6 @@
     </label>
 
     <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters</button>
-
-    <fieldset class="profile-box">
-        <legend>Scoring profile & Risk appetite</legend>
-
-        <div class="profile-container">
-            <div class="risk-scale"></div>
-
-            <div class="risk-labels">
-                <span>Lower Risk</span>
-                <span>Higher Risk</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">
-                <label class="profile-option" title="Focuses on high current income. Prioritizes coupon and yield.">
-                    <input type="radio" name="profile" value="INCOME" onchange="updateScores()">
-                    <span>Income</span>
-                </label>
-
-                <label class="profile-option" title="Balanced trade-off between income, risk, and total return.">
-                    <input type="radio" name="profile" value="BALANCED" checked onchange="updateScores()">
-                    <span>Balanced</span>
-                </label>
-
-                <label class="profile-option" title="Targets higher long-term total return. Accepts more volatility.">
-                    <input type="radio" name="profile" value="GROWTH" onchange="updateScores()">
-                    <span>Growth</span>
-                </label>
-
-                <label class="profile-option" title="Seeks maximum yield. Tolerates high credit and FX risk.">
-                    <input type="radio" name="profile" value="OPPORTUNISTIC" onchange="updateScores()">
-                    <span>Opportunistic</span>
-                </label>
-            </div>
-        </div>
-    </fieldset>
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
@@ -474,70 +340,46 @@
         <th onclick="sortTable(COL.PRICE_R)">Price (${reportCurrency})<span class="arrow"></span></th>
         <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
         <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
-        <th title="Supposing an investment of ${reportCurrency}100, what would the gain be?"
-            onclick="sortTable(COL.CURR_YIELD)">
+        <th title="Supposing an investment of EUR 100, what would the gain be?"
+            onclick="sortTable(COL.CURR_COUPON)">
             Curr. Coupon %<span class="arrow"></span><br>
-            <input id="filterMinYield" type="number" step="0.5" placeholder="min"
+            <input id="filterMinCoupon" type="number" step="0.5" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
-        <th title="Supposing an investment of ${reportCurrency}1,000, what amount will you have at maturity?"
-            onclick="sortTable(COL.TOTAL_YIELD)">
-            Tot. Capital to Maturity (per ${reportCurrency} 1,000)<span class="arrow"></span><br>
-            <input id="filterMinTotal" type="number" step="500" placeholder="min"
+        <th title="Supposing an investment of EUR 1,000, what amount will you have at maturity?"
+            onclick="sortTable(COL.CAPITAL_AT_MAT)">
+            Tot. Capital to Maturity (per EUR 1,000)<span class="arrow"></span><br>
+            <input id="filterMinCapitalAtMat" type="number" step="500" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
-        </th>
-        <th onclick="sortTable(COL.SCORE)" title="Profile-based composite score">
-            Score<span class="arrow"></span><br>
-            <input id="filterScore" type="number" step="0.1" placeholder="min"
-                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
     </tr>
     </thead>
 
     <tbody>
-    <#list rows as r>
-    <#assign b = r.bond()>
-    <#assign s = r.scores()>
-    <tr
-            data-scoreINCOME="${s['INCOME']?string['0.000']}"
-            data-scoreBALANCED="${s['BALANCED']?string['0.000']}"
-            data-scoreGROWTH="${s['GROWTH']?string['0.000']}"
-            data-scoreOPPORTUNISTIC="${s['OPPORTUNISTIC']?string['0.000']}"
-    >
-    <td>${b.isin()}</td>
-    <td>${b.issuer()}</td>
+    <#list bonds as b>
+    <tr>
+    <td>${b.getIsin()}</td>
+    <td>${b.getIssuer()}</td>
 
-    <td class="<#if (b.price() <= 100)>good<#else>bad</#if>">
-        ${b.price()?string["0.00"]}
+    <td class="<#if (b.getPrice() <= 100)>good<#else>bad</#if>">
+        ${b.getPrice()?string["0.00"]}
     </td>
 
-    <td>${b.currency()}</td>
+    <td>${b.getCurrency()}</td>
 
     <td>
-        <#if reportCurrency == "EUR">
-        ${b.priceEur()?string["0.00"]}
-        <#else>
-        ${b.priceChf()?string["0.00"]}
-    </#if>
+        ${b.getPriceEur()?string["0.00"]}
     </td>
 
-    <td>${b.couponPct()?string["0.00"]}</td>
-    <td>${b.maturity()}</td>
+    <td>${b.getCouponPct()?string["0.00"]}</td>
+    <td>${b.getMaturity()}</td>
 
     <td>
-        <#if reportCurrency == "EUR">
-        ${b.currentCoupon()?string["0.00"]}
-        <#else>
-        ${b.currentCouponChf()?string["0.00"]}
-    </#if>
+        ${b.getCurrentCoupon()?string["0.00"]}
     </td>
 
     <td>
-        <#if reportCurrency == "EUR">
-        ${b.finalCapitalToMat()?string["0"]}
-        <#else>
-        ${b.finalCapitalToMatChf()?string["0"]}
-    </#if>
+        ${b.getFinalCapitalToMat()?string["0"]}
     </td>
 
     <td class="score-cell"></td>

@@ -1,181 +1,137 @@
 package bond.scoring;
 
+import bond.fx.FxService;
 import bond.model.Bond;
-import bond.scrape.SovereignSpreadService;
+import lombok.SneakyThrows;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-/**
- * Bond scoring engine combining yield normalization, FX risk penalty,
- * and non-linear credit quality shaping.
- *
- * <p><b>CALIBRATION & BACKTESTING (2023–2024 sovereign bond universe)</b></p>
- *
- * <ul>
- *   <li><b>INCOME profile:</b>
- *     <ul>
- *       <li>Top-quartile ranked bonds outperformed bottom quartile by
- *           <b>+3.1% annualized</b></li>
- *       <li>False-positive "high yield traps" reduced by ~27% vs linear trust model</li>
- *     </ul>
- *   </li>
- *   <li><b>Logistic trust shaping:</b>
- *     <ul>
- *       <li>Midpoint = <code>0.55</code> minimizes false bargains while preserving upside</li>
- *       <li>Steepness = <code>10.0</code> captures credit cliff behavior during stress regimes</li>
- *     </ul>
- *   </li>
- *   <li><b>FX penalty model:</b>
- *     <ul>
- *       <li>Penalty curve matches realized FX volatility term structure
- *           with R² ≈ 0.82 on USD/EUR, USD/CHF, GBP/EUR pairs</li>
- *       <li>Wrong-way credit-FX amplification improves drawdown capture
- *           during sovereign stress episodes (e.g. IT 2022, UK 2023)</li>
- *     </ul>
- *   </li>
- * </ul>
- *
- * <p><b>Interpretation:</b>
- * Scores are intended for <i>relative ranking</i>, not absolute thresholds.
- * A score difference of ~0.05–0.10 typically reflects a meaningful change
- * in risk-adjusted attractiveness within the same maturity and currency bucket.</p>
- *
- * <p><b>Note:</b>
- * Calibration values are stable parameters, not optimized daily.
- * Market regime shifts should be validated via historical backtesting
- * before updating constants.</p>
- */
+
 public class BondScoreEngine {
 
-    private record ProfileParams(double alpha,
-                                 double lambdaFactor,
-                                 double capitalSensitivity,
-                                 double riskAversion) {
+    private void expectedFinalValue(
+        Bond bond,
+        double investment,    // 3.5% (Bund + Spread)
+        double maturityYears,
+        double initialFxRate,
+        String reportCurrency
+    ) {
+
+        double capitalX = investment * initialFxRate;
+        double nominal = capitalX / (bond.getPrice() / 100.0);
+
+        // Cedole al rendimento TOTALE (include spread)
+        double coupon = nominal * (bond.getCouponPct() / 100.0);
+        double totalCoupons = coupon * maturityYears;
+
+        double finalAmount = totalCoupons + nominal;
+
+        bond.setFinalCapitalToMat(finalAmount);
     }
 
-    // Logistic curve parameters (credit cliff protection)
-    private static final double LOGISTIC_STEEPNESS = 10.0;
-    private static final double LOGISTIC_MIDPOINT = 0.55;
+    @SneakyThrows
+    private double getExchangeRate(String from, String to) {
+        if (to.equals("EUR")) {
+            return FxService.getInstance().loadFxRates().get("EUR");
+        } else {
+            return FxService.getInstance().loadFxRates().get(from) / FxService.getInstance().loadFxRates().get(to);
+        }
+    }
 
-    /* ========================================================= */
+    public void estimateFinalCapitalAtMaturity(List<Bond> bonds, String reportCurrency) {
+        for (Bond bond : bonds) {
+            double maturityYears = yearsToMaturity(bond);
+            double rate = getExchangeRate(bond.getCurrency(), reportCurrency);
 
-    public Map<String, Double> score(Bond bond,
-                                     String reportCurrency,
-                                     List<Double> couponByBond,
-                                     List<Double> finalCapitalByBond,
-                                     double lambdaBase,
-                                     Map<String, Double> sovereignSpreads) {
+            expectedFinalValue(bond, 1000, maturityYears, rate, reportCurrency);
 
-        double currCoupon = reportCurrency.equals("CHF")
-            ? bond.currentCouponChf()
-            : bond.currentCoupon();
+            // Apply downside value to bond
+            estimateFinalCapitalAtMaturity(bond, reportCurrency);
+        }
+    }
 
-        double currFinalCapital = reportCurrency.equals("CHF")
-            ? bond.finalCapitalToMatChf()
-            : bond.finalCapitalToMat();
 
-        double normC = MathLibrary.normWinsorized(currCoupon, couponByBond);
-        double normT = MathLibrary.normWinsorized(currFinalCapital, finalCapitalByBond);
+    /**
+     * Evaluates a bond and modifies the parameters finalCapitalToMat and finalCapitalToMatChf
+     * with the worst-case scenario (downside) based on FX risk.
+     * <p>
+     * LOGIC:
+     * - If bond is in EUR and report is EUR: no FX risk, value remains unchanged (NULL)
+     * - If bond is in different currency: applies downside scenario (95% CI lower bound)
+     * - Downside = value / (1 + 1.96 * sigma_total)
+     */
+    private void estimateFinalCapitalAtMaturity(Bond bond, String reportCurrency) {
+        // FX parameters
+        double yearsToMat = yearsToMaturity(bond);
+        double fxSigmaAnnual = getSigma(bond.getCurrency(), reportCurrency);
 
-        // --- Credit quality from sovereign spread ---
-        double spreadBps = SovereignSpreadService.getSpreadForIssuer(bond.issuer(), sovereignSpreads);
-        double creditQuality = calculateCreditQualityFromSpread(spreadBps);
-
-        Map<String, Double> scores = new LinkedHashMap<>();
-
-        for (BondProfileManager.BondProfile profile : BondProfileManager.all()) {
-
-            double baseScore = profile.getAlpha() * normC + (1 - profile.getAlpha()) * normT;
-            double lambda = lambdaBase * profile.getLambdaFactor();
-
-            // --- FX-credit wrong-way correlation ---
-            double correlationFactor = calculateFxCreditCorrelation(creditQuality);
-
-            double penalty = fxCapitalPenalty(
-                bond.currency(),
-                reportCurrency,
-                yearsToMaturity(bond),
-                1,
-                profile.getCapitalSensitivity(),
-                lambda,
-                correlationFactor
-            );
-
-            // --- Non-linear credit trust shaping ---
-            double logisticQuality = applyLogisticTrust(creditQuality);
-            double adjustedQuality = Math.pow(logisticQuality, profile.getRiskAversion());
-
-            double finalScore = Math.max(0, (baseScore - penalty) * adjustedQuality);
-            scores.put(profile.getName(), finalScore);
+        // If same currency, no FX risk
+        if (fxSigmaAnnual == 0) {
+            // Nothing to modify, values remain unchanged
+            return;
         }
 
-        return scores;
+        // Calculate volatility at maturity
+        double fxSigmaAtMaturity = fxSigmaAnnual * Math.sqrt(yearsToMat);
+        double fxSigmaCapped = Math.min(fxSigmaAtMaturity, 0.35);
+
+        // Downside scenario (95% CI lower)
+        double downsideMultiplier = 1.0 / (1 + 1.96 * fxSigmaCapped);
+
+        // Modify parameters with worst-case scenario
+        double originalFinalCapital = bond.getFinalCapitalToMat();
+
+        double finalValue = originalFinalCapital * downsideMultiplier;
+        bond.setFinalCapitalToMat(finalValue);
     }
 
     /* ========================================================= */
-    /* CREDIT QUALITY */
+    /* UTILITY METHODS */
     /* ========================================================= */
 
     /**
-     * Converts sovereign spread (bps) into a smooth credit quality score ∈ [0.1, 0.95].
-     * Convex decay: low spreads barely penalized, high spreads punished exponentially.
+     * Calculates the years to maturity of a bond
      */
-    static double calculateCreditQualityFromSpread(double spreadBps) {
-        double x = Math.max(0, spreadBps);
-        double quality = 0.95 * Math.exp(-x / 600.0);
-        return Math.max(0.1, Math.min(0.95, quality));
-    }
-
-    /**
-     * Logistic cliff protection against false bargains.
-     */
-    static double applyLogisticTrust(double creditQuality) {
-        return 1.0 / (1.0 + Math.exp(-LOGISTIC_STEEPNESS * (creditQuality - LOGISTIC_MIDPOINT)));
-    }
-
-    /**
-     * FX-credit wrong-way risk amplification.
-     * Lower credit quality → higher FX penalty.
-     */
-    static double calculateFxCreditCorrelation(double creditQuality) {
-        return 1.0 + Math.max(0, (1.0 - creditQuality) * 0.8);
-    }
-
-    /* ========================================================= */
-    /* FX PENALTY */
-    /* ========================================================= */
-
     private static double yearsToMaturity(Bond b) {
-        double y = ChronoUnit.DAYS.between(LocalDate.now(), b.maturity()) / 365.25;
+        double y = ChronoUnit.DAYS.between(LocalDate.now(), b.getMaturity()) / 365.25;
         return Math.max(0.1, y);
     }
 
-    static double fxCapitalPenalty(String bCurr,
-                                   String rCurr,
-                                   double years,
-                                   double capitalWeight,
-                                   double capitalSensitivity,
-                                   double lambda,
-                                   double correlationFactor) {
-        if (bCurr.equals(rCurr)) return 0;
+    /**
+     * Retrieves annual FX volatility for a currency pair.
+     * Returns 0 if currencies are the same (no FX risk).
+     */
+    static double getSigma(String bondCurrency, String reportCurrency) {
+        if (bondCurrency.equals(reportCurrency)) return 0;
 
-        double sigma = switch (bCurr + "_" + rCurr) {
-            case "USD_EUR", "EUR_USD" -> 0.09;
-            case "USD_CHF", "CHF_USD" -> 0.11;
-            case "GBP_EUR" -> 0.10;
-            case "SEK_EUR" -> 0.13;
-            case "SEK_CHF" -> 0.15;
-            case "EUR_CHF", "CHF_EUR" -> 0.07;
+        String key = normalizePair(bondCurrency, reportCurrency);
+
+        double sigma = switch (key) {
+            case "CHF_EUR" -> 0.07;
+            case "CHF_GBP" -> 0.10;
+            case "CHF_USD" -> 0.11;
+            case "EUR_GBP" -> 0.08;
+            case "EUR_USD" -> 0.09;
+            case "GBP_USD" -> 0.10;
+            case "EUR_SEK" -> 0.13;
+            case "CHF_SEK" -> 0.15;
+            case "USD_SEK" -> 0.14;
             default -> 0.12;
         };
 
-        double riskSensitivity = 1 + (capitalWeight * capitalSensitivity);
+        return sigma;
+    }
 
-        double basePenalty = lambda * (1 - Math.exp(-sigma * Math.sqrt(years) * riskSensitivity));
-        return basePenalty * correlationFactor;
+    /**
+     * Normalizes a currency pair (alphabetical order)
+     */
+    private static String normalizePair(String curr1, String curr2) {
+        if (curr1.compareTo(curr2) < 0) {
+            return curr1 + "_" + curr2;
+        } else {
+            return curr2 + "_" + curr1;
+        }
     }
 }
