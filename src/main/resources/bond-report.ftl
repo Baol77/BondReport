@@ -33,6 +33,55 @@
             min-width: 200px;
         }
 
+        /* =======================
+           PROFILE PRESETS
+        ======================= */
+        .profile-presets {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 8px 10px;
+            background: #f0f8ff;
+            border-left: 4px solid #2196F3;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .profile-presets label {
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        .preset-button {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-button:hover {
+            background: #f0f0f0;
+            border-color: #666;
+        }
+
+        .preset-button.active {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+            font-weight: bold;
+        }
+
+        .preset-description {
+            font-size: 11px;
+            color: #555;
+            margin-left: 10px;
+            font-style: italic;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -195,7 +244,10 @@
             document.getElementById("filterMinCoupon").value = "";
             document.getElementById("filterMinCapitalAtMat").value = "";
             document.getElementById("filterMinCagr").value = "";
+            setDefaultMaturityFilters();
             filterTable();
+            updatePresetButtons(null);
+            document.getElementById("presetDesc").textContent = "";
         }
 
         /* =======================
@@ -244,7 +296,7 @@
             const green  = [215, 245, 215];
 
             rows.forEach(r => {
-                // === Current Coupon (Yield at today's price) ===
+                // === Current Coupon ===
                 const v = parseNum(r.cells[COL.CURR_COUPON].innerText);
                 let bg;
                 if (v <= 1.5) bg = "rgb(" + red.join(",") + ")";
@@ -253,7 +305,7 @@
                 else bg = "rgb(" + green.join(",") + ")";
                 r.cells[COL.CURR_COUPON].style.backgroundColor = bg;
 
-                // === Total Capital at Maturity (Absolute EUR amount) ===
+                // === Total Capital at Maturity ===
                 const w = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
                 let bg2;
                 if (w <= 1150) bg2 = "rgb(" + red.join(",") + ")";
@@ -262,33 +314,21 @@
                 else bg2 = "rgb(" + green.join(",") + ")";
                 r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
 
-                // === CAGR (Annualized Growth Rate %) === [UPDATED]
-                // Based on actual data analysis: min 0.36%, max 4.80%, avg 2.91%
+                // === CAGR ===
                 const cagr = parseNum(r.cells[COL.CAGR].innerText);
                 let bg3;
                 if (cagr <= 1.0) {
-                    // RED: < 1% (terrible - mostly FX currency bonds)
                     bg3 = "rgb(" + red.join(",") + ")";
-
                 } else if (cagr <= 2.5) {
-                    // YELLOW: 1-2.5% (poor - needs improvement)
                     bg3 = lerpColor(red, yellow, (cagr - 1.0) / 1.5);
-
                 } else if (cagr <= 3.5) {
-                    // GREEN: 2.5-3.5% (good - standard sovereign bonds)
                     bg3 = lerpColor(yellow, green, (cagr - 2.5) / 1.0);
-
                 } else if (cagr <= 4.5) {
-                    // DARK GREEN: 3.5-4.5% (excellent - pick these)
-                    // Interpolate between green and a darker green
-                    const darkGreen = [100, 200, 100];  // Darker green
+                    const darkGreen = [100, 200, 100];
                     bg3 = lerpColor(green, darkGreen, (cagr - 3.5) / 1.0);
-
                 } else {
-                    // BRIGHT GREEN: > 4.5% (best of the best - top opportunities)
-                    bg3 = "rgb(50, 180, 50)";  // Bright green for winners
+                    bg3 = "rgb(50, 180, 50)";
                 }
-
                 r.cells[COL.CAGR].style.backgroundColor = bg3;
             });
         }
@@ -312,9 +352,122 @@
             document.getElementById("filterMaxMat").value = formatDate(max);
         }
 
+        /* =======================
+           PRESET PROFILES
+        ======================= */
+
+        const PRESETS = {
+            cagrAggressive: {
+                name: "CAGR - Aggressive Growth",
+                filters: {
+                    maxPrice: 85,
+                    minMatYears: 10,
+                    maxMatYears: 20,
+                    minCoupon: 0,
+                    minCapitalAtMat: 1800,
+                    minCagr: 3.5
+                },
+                description: "Cheap bonds, 10–20y maturity, high final capital & CAGR."
+            },
+
+            cagrConservative: {
+                name: "CAGR - Conservative",
+                filters: {
+                    maxPrice: 120,
+                    minMatYears: 5,
+                    maxMatYears: 35,
+                    minCoupon: 0,
+                    minCapitalAtMat: 1300,
+                    minCagr: 2.5
+                },
+                description: "All solid bonds with stable capital growth."
+            },
+
+            incomeHigh: {
+                name: "Income - High Yield",
+                filters: {
+                    maxPrice: 120,
+                    minMatYears: 20,
+                    maxMatYears: 35,
+                    minCoupon: 5.5,
+                    minCapitalAtMat: 0,
+                    minCagr: 0
+                },
+                description: "High coupon, long duration, strong cash flow."
+            },
+
+            incomeModerate: {
+                name: "Income - Moderate Yield",
+                filters: {
+                    maxPrice: 120,
+                    minMatYears: 20,
+                    maxMatYears: 35,
+                    minCoupon: 4.5,
+                    minCapitalAtMat: 0,
+                    minCagr: 0
+                },
+                description: "Moderate coupon bonds, long duration, safer income."
+            }
+        };
+
+        function applyPreset(presetName) {
+            if (presetName === "reset") {
+                clearColumnFilters();
+                updatePresetButtons(null);
+                document.getElementById("presetDesc").textContent = "";
+                return;
+            }
+
+            const preset = PRESETS[presetName];
+            if (!preset) return;
+
+            clearColumnFilters();
+
+            // Price
+            document.getElementById("filterPrice").value = preset.filters.maxPrice;
+
+            // Maturity
+            const today = new Date();
+            const minMat = new Date(today);
+            minMat.setFullYear(today.getFullYear() + preset.filters.minMatYears);
+            const maxMat = new Date(today);
+            maxMat.setFullYear(today.getFullYear() + preset.filters.maxMatYears);
+
+            function formatDate(d) {
+                const y = d.getFullYear();
+                const m = ("0" + (d.getMonth() + 1)).slice(-2);
+                const day = ("0" + d.getDate()).slice(-2);
+                return y + "-" + m + "-" + day;
+            }
+
+            document.getElementById("filterMinMat").value = formatDate(minMat);
+            document.getElementById("filterMaxMat").value = formatDate(maxMat);
+
+            // Mode-specific filters
+            document.getElementById("filterMinCoupon").value = preset.filters.minCoupon || "";
+            document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
+            document.getElementById("filterMinCagr").value = preset.filters.minCagr || "";
+
+            filterTable();
+            updatePresetButtons(presetName);
+            document.getElementById("presetDesc").textContent = "✓ " + preset.description;
+        }
+
+        function updatePresetButtons(activePreset) {
+            const ids = ["cagrAggressive", "cagrConservative", "incomeHigh", "incomeModerate"];
+            ids.forEach(id => {
+                const btn = document.getElementById("preset-" + id);
+                if (btn) btn.classList.toggle("active", id === activePreset);
+            });
+            document.getElementById("preset-reset").classList.remove("active");
+        }
+
+        /* =======================
+           Init
+        ======================= */
         document.addEventListener("DOMContentLoaded", () => {
             setDefaultMaturityFilters();
-            filterTable();
+            applyPreset("cagrAggressive");   // Default preset
             applyHeatmap();
             sortTable(COL.CAGR,true);
         });
@@ -329,6 +482,45 @@
         — 📅 ${generatedAt}
     </span>
 </h2>
+
+<!-- =======================
+     PROFILE PRESETS UI
+======================= -->
+<div class="profile-presets">
+    <label>Investor profiles:</label>
+
+    <button class="preset-button active" id="preset-cagrAggressive"
+            onclick="applyPreset('cagrAggressive')"
+            title="Cheap bonds, 10–20y, high CAGR">
+        🚀 CAGR Aggressive
+    </button>
+
+    <button class="preset-button" id="preset-cagrConservative"
+            onclick="applyPreset('cagrConservative')"
+            title="Stable bonds, broad maturity">
+        🛡️ CAGR Conservative
+    </button>
+
+    <button class="preset-button" id="preset-incomeHigh"
+            onclick="applyPreset('incomeHigh')"
+            title="High coupon bonds, long duration">
+        💎 Income High
+    </button>
+
+    <button class="preset-button" id="preset-incomeModerate"
+            onclick="applyPreset('incomeModerate')"
+            title="Moderate coupon bonds, long duration">
+        💰 Income Moderate
+    </button>
+
+    <button class="preset-button" id="preset-reset"
+            onclick="applyPreset('reset')"
+            title="Clear all filters">
+        🧹 Reset
+    </button>
+
+    <span class="preset-description" id="presetDesc"></span>
+</div>
 
 <div class="controls">
     <label>
@@ -375,7 +567,7 @@
         <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
         <th title="Supposing an investment of EUR 100, what would the gain be?"
             onclick="sortTable(COL.CURR_COUPON)">
-            Curr. Coupon %<span class="arrow"></span><br>
+            Curr. Yield %<span class="arrow"></span><br>
             <input id="filterMinCoupon" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
@@ -397,23 +589,23 @@
     <tbody>
     <#list bonds as b>
     <tr>
-    <td>${b.getIsin()}</td>
-    <td>${b.getIssuer()}</td>
-    <td class="<#if (b.getPrice() <= 100)>good<#else>bad</#if>">
-        ${b.getPrice()?string["0.00"]}
-    </td>
-    <td>${b.getCurrency()}</td>
-    <td>
-        ${b.getPriceEur()?string["0.00"]}
-    </td>
-    <td>${b.getCouponPct()?string["0.00"]}</td>
-    <td>${b.getMaturity()}</td>
-    <td>
-        ${b.getCurrentCoupon()?string["0.00"]}
-    </td>
-    <td>
-        ${b.getFinalCapitalToMat()?string["0"]}
-    </td>
+        <td>${b.getIsin()}</td>
+        <td>${b.getIssuer()}</td>
+        <td class="<#if (b.getPrice() <= 100)>good<#else>bad</#if>">
+            ${b.getPrice()?string["0.00"]}
+        </td>
+        <td>${b.getCurrency()}</td>
+        <td>
+            ${b.getPriceEur()?string["0.00"]}
+        </td>
+        <td>${b.getCouponPct()?string["0.00"]}</td>
+        <td>${b.getMaturity()}</td>
+        <td>
+            ${b.getCurrentCoupon()?string["0.00"]}
+        </td>
+        <td>
+            ${b.getFinalCapitalToMat()?string["0"]}
+        </td>
         <td>
             ${b.getCagr()?string["0.00"]}
         </td>
