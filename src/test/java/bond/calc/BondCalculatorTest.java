@@ -40,7 +40,7 @@ public class BondCalculatorTest {
         assertNotNull(b);
         assertEquals("IT0001234567", b.getIsin());
         assertEquals("Italy", b.getIssuer());
-        assertEquals(4.21, b.getCurrentCoupon(), 0.01);
+        assertEquals(4.21, b.getCurrentYield(), 0.01);
         assertTrue(b.getFinalCapitalToMat() > 0);
     }
 
@@ -57,7 +57,7 @@ public class BondCalculatorTest {
             "X2", "Issuer", 110, "EUR", 1100, 4,
             LocalDate.now().plusYears(10));
 
-        assertTrue(cheap.getCurrentCoupon() > expensive.getCurrentCoupon());
+        assertTrue(cheap.getCurrentYield() > expensive.getCurrentYield());
     }
 
     // ---------------------------------------------------
@@ -75,7 +75,7 @@ public class BondCalculatorTest {
             LocalDate.now().plusYears(8)
         );
 
-        assertEquals(0.333, b.getCurrentCoupon(), 0.001);
+        assertEquals(0.333, b.getCurrentYield(), 0.001);
     }
 
     // ---------------------------------------------------
@@ -101,7 +101,7 @@ public class BondCalculatorTest {
             LocalDate.now().plusYears(10)
         );
 
-        assertEquals(1.2, b.getCurrentCoupon(), 0.001);
+        assertEquals(1.2, b.getCurrentYield(), 0.001);
     }
 
     // ---------------------------------------------------
@@ -132,7 +132,7 @@ public class BondCalculatorTest {
         BondScoreEngine engine = new BondScoreEngine();
         engine.estimateFinalCapitalAtMaturity(List.of(b), b.getCurrency());
 
-        assertEquals(0.0, b.getCurrentCoupon(), 0.0001);
+        assertEquals(0.0, b.getCurrentYield(), 0.0001);
         assertTrue(b.getFinalCapitalToMat() > 1000);
     }
 }

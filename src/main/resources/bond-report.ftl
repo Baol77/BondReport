@@ -142,6 +142,56 @@
             border: 1px solid #ccc;
         }
 
+         /* =======================
+           LOADING SPINNER
+        ======================= */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
     </style>
 
     <script>
@@ -256,6 +306,8 @@
 
                 r.style.display = ok ? "" : "none";
             });
+
+            applyHeatmap();
         }
 
         function clearColumnFilters() {
@@ -492,49 +544,68 @@
         };
 
         function applyPreset(presetName) {
-            if (presetName === "reset") {
+            // Show loading spinner
+            showLoading();
+
+            // Use setTimeout to allow the UI to update before processing
+            setTimeout(() => {
+                if (presetName === "reset") {
+                    clearColumnFilters();
+                    updatePresetButtons(presetName);
+                    updateLegend();
+                    applyHeatmap();
+                    document.getElementById("presetDesc").textContent = "";
+                    hideLoading();
+                    return;
+                }
+
+                const preset = PRESETS[presetName];
+                if (!preset) {
+                    hideLoading();
+                    return;
+                }
+
                 clearColumnFilters();
+
+                // Price
+                document.getElementById("filterPrice").value = preset.filters.maxPrice;
+
+                // Maturity
+                const today = new Date();
+                const minMat = new Date(today);
+                minMat.setFullYear(today.getFullYear() + preset.filters.minMatYears);
+                const maxMat = new Date(today);
+                maxMat.setFullYear(today.getFullYear() + preset.filters.maxMatYears);
+
+                function formatDate(d) {
+                    const y = d.getFullYear();
+                    const m = ("0" + (d.getMonth() + 1)).slice(-2);
+                    const day = ("0" + d.getDate()).slice(-2);
+                    return y + "-" + m + "-" + day;
+                }
+
+                document.getElementById("filterMinMat").value = formatDate(minMat);
+                document.getElementById("filterMaxMat").value = formatDate(maxMat);
+
+                // Mode-specific filters
+                document.getElementById("filterminYield").value = preset.filters.minYield || "";
+                document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
+                document.getElementById("filterMinCagr").value = preset.filters.minCagr || "";
+
+                currentMode = presetName.startsWith("cagr") ? "cagr" : "income";
+                filterTable();
                 updatePresetButtons(presetName);
                 updateLegend();
-                document.getElementById("presetDesc").textContent = "";
-                return;
-            }
+                document.getElementById("presetDesc").textContent = "✓ " + preset.description;
 
-            const preset = PRESETS[presetName];
-            if (!preset) return;
+                if(presetName.startsWith("income"))
+                    sortTable(COL.CURR_YIELD,true);
+                else
+                    sortTable(COL.CAGR, true);
 
-            clearColumnFilters();
-
-            // Price
-            document.getElementById("filterPrice").value = preset.filters.maxPrice;
-
-            // Maturity
-            const today = new Date();
-            const minMat = new Date(today);
-            minMat.setFullYear(today.getFullYear() + preset.filters.minMatYears);
-            const maxMat = new Date(today);
-            maxMat.setFullYear(today.getFullYear() + preset.filters.maxMatYears);
-
-            function formatDate(d) {
-                const y = d.getFullYear();
-                const m = ("0" + (d.getMonth() + 1)).slice(-2);
-                const day = ("0" + d.getDate()).slice(-2);
-                return y + "-" + m + "-" + day;
-            }
-
-            document.getElementById("filterMinMat").value = formatDate(minMat);
-            document.getElementById("filterMaxMat").value = formatDate(maxMat);
-
-            // Mode-specific filters
-            document.getElementById("filterminYield").value = preset.filters.minYield || "";
-            document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
-            document.getElementById("filterMinCagr").value = preset.filters.minCagr || "";
-
-            filterTable();
-            updatePresetButtons(presetName);
-            currentMode = presetName.startsWith("cagr") ? "cagr" : "income";
-            updateLegend();
-            document.getElementById("presetDesc").textContent = "✓ " + preset.description;
+                // Hide loading spinner
+                hideLoading();
+            }, 100);  // Slight delay to show the spinner
         }
 
         function updatePresetButtons(activePreset) {
@@ -553,12 +624,33 @@
             setDefaultMaturityFilters();
             applyPreset("cagrAggressive");   // Default preset
             applyHeatmap();
-            sortTable(COL.CAGR,true);
         });
+
+         function showLoading() {
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) {
+                overlay.classList.add("active");
+            }
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) {
+                overlay.classList.remove("active");
+            }
+        }
     </script>
 </head>
 
 <body>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading data...</div>
+    </div>
+</div>
 
 <h2>
     Bond Yield Ranking (EUR)
@@ -664,7 +756,7 @@
         <td>${b.getCouponPct()?string["0.00"]}</td>
         <td>${b.getMaturity()}</td>
         <td>
-            ${b.getCurrentCoupon()?string["0.00"]}
+            ${b.getCurrentYield()?string["0.00"]}
         </td>
         <td>
             ${b.getFinalCapitalToMat()?string["0"]}

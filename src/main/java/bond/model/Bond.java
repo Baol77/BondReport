@@ -14,7 +14,7 @@ public class Bond {
     double priceEur;
     double couponPct;
     LocalDate maturity;
-    double currentCoupon;
+    double currentYield;
     double finalCapitalToMat;
     double cagr;
 
@@ -28,6 +28,6 @@ public class Bond {
         this.priceEur = priceEur;
         this.couponPct = couponPct;
         this.maturity = maturity;
-        this.currentCoupon = couponPct * 100 / priceEur;
+        this.currentYield = couponPct * 100 / priceEur;
     }
 }
