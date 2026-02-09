@@ -1,10 +1,16 @@
 package bond.report;
 
+import bond.config.BondProfilesConfig;
 import bond.model.Bond;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +47,10 @@ public class HtmlReportWriter {
             .sorted()
             .toList();
         model.put("currencies", currencies);
+
+        // Load profiles
+        BondProfilesConfig cfg = BondProfilesConfig.load();
+        model.put("presets", cfg.getProfiles());
 
         try (FileWriter w = new FileWriter(file)) {
             t.process(model, w);

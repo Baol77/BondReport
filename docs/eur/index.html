@@ -357,57 +357,48 @@
         ======================= */
 
         const PRESETS = {
-            cagrAggressive: {
-                name: "CAGR - Aggressive Growth",
-                filters: {
-                    maxPrice: 85,
-                    minMatYears: 10,
-                    maxMatYears: 20,
-                    minCoupon: 0,
-                    minCapitalAtMat: 1800,
-                    minCagr: 3.5
-                },
-                description: "Cheap bonds, 10–20y maturity, high final capital & CAGR."
-            },
-
-            cagrConservative: {
-                name: "CAGR - Conservative",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 5,
-                    maxMatYears: 35,
-                    minCoupon: 0,
-                    minCapitalAtMat: 1300,
-                    minCagr: 2.5
-                },
-                description: "All solid bonds with stable capital growth."
-            },
-
-            incomeHigh: {
-                name: "Income - High Yield",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 20,
-                    maxMatYears: 35,
-                    minCoupon: 5.5,
-                    minCapitalAtMat: 0,
-                    minCagr: 0
-                },
-                description: "High coupon, long duration, strong cash flow."
-            },
-
-            incomeModerate: {
-                name: "Income - Moderate Yield",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 20,
-                    maxMatYears: 35,
-                    minCoupon: 4.5,
-                    minCapitalAtMat: 0,
-                    minCagr: 0
-                },
-                description: "Moderate coupon bonds, long duration, safer income."
+                  cagrAggressive: {
+            name: "CAGR Aggressive",
+            description: "Cheap bonds, 10–20y maturity, high CAGR.",
+            filters: {
+              maxPrice: 85,
+              minMatYears: 10,
+              maxMatYears: 20,
+              minCapitalAtMat: 1800,
+              minCagr: 3.5
             }
+          },
+          cagrConservative: {
+            name: "CAGR Conservative",
+            description: "Stable bonds, broad maturity range.",
+            filters: {
+              maxPrice: 120,
+              minMatYears: 5,
+              maxMatYears: 35,
+              minCapitalAtMat: 1300,
+              minCagr: 2.5
+            }
+          },
+          incomeHigh: {
+            name: "Income High",
+            description: "High coupon bonds, long duration.",
+            filters: {
+              maxPrice: 120,
+              minMatYears: 20,
+              maxMatYears: 35,
+              minCoupon: 5.5
+            }
+          },
+          incomeModerate: {
+            name: "Income Moderate",
+            description: "Moderate coupon bonds, long duration.",
+            filters: {
+              maxPrice: 120,
+              minMatYears: 20,
+              maxMatYears: 35,
+              minCoupon: 4.5
+            }
+          }
         };
 
         function applyPreset(presetName) {
@@ -456,7 +447,7 @@
         function updatePresetButtons(activePreset) {
             const ids = ["cagrAggressive", "cagrConservative", "incomeHigh", "incomeModerate"];
             ids.forEach(id => {
-                const btn = document.getElementById("preset-" + id);
+                const btn = document.getElementById(id);
                 if (btn) btn.classList.toggle("active", id === activePreset);
             });
             document.getElementById("preset-reset").classList.remove("active");
@@ -479,7 +470,7 @@
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-09 00:07
+        — 📅 2026-02-09 00:59
     </span>
 </h2>
 
@@ -487,39 +478,34 @@
      PROFILE PRESETS UI
 ======================= -->
 <div class="profile-presets">
-    <label>Investor profiles:</label>
-
-    <button class="preset-button active" id="preset-cagrAggressive"
+    <label>Quick presets:</label>
+    <button class="preset-button"
+            id="cagrAggressive"
             onclick="applyPreset('cagrAggressive')"
-            title="Cheap bonds, 10–20y, high CAGR">
+            title="Cheap bonds, 10–20y maturity, high CAGR.">
         🚀 CAGR Aggressive
     </button>
-
-    <button class="preset-button" id="preset-cagrConservative"
+    <button class="preset-button"
+            id="cagrConservative"
             onclick="applyPreset('cagrConservative')"
-            title="Stable bonds, broad maturity">
+            title="Stable bonds, broad maturity range.">
         🛡️ CAGR Conservative
     </button>
-
-    <button class="preset-button" id="preset-incomeHigh"
+    <button class="preset-button"
+            id="incomeHigh"
             onclick="applyPreset('incomeHigh')"
-            title="High coupon bonds, long duration">
+            title="High coupon bonds, long duration.">
         💎 Income High
     </button>
-
-    <button class="preset-button" id="preset-incomeModerate"
+    <button class="preset-button"
+            id="incomeModerate"
             onclick="applyPreset('incomeModerate')"
-            title="Moderate coupon bonds, long duration">
+            title="Moderate coupon bonds, long duration.">
         💰 Income Moderate
     </button>
-
-    <button class="preset-button" id="preset-reset"
-            onclick="applyPreset('reset')"
-            title="Clear all filters">
-        🧹 Reset
-    </button>
-
-    <span class="preset-description" id="presetDesc"></span>
+<button class="preset-button" id="preset-reset"
+        onclick="applyPreset('reset')">🧹 Reset</button>
+<span class="preset-description" id="presetDesc"></span>
 </div>
 
 <div class="controls">

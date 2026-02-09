@@ -357,57 +357,17 @@
         ======================= */
 
         const PRESETS = {
-            cagrAggressive: {
-                name: "CAGR - Aggressive Growth",
-                filters: {
-                    maxPrice: 85,
-                    minMatYears: 10,
-                    maxMatYears: 20,
-                    minCoupon: 0,
-                    minCapitalAtMat: 1800,
-                    minCagr: 3.5
-                },
-                description: "Cheap bonds, 10–20y maturity, high final capital & CAGR."
-            },
-
-            cagrConservative: {
-                name: "CAGR - Conservative",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 5,
-                    maxMatYears: 35,
-                    minCoupon: 0,
-                    minCapitalAtMat: 1300,
-                    minCagr: 2.5
-                },
-                description: "All solid bonds with stable capital growth."
-            },
-
-            incomeHigh: {
-                name: "Income - High Yield",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 20,
-                    maxMatYears: 35,
-                    minCoupon: 5.5,
-                    minCapitalAtMat: 0,
-                    minCagr: 0
-                },
-                description: "High coupon, long duration, strong cash flow."
-            },
-
-            incomeModerate: {
-                name: "Income - Moderate Yield",
-                filters: {
-                    maxPrice: 120,
-                    minMatYears: 20,
-                    maxMatYears: 35,
-                    minCoupon: 4.5,
-                    minCapitalAtMat: 0,
-                    minCagr: 0
-                },
-                description: "Moderate coupon bonds, long duration, safer income."
+        <#list presets as p>
+          ${p.id}: {
+            name: "${p.label}",
+            description: "${p.description}",
+            filters: {
+            <#list p.filters?keys as k>
+              ${k}: ${p.filters[k]?is_number?then(p.filters[k]?c, '"' + p.filters[k] + '"')}<#if k_has_next>,</#if>
+            </#list>
             }
+          }<#if p_has_next>,</#if>
+        </#list>
         };
 
         function applyPreset(presetName) {
@@ -456,7 +416,7 @@
         function updatePresetButtons(activePreset) {
             const ids = ["cagrAggressive", "cagrConservative", "incomeHigh", "incomeModerate"];
             ids.forEach(id => {
-                const btn = document.getElementById("preset-" + id);
+                const btn = document.getElementById(id);
                 if (btn) btn.classList.toggle("active", id === activePreset);
             });
             document.getElementById("preset-reset").classList.remove("active");
@@ -487,39 +447,18 @@
      PROFILE PRESETS UI
 ======================= -->
 <div class="profile-presets">
-    <label>Investor profiles:</label>
-
-    <button class="preset-button active" id="preset-cagrAggressive"
-            onclick="applyPreset('cagrAggressive')"
-            title="Cheap bonds, 10–20y, high CAGR">
-        🚀 CAGR Aggressive
+    <label>Quick presets:</label>
+    <#list presets as p>
+    <button class="preset-button"
+            id="${p.id}"
+            onclick="applyPreset('${p.id}')"
+            title="${p.description}">
+        ${p.emoji} ${p.label}
     </button>
-
-    <button class="preset-button" id="preset-cagrConservative"
-            onclick="applyPreset('cagrConservative')"
-            title="Stable bonds, broad maturity">
-        🛡️ CAGR Conservative
-    </button>
-
-    <button class="preset-button" id="preset-incomeHigh"
-            onclick="applyPreset('incomeHigh')"
-            title="High coupon bonds, long duration">
-        💎 Income High
-    </button>
-
-    <button class="preset-button" id="preset-incomeModerate"
-            onclick="applyPreset('incomeModerate')"
-            title="Moderate coupon bonds, long duration">
-        💰 Income Moderate
-    </button>
-
-    <button class="preset-button" id="preset-reset"
-            onclick="applyPreset('reset')"
-            title="Clear all filters">
-        🧹 Reset
-    </button>
-
-    <span class="preset-description" id="presetDesc"></span>
+</#list>
+<button class="preset-button" id="preset-reset"
+        onclick="applyPreset('reset')">🧹 Reset</button>
+<span class="preset-description" id="presetDesc"></span>
 </div>
 
 <div class="controls">

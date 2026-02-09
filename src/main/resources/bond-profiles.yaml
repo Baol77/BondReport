@@ -1,0 +1,42 @@
+profiles:
+  - id: cagrAggressive
+    label: CAGR Aggressive
+    emoji: "🚀"
+    description: Cheap bonds, 10–20y maturity, high CAGR.
+    filters:
+      maxPrice: 85
+      minMatYears: 10
+      maxMatYears: 20
+      minCapitalAtMat: 1800
+      minCagr: 3.5
+
+  - id: cagrConservative
+    label: CAGR Conservative
+    emoji: "🛡️"
+    description: Stable bonds, broad maturity range.
+    filters:
+      maxPrice: 120
+      minMatYears: 5
+      maxMatYears: 35
+      minCapitalAtMat: 1300
+      minCagr: 2.5
+
+  - id: incomeHigh
+    label: Income High
+    emoji: "💎"
+    description: High coupon bonds, long duration.
+    filters:
+      maxPrice: 120
+      minMatYears: 20
+      maxMatYears: 35
+      minCoupon: 5.5
+
+  - id: incomeModerate
+    label: Income Moderate
+    emoji: "💰"
+    description: Moderate coupon bonds, long duration.
+    filters:
+      maxPrice: 120
+      minMatYears: 20
+      maxMatYears: 35
+      minCoupon: 4.5
