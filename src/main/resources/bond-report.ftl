@@ -494,7 +494,7 @@
         function applyPreset(presetName) {
             if (presetName === "reset") {
                 clearColumnFilters();
-                updatePresetButtons(null);
+                updatePresetButtons(presetName);
                 updateLegend();
                 document.getElementById("presetDesc").textContent = "";
                 return;
@@ -532,6 +532,8 @@
 
             filterTable();
             updatePresetButtons(presetName);
+            currentMode = presetName.startsWith("cagr") ? "cagr" : "income";
+            updateLegend();
             document.getElementById("presetDesc").textContent = "✓ " + preset.description;
         }
 

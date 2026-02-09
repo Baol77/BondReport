@@ -26,18 +26,26 @@ public class BondScoreEngine {
     }
 
     public void calculateCAGR(Bond bond, double years) {
-        // Use actual investment (bond price), not fixed 1000
-        double investment = 1000;
 
         if (years <= 0) {
             bond.setCagr(0);
             return;
         }
 
-        // CAGR based on actual price invested
-        double cagr = Math.pow(bond.getFinalCapitalToMat() / investment, 1.0 / years) - 1;
-        bond.setCagr(cagr * 100);  // Store as percentage (not decimal)
+        double price = bond.getPrice(); // clean price
+        double coupon = bond.getCouponPct();
+
+        // Current yield
+        double currentYield = coupon / price;
+
+        // Capital gain CAGR to par
+        double capitalGainCagr = Math.pow(100.0 / price, 1.0 / years) - 1.0;
+
+        double totalCagr = currentYield + capitalGainCagr;
+
+        bond.setCagr(totalCagr * 100);
     }
+
 
     public void estimateFinalCapitalAtMaturity(List<Bond> bonds, String reportCurrency) {
         for (Bond bond : bonds) {
