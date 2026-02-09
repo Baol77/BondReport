@@ -118,9 +118,30 @@
         .arrow { font-size: 10px; margin-left: 4px; }
         button { cursor: pointer; }
 
-        .score-cell {
-            font-weight: bold;
+        /* Legend styling */
+        .legend {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #666;
+            font-size: 12px;
         }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .legend-table {
+            margin-top: 8px;
+            font-size: 11px;
+        }
+
+        .legend-table tr td {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+        }
+
     </style>
 
     <script>
@@ -135,7 +156,7 @@
             PRICE_R: 4,
             COUPON: 5,
             MATURITY: 6,
-            CURR_COUPON: 7,
+            CURR_YIELD: 7,
             CAPITAL_AT_MAT: 8,
             CAGR: 9
         };
@@ -145,6 +166,7 @@
         ======================= */
         let currentSortCol = COL.CAGR;
         let currentSortDir = "desc";
+        let currentMode = "cagr";   // "cagr" or "income"
 
         function parseValue(v) {
             v = v.replace(/[€CHF%]/g, "").replace(",", ".").trim();
@@ -205,7 +227,7 @@
             const currency = document.getElementById("filterCurrency").value;
             const minMat = document.getElementById("filterMinMat").value;
             const maxMat = document.getElementById("filterMaxMat").value;
-            const minCoupon = parseFloat(document.getElementById("filterMinCoupon").value || "0");
+            const minYield = parseFloat(document.getElementById("filterminYield").value || "0");
             const minCapitalAtMat = parseFloat(document.getElementById("filterMinCapitalAtMat").value || "0");
             const minCagr = parseFloat(document.getElementById("filterMinCagr").value || "0");
 
@@ -217,7 +239,7 @@
                 const priceCell = parseNum(r.cells[COL.PRICE].innerText);
                 const currencyCell = r.cells[COL.CURRENCY].innerText;
                 const mat = r.cells[COL.MATURITY].innerText;
-                const currCoupon = parseNum(r.cells[COL.CURR_COUPON].innerText);
+                const currCoupon = parseNum(r.cells[COL.CURR_YIELD].innerText);
                 const capitalAtMat = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
                 const cagr = parseNum(r.cells[COL.CAGR].innerText);
 
@@ -228,7 +250,7 @@
                 if (currency && currencyCell !== currency) ok = false;
                 if (minMat && mat < minMat) ok = false;
                 if (maxMat && mat > maxMat) ok = false;
-                if (currCoupon < minCoupon) ok = false;
+                if (currCoupon < minYield) ok = false;
                 if (capitalAtMat < minCapitalAtMat) ok = false;
                 if (cagr < minCagr) ok = false;
 
@@ -241,7 +263,7 @@
             document.getElementById("filterIssuer").value = "";
             document.getElementById("filterPrice").value = "";
             document.getElementById("filterCurrency").value = "";
-            document.getElementById("filterMinCoupon").value = "";
+            document.getElementById("filterminYield").value = "";
             document.getElementById("filterMinCapitalAtMat").value = "";
             document.getElementById("filterMinCagr").value = "";
             setDefaultMaturityFilters();
@@ -274,19 +296,9 @@
             URL.revokeObjectURL(url);
         }
 
-        /* =======================
-           Heatmap
-        ======================= */
-        function lerp(a, b, t) {
-            return Math.round(a + (b - a) * t);
-        }
-
-        function lerpColor(c1, c2, t) {
-            return "rgb(" +
-                lerp(c1[0], c2[0], t) + "," +
-                lerp(c1[1], c2[1], t) + "," +
-                lerp(c1[2], c2[2], t) + ")";
-        }
+        // ============================================================
+        // HEATMAP FUNCTION - DUAL MODE
+        // ============================================================
 
         function applyHeatmap() {
             const rows = document.querySelectorAll("#bondTable tbody tr");
@@ -296,41 +308,150 @@
             const green  = [215, 245, 215];
 
             rows.forEach(r => {
-                // === Current Coupon ===
-                const v = parseNum(r.cells[COL.CURR_COUPON].innerText);
+                // === Current Yield (Behavior changes by mode) ===
+                const v = parseNum(r.cells[COL.CURR_YIELD].innerText);
                 let bg;
-                if (v <= 1.5) bg = "rgb(" + red.join(",") + ")";
-                else if (v < 3.0) bg = lerpColor(red, yellow, (v - 1.5) / 1.5);
-                else if (v < 5.0) bg = lerpColor(yellow, green, (v - 3.0) / 2.0);
-                else bg = "rgb(" + green.join(",") + ")";
-                r.cells[COL.CURR_COUPON].style.backgroundColor = bg;
 
-                // === Total Capital at Maturity ===
+                if (currentMode === "income") {
+                    // INCOME MODE: Strong coloring (PRIMARY)
+                    // Bands: < 3%, 3-4.5%, 4.5-5.5%, 5.5-6.5%, > 6.5%
+                    if (v <= 3.0) {
+                        bg = "rgb(" + red.join(",") + ")";
+                    } else if (v <= 4.5) {
+                        bg = lerpColor(red, yellow, (v - 3.0) / 1.5);
+                    } else if (v <= 5.5) {
+                        bg = lerpColor(yellow, green, (v - 4.5) / 1.0);
+                    } else if (v <= 6.5) {
+                        const darkGreen = [100, 200, 100];
+                        bg = lerpColor(green, darkGreen, (v - 5.5) / 1.0);
+                    } else {
+                        bg = "rgb(50, 180, 50)";
+                    }
+                } else {
+                    // CAGR MODE: Light coloring (SECONDARY)
+                    if (v <= 1.5) {
+                        bg = "rgba(255, 215, 215, 0.3)";
+                    } else if (v < 3.0) {
+                        bg = lerpColor(red, yellow, (v - 1.5) / 1.5);
+                    } else if (v < 5.0) {
+                        bg = lerpColor(yellow, green, (v - 3.0) / 2.0);
+                    } else {
+                        bg = "rgba(215, 245, 215, 0.5)";
+                    }
+                }
+                r.cells[COL.CURR_YIELD].style.backgroundColor = bg;
+
+                // === Total Capital at Maturity (SECONDARY in both modes) ===
                 const w = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
                 let bg2;
-                if (w <= 1150) bg2 = "rgb(" + red.join(",") + ")";
-                else if (w < 1400) bg2 = lerpColor(red, yellow, (w - 1150) / 250);
-                else if (w < 1650) bg2 = lerpColor(yellow, green, (w - 1400) / 250);
-                else bg2 = "rgb(" + green.join(",") + ")";
+                if (w <= 1150) {
+                    bg2 = "rgba(255, 215, 215, 0.3)";
+                } else if (w < 1400) {
+                    bg2 = lerpColor(red, yellow, (w - 1150) / 250);
+                } else if (w < 1650) {
+                    bg2 = lerpColor(yellow, green, (w - 1400) / 250);
+                } else {
+                    bg2 = "rgba(215, 245, 215, 0.5)";
+                }
                 r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
 
-                // === CAGR ===
+                // === CAGR (Behavior changes by mode) ===
                 const cagr = parseNum(r.cells[COL.CAGR].innerText);
                 let bg3;
-                if (cagr <= 1.0) {
-                    bg3 = "rgb(" + red.join(",") + ")";
-                } else if (cagr <= 2.5) {
-                    bg3 = lerpColor(red, yellow, (cagr - 1.0) / 1.5);
-                } else if (cagr <= 3.5) {
-                    bg3 = lerpColor(yellow, green, (cagr - 2.5) / 1.0);
-                } else if (cagr <= 4.5) {
-                    const darkGreen = [100, 200, 100];
-                    bg3 = lerpColor(green, darkGreen, (cagr - 3.5) / 1.0);
+
+                if (currentMode === "cagr") {
+                    // CAGR MODE: Strong coloring (PRIMARY)
+                    // Bands: < 1%, 1-2.5%, 2.5-3.5%, 3.5-4.5%, > 4.5%
+                    if (cagr <= 1.0) {
+                        bg3 = "rgb(" + red.join(",") + ")";
+                    } else if (cagr <= 2.5) {
+                        bg3 = lerpColor(red, yellow, (cagr - 1.0) / 1.5);
+                    } else if (cagr <= 3.5) {
+                        bg3 = lerpColor(yellow, green, (cagr - 2.5) / 1.0);
+                    } else if (cagr <= 4.5) {
+                        const darkGreen = [100, 200, 100];
+                        bg3 = lerpColor(green, darkGreen, (cagr - 3.5) / 1.0);
+                    } else {
+                        bg3 = "rgb(50, 180, 50)";
+                    }
                 } else {
-                    bg3 = "rgb(50, 180, 50)";
+                    // INCOME MODE: Light coloring (SECONDARY)
+                    if (cagr <= 1.0) {
+                        bg3 = "rgba(255, 215, 215, 0.2)";
+                    } else if (cagr <= 2.5) {
+                        bg3 = "rgba(255, 245, 190, 0.2)";
+                    } else if (cagr <= 3.5) {
+                        bg3 = "rgba(215, 245, 215, 0.2)";
+                    } else {
+                        bg3 = "rgba(215, 245, 215, 0.3)";
+                    }
                 }
                 r.cells[COL.CAGR].style.backgroundColor = bg3;
             });
+        }
+
+        function lerpColor(c1, c2, t) {
+            return "rgb(" +
+                Math.round(c1[0] + (c2[0] - c1[0]) * t) + "," +
+                Math.round(c1[1] + (c2[1] - c1[1]) * t) + "," +
+                Math.round(c1[2] + (c2[2] - c1[2]) * t) + ")";
+        }
+
+        function updateLegend() {
+            const legendTitle = document.getElementById("legendTitle");
+            const legendTable = document.getElementById("legendTable");
+
+            if (!legendTitle || !legendTable) return;
+
+            if (currentMode === "income") {
+                legendTitle.textContent = "Current Yield Heatmap (Income Mode)";
+                legendTable.innerHTML = `
+                    <tr>
+                        <td style="background: rgb(255, 215, 215); padding: 6px 8px;">< 3%</td>
+                        <td style="padding: 6px 8px;">Too low (worse than risk-free rate)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(255, 245, 190); padding: 6px 8px;">3–4.5%</td>
+                        <td style="padding: 6px 8px;">Acceptable (moderate income)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(215, 245, 215); padding: 6px 8px;">4.5–5.5%</td>
+                        <td style="padding: 6px 8px;">Good (solid income)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(100, 200, 100); padding: 6px 8px;">5.5–6.5%</td>
+                        <td style="padding: 6px 8px;">Excellent (high income)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(50, 180, 50); padding: 6px 8px;">> 6.5%</td>
+                        <td style="padding: 6px 8px;">⭐ Outstanding (premium income)</td>
+                    </tr>
+                `;
+            } else {
+                legendTitle.textContent = "CAGR Heatmap (Capital Gain Mode)";
+                legendTable.innerHTML = `
+                    <tr>
+                        <td style="background: rgb(255, 215, 215); padding: 6px 8px;">< 1%</td>
+                        <td style="padding: 6px 8px;">Terrible (FX currency bonds)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(255, 245, 190); padding: 6px 8px;">1–2.5%</td>
+                        <td style="padding: 6px 8px;">Poor (needs improvement)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(215, 245, 215); padding: 6px 8px;">2.5–3.5%</td>
+                        <td style="padding: 6px 8px;">Good (standard sovereign)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(100, 200, 100); padding: 6px 8px;">3.5–4.5%</td>
+                        <td style="padding: 6px 8px;">Excellent (best value)</td>
+                    </tr>
+                    <tr>
+                        <td style="background: rgb(50, 180, 50); padding: 6px 8px;">> 4.5%</td>
+                        <td style="padding: 6px 8px;">⭐ Top performers</td>
+                    </tr>
+                `;
+            }
         }
 
         /* =======================
@@ -374,6 +495,7 @@
             if (presetName === "reset") {
                 clearColumnFilters();
                 updatePresetButtons(null);
+                updateLegend();
                 document.getElementById("presetDesc").textContent = "";
                 return;
             }
@@ -404,7 +526,7 @@
             document.getElementById("filterMaxMat").value = formatDate(maxMat);
 
             // Mode-specific filters
-            document.getElementById("filterMinCoupon").value = preset.filters.minCoupon || "";
+            document.getElementById("filterminYield").value = preset.filters.minYield || "";
             document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
             document.getElementById("filterMinCagr").value = preset.filters.minCagr || "";
 
@@ -447,7 +569,7 @@
      PROFILE PRESETS UI
 ======================= -->
 <div class="profile-presets">
-    <label>Quick presets:</label>
+    <label>Investor profiles:</label>
     <#list presets as p>
     <button class="preset-button"
             id="${p.id}"
@@ -505,9 +627,9 @@
         <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
         <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
         <th title="Supposing an investment of EUR 100, what would the gain be?"
-            onclick="sortTable(COL.CURR_COUPON)">
+            onclick="sortTable(COL.CURR_YIELD)">
             Curr. Yield %<span class="arrow"></span><br>
-            <input id="filterMinCoupon" type="number" step="0.5" placeholder="min %"
+            <input id="filterminYield" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
         <th title="Supposing an investment of EUR 1,000, what amount will you have at maturity?"
@@ -552,6 +674,33 @@
     </#list>
     </tbody>
 </table>
+
+<!-- Legend for heatmap -->
+<div class="legend">
+    <div class="legend-title" id="legendTitle">CAGR Heatmap (Capital Gain Mode)</div>
+    <table class="legend-table" id="legendTable">
+        <tr>
+            <td style="background: rgb(255, 215, 215);">< 1%</td>
+            <td>Terrible (FX currency bonds)</td>
+        </tr>
+        <tr>
+            <td style="background: rgb(255, 245, 190);">1–2.5%</td>
+            <td>Poor (needs improvement)</td>
+        </tr>
+        <tr>
+            <td style="background: rgb(215, 245, 215);">2.5–3.5%</td>
+            <td>Good (standard sovereign)</td>
+        </tr>
+        <tr>
+            <td style="background: rgb(100, 200, 100);">3.5–4.5%</td>
+            <td>Excellent (best value)</td>
+        </tr>
+        <tr>
+            <td style="background: rgb(50, 180, 50);">> 4.5%</td>
+            <td>⭐ Top performers</td>
+        </tr>
+    </table>
+</div>
 
 </body>
 </html>

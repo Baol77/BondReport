@@ -29,7 +29,7 @@ profiles:
       maxPrice: 115
       minMatYears: 15
       maxMatYears: 35
-      minCoupon: 5.0
+      minYield: 4.75
 
   - id: incomeModerate
     label: Income Moderate
@@ -39,4 +39,4 @@ profiles:
       maxPrice: 115
       minMatYears: 10
       maxMatYears: 35
-      minCoupon: 4.0
+      minYield: 4.0
