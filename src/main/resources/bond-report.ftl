@@ -116,7 +116,7 @@
         </th>
         <th title="Supposing an investment of EUR 1,000, what amount will you have at maturity?"
             onclick="sortTable(COL.CAPITAL_AT_MAT)">
-            Tot. Capital to Maturity (per EUR 1,000)<span class="arrow"></span><br>
+            Total Return (1k€)<span class="arrow"></span><br>
             <input id="filterMinCapitalAtMat" type="number" step="500" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
