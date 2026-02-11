@@ -138,7 +138,7 @@
             ${b.getPrice()?string["0.00"]}
         </td>
         <td>${b.getCurrency()}</td>
-        <td class="<#if (b.getRating() == "AAA" || b.getRating() == "AA+" || b.getRating() == "AA")>good<#elseif (b.getRating()?starts_with("BBB"))>neutral<#else>bad</#if>">
+        <td class="<#if (b.getRating()?starts_with('A'))>good<#elseif (b.getRating()?starts_with('BBB'))>neutral<#else>bad</#if>">
     <strong>${b.getRating()}</strong>
     </td>
     <td>

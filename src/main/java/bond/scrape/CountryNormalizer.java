@@ -19,16 +19,21 @@ public final class CountryNormalizer {
 
         return switch (upper) {
             case "ITALY", "ITALIA", "REPUBLIC OF ITALY", "REPUBBLICA ITALIANA", "ITALYI", "ITALY ITALIA" -> "ITALIA";
+            case "SWITZERLAND" -> "SVIZZERA";
+            case "LUXEMBOURG" -> "LUSSEMBURGO";
             case "GERMANY", "DEUTSCHLAND", "BUNDESREPUBLIK DEUTSCHLAND", "GERMANIA" -> "GERMANIA";
             case "FRANCE", "FRANCIA" -> "FRANCIA";
             case "SPAIN", "ESPANA", "SPAGNA" -> "SPAGNA";
             case "PORTUGAL", "PORTOGALLO" -> "PORTOGALLO";
             case "GREECE", "ELLAS", "GRECIA", "REPUBBLICA GRECA" -> "GRECIA";
+            case "CZECH REPUBLIC" -> "REPUBBLICA CECA";
+            case "SLOVAKIA" -> "SLOVACCHIA";
             case "IRELAND", "IRLANDA" -> "IRLANDA";
             case "NETHERLANDS", "HOLLAND", "PAESI BASSI", "OLANDA" -> "OLANDA";
             case "BELGIUM", "BELGIO" -> "BELGIO";
             case "AUSTRIA" -> "AUSTRIA";
             case "FINLAND", "FINLANDIA" -> "FINLANDIA";
+            case "DENMARK" -> "DANIMARCA";
             case "SWEDEN", "SVEZIA" -> "SVEZIA";
             case "NORWAY", "NORVEGIA" -> "NORVEGIA";
             case "UNITED KINGDOM", "UK", "GREAT BRITAIN", "REGNO UNITO", "GRAN BRETAGNA" -> "REGNO UNITO";
@@ -41,9 +46,15 @@ public final class CountryNormalizer {
             case "ESTONIA" -> "ESTONIA";
             case "LATVIA", "LETTONIA" -> "LETTONIA";
             case "LITHUANIA", "LITUANIA" -> "LITUANIA";
+            case "CHILE", "CILE" -> "CILE";
+            case "MEXICO" -> "MESSICO";
             case "CYPRUS", "CIPRO" -> "CIPRO";
             case "TURKEY", "TURCHIA", "TÜRKIYE" -> "TURCHIA";
-            default -> "";
+            case "BRAZIL" -> "BRASILE";
+            case "UNITED STATES" -> "USA";
+            case "JAPAN" -> "GIAPPONE";
+            case "SOUTH AFRICA" -> "SUDAFRICA";
+            default -> upper;
         };
     }
 }
