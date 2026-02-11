@@ -390,9 +390,11 @@ Open `docs/eur/index.html` in your browser to view the interactive report.
 
 ## 🛠️ Configuration
 
-### Customizing Profiles
+### Customizing Profiles (Two Methods)
 
-Edit `src/main/resources/bond-profiles.yaml`:
+#### Method 1: Edit YAML Configuration File (Permanent)
+
+Edit `src/main/resources/bond-profiles.yaml` and rebuild:
 
 ```yaml
 profiles:
@@ -409,6 +411,61 @@ profiles:
       minYield: 3.0        # Optional: minimum Current Yield %
       minRating: A-        # Optional: minimum credit rating
 ```
+
+Then rebuild with `mvn clean package`.
+
+#### Method 2: Import YAML at Runtime (Dynamic)
+
+Create a custom profiles YAML file and import it directly in the browser:
+
+**Step 1: Create your custom YAML file** (e.g., `my-profiles.yaml`):
+
+```yaml
+profiles:
+  - id: ultraShortHigh
+    label: Ultra Short High
+    emoji: "⚡💰"
+    description: Ultra short-term (1-3y) bonds with very high yield (6%+)
+    filters:
+      minMatYears: 1
+      maxMatYears: 3
+      minYield: 6.0
+      
+  - id: longQuality
+    label: Long Quality
+    emoji: "🏛️📈"
+    description: Long-term (25-40y) investment-grade with 4%+ yield
+    filters:
+      minMatYears: 25
+      maxMatYears: 40
+      minYield: 4.0
+      minRating: A-
+```
+
+**Step 2: Import in the web interface**:
+
+1. Open the generated HTML report (`docs/eur/index.html`)
+2. Click the **"📁 Import YAML"** button
+3. Select your custom YAML file
+4. Custom profiles appear with orange/dashed borders
+5. Click any profile to apply its filters (example here: [custom profile](./docs/bond-profiles-custom.yaml))
+
+**Advantages**:
+- ✅ No rebuild required
+- ✅ Easy to share profiles with colleagues
+- ✅ Quick experimentation with different strategies
+- ✅ Profiles persist until page reload
+- ✅ Can re-import to update
+
+**Available Filter Options**:
+- `minPrice` / `maxPrice`: Price range in bond currency
+- `minMatYears` / `maxMatYears`: Years to maturity (from today)
+- `minSAL`: Minimum Simple Annual Yield (%)
+- `minYield`: Minimum Current Yield (%)
+- `minCapitalAtMat`: Minimum final capital at maturity (EUR)
+- `minRating`: Minimum credit rating (AAA, AA+, AA, AA-, A+, A, A-, BBB+, BBB, etc.)
+
+**Example Template**: See `custom-profiles-example.yaml` for a complete template with 6 example profiles.
 
 ### Adjusting FX Risk
 

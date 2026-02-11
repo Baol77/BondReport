@@ -42,6 +42,12 @@
 <button class="preset-button" id="preset-reset"
         onclick="applyPreset('reset')">🧹 Reset
 </button>
+<button class="preset-button" id="import-yaml-btn"
+        onclick="document.getElementById('yamlFileInput').click()"
+        title="Import custom profiles from YAML file">
+    📁 Import YAML
+</button>
+<input type="file" id="yamlFileInput" accept=".yaml,.yml" style="display: none;" onchange="handleYamlImport(event)">
 <span class="preset-description" id="presetDesc"></span>
 </div>
 
@@ -139,22 +145,22 @@
         </td>
         <td>${b.getCurrency()}</td>
         <td class="<#if (b.getRating()?starts_with('A'))>good<#elseif (b.getRating()?starts_with('BBB'))>neutral<#else>bad</#if>">
-    <strong>${b.getRating()}</strong>
-    </td>
-    <td>
-        ${b.getPriceEur()?string["0.00"]}
-    </td>
-    <td>${b.getCouponPct()?string["0.00"]}</td>
-    <td style="white-space: nowrap;">${b.getMaturity()}</td>
-    <td>
-        ${b.getCurrentYield()?string["0.00"]}
-    </td>
-    <td>
-        ${b.getFinalCapitalToMat()?string["0"]}
-    </td>
-    <td>
-        ${b.getSimpleAnnualYield()?string["0.00"]}
-    </td>
+            <strong>${b.getRating()}</strong>
+        </td>
+        <td>
+            ${b.getPriceEur()?string["0.00"]}
+        </td>
+        <td>${b.getCouponPct()?string["0.00"]}</td>
+        <td style="white-space: nowrap;">${b.getMaturity()}</td>
+        <td>
+            ${b.getCurrentYield()?string["0.00"]}
+        </td>
+        <td>
+            ${b.getFinalCapitalToMat()?string["0"]}
+        </td>
+        <td>
+            ${b.getSimpleAnnualYield()?string["0.00"]}
+        </td>
     </tr>
     </#list>
     </tbody>

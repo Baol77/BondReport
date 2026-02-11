@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Service to map COUNTRIES to sovereign ratings.
  * <p>
- * ⚠️ IMPORTANT: The rating is based on the COUNTRY (issuer), NOT the currency!
- * <p>
  * Strategy:
  * 1. Normalize the country name using CountryNormalizer.normalize()
  * 2. Look up the normalized name in COUNTRY_TO_RATING

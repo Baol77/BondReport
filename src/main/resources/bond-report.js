@@ -387,6 +387,133 @@ function setDefaultMaturityFilters() {
         </#list>
         };
 
+/* =======================
+   YAML IMPORT
+======================= */
+function handleYamlImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const yamlContent = e.target.result;
+            const customProfiles = parseYamlProfiles(yamlContent);
+
+            if (customProfiles && customProfiles.length > 0) {
+                mergeCustomProfiles(customProfiles);
+                alert('\u2713 Successfully imported ' + customProfiles.length + ' custom profile(s)!');
+            } else {
+                alert('\u26a0\ufe0f No valid profiles found in YAML file.');
+            }
+        } catch (error) {
+            alert('\u274c Error parsing YAML file: ' + error.message);
+            console.error('YAML parse error:', error);
+        }
+    };
+    reader.readAsText(file);
+
+    // Reset file input so same file can be imported again
+    event.target.value = '';
+}
+
+function parseYamlProfiles(yamlText) {
+    // Simple YAML parser for the specific structure we expect
+    const profiles = [];
+    const lines = yamlText.split('\n');
+    let currentProfile = null;
+    let inFilters = false;
+
+    for (let line of lines) {
+        line = line.trim();
+
+        // Skip comments and empty lines
+        if (!line || line.startsWith('#')) continue;
+
+        // New profile
+        if (line.startsWith('- id:')) {
+            if (currentProfile) {
+                profiles.push(currentProfile);
+            }
+            currentProfile = {
+                id: line.split(':')[1].trim(),
+                filters: {}
+            };
+            inFilters = false;
+        }
+        // Profile properties
+        else if (currentProfile) {
+            if (line.startsWith('label:')) {
+                currentProfile.name = line.split(':')[1].trim().replace(/['"]/g, '');
+            }
+            else if (line.startsWith('emoji:')) {
+                currentProfile.emoji = line.split(':')[1].trim().replace(/['"]/g, '');
+            }
+            else if (line.startsWith('description:')) {
+                currentProfile.description = line.split(':')[1].trim().replace(/['"]/g, '');
+            }
+            else if (line.startsWith('filters:')) {
+                inFilters = true;
+            }
+            else if (inFilters && line.includes(':')) {
+                const parts = line.split(':');
+                const key = parts[0].trim();
+                let value = parts[1].trim();
+
+                // Parse numeric values
+                if (!isNaN(value)) {
+                    value = parseFloat(value);
+                } else {
+                    // Remove quotes from string values
+                    value = value.replace(/['"]/g, '');
+                }
+
+                currentProfile.filters[key] = value;
+            }
+        }
+    }
+
+    // Add last profile
+    if (currentProfile) {
+        profiles.push(currentProfile);
+    }
+
+    return profiles;
+}
+
+function mergeCustomProfiles(customProfiles) {
+    const presetsContainer = document.querySelector('.profile-presets');
+    const resetButton = document.getElementById('preset-reset');
+    const importButton = document.getElementById('import-yaml-btn');
+
+    // Remove existing custom buttons (those after the default presets)
+    const customButtons = presetsContainer.querySelectorAll('.preset-button.custom');
+    customButtons.forEach(btn => btn.remove());
+
+    // Add new custom profile buttons before reset button
+    customProfiles.forEach(profile => {
+        // Add to PRESETS object
+        PRESETS[profile.id] = {
+            name: profile.name || profile.id,
+            description: profile.description || 'Custom profile',
+            filters: profile.filters
+        };
+
+        // Create button
+        const button = document.createElement('button');
+        button.className = 'preset-button custom';
+        button.id = profile.id;
+        button.onclick = () => applyPreset(profile.id);
+        button.title = profile.description || 'Custom profile';
+
+        const emoji = profile.emoji || '\ud83c\udfaf'; // 🎯
+        button.textContent = emoji + ' ' + (profile.name || profile.id);
+
+        // Insert before reset button
+        presetsContainer.insertBefore(button, resetButton);
+    });
+}
+
 
 function showLoading() {
     const overlay = document.getElementById("loadingOverlay");

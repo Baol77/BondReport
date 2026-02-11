@@ -91,6 +91,23 @@ button {
     font-weight: bold;
 }
 
+.preset-button.custom {
+    background: #fff3e0;
+    border: 1px dashed #ff9800;
+}
+
+.preset-button.custom:hover {
+    background: #ffe0b2;
+    border-color: #f57c00;
+}
+
+.preset-button.custom.active {
+    background: #ff9800;
+    color: white;
+    border: 1px solid #f57c00;
+    font-weight: bold;
+}
+
 .preset-description {
     font-size: 11px;
     color: #555;

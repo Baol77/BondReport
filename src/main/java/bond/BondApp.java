@@ -13,7 +13,7 @@ import java.util.*;
  * Main application class.
  * Enhancements:
  * - Loads sovereign spreads for dynamic trust calculation
- * - Generates scoring reports in EUR and CHF
+ * - Generates scoring reports in EUR
  * - Tracks unknown issuers and generates alerts
  */
 public class BondApp {

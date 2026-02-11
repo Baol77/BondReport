@@ -1,0 +1,107 @@
+# Custom Bond Profiles - Example Template
+# 
+# This file demonstrates how to create custom investment profiles
+# that can be imported into the Bond Analytics report.
+#
+# YAML Format Requirements:
+# - Start with "profiles:" header
+# - Each profile starts with "- id:"
+# - Required fields: id, label, description
+# - Optional fields: emoji
+# - Filters section contains the actual filter criteria
+#
+# Available Filters:
+# - minPrice / maxPrice: Price range in bond currency
+# - minMatYears / maxMatYears: Years to maturity range (from today)
+# - minSAL: Minimum Simple Annual Yield (%)
+# - minYield: Minimum Current Yield (%)
+# - minCapitalAtMat: Minimum final capital at maturity (EUR)
+# - minRating: Minimum credit rating (e.g., BBB+, A, AA-)
+
+profiles:
+  # Example 1: Ultra Short-Term High Yield
+  - id: ultraShortHigh
+    label: Ultra Short High
+    emoji: "⚡💰"
+    description: Ultra short-term (1-3y) bonds with very high yield (6%+)
+    filters:
+      minMatYears: 1
+      maxMatYears: 3
+      minYield: 6.0
+
+  # Example 2: Long-Term Quality Income
+  - id: longQuality
+    label: Long Quality
+    emoji: "🏛️📈"
+    description: Long-term (25-40y) investment-grade bonds with 4%+ yield
+    filters:
+      minMatYears: 25
+      maxMatYears: 40
+      minYield: 4.0
+      minRating: A-
+
+  # Example 3: Balanced Total Return
+  - id: balancedReturn
+    label: Balanced Return
+    emoji: "⚖️💼"
+    description: Medium-term (5-15y) bonds with 4.5%+ SAL, BBB+ minimum
+    filters:
+      minMatYears: 5
+      maxMatYears: 15
+      minSAL: 4.5
+      minRating: BBB+
+
+  # Example 4: High Final Capital
+  - id: highFinalCapital
+    label: High Final Capital
+    emoji: "🎯💎"
+    description: Bonds that reach at least €1,600 final capital from €1,000
+    filters:
+      minCapitalAtMat: 1600
+      minMatYears: 1
+      maxMatYears: 30
+
+  # Example 5: Premium Bonds Only
+  - id: premiumBonds
+    label: Premium Bonds
+    emoji: "👑✨"
+    description: Premium-priced bonds (>105) with good current yield
+    filters:
+      minPrice: 105
+      maxPrice: 120
+      minYield: 3.5
+      minMatYears: 10
+      maxMatYears: 30
+
+  # Example 6: AAA/AA Sovereigns
+  - id: topRated
+    label: Top Rated Only
+    emoji: "⭐🛡️"
+    description: Only AAA and AA rated sovereigns with 3%+ SAL
+    filters:
+      minRating: AA-
+      minSAL: 3.0
+      minMatYears: 5
+      maxMatYears: 25
+
+# USAGE INSTRUCTIONS:
+#
+# 1. Copy this file and customize the profiles above
+# 2. Save with a .yaml or .yml extension
+# 3. In the Bond Report HTML page, click "📁 Import YAML"
+# 4. Select your custom YAML file
+# 5. Custom profiles will appear as buttons with orange/dashed borders
+# 6. Click any custom profile to apply its filters
+#
+# TIPS:
+# - You can have as many profiles as you want
+# - Use meaningful IDs (no spaces, use camelCase)
+# - Emojis are optional but make profiles easier to identify
+# - You can combine multiple filter criteria
+# - Import will merge with existing profiles (won't remove defaults)
+# - Re-import to update your custom profiles
+#
+# VALIDATION:
+# - All numeric values must be numbers (no quotes)
+# - Rating values must be strings (can use quotes or not)
+# - YAML is indentation-sensitive (use 2 or 4 spaces consistently)
