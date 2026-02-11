@@ -6,20 +6,47 @@ const COL = {
     ISSUER: 1,
     PRICE: 2,
     CURRENCY: 3,
-    PRICE_R: 4,
-    COUPON: 5,
-    MATURITY: 6,
-    CURR_YIELD: 7,
-    CAPITAL_AT_MAT: 8,
-    CAGR: 9
+    RATING: 4,
+    PRICE_R: 5,
+    COUPON: 6,
+    MATURITY: 7,
+    CURR_YIELD: 8,
+    CAPITAL_AT_MAT: 9,
+    SAL: 10
+};
+
+/* =======================
+   RATING HIERARCHY (for minimum rating filtering)
+======================= */
+const RATING_RANK = {
+    "AAA": 10,
+    "AA+": 9,
+    "AA": 8,
+    "AA-": 7,
+    "A+": 6,
+    "A": 5,
+    "A-": 4,
+    "BBB+": 3,
+    "BBB": 2,
+    "BBB-": 1,
+    "BB+": 0,
+    "BB": -1,
+    "BB-": -2,
+    "B+": -3,
+    "B": -4,
+    "B-": -5,
+    "CCC": -6,
+    "CC": -7,
+    "C": -8,
+    "D": -9
 };
 
 /* =======================
    GLOBAL STATE
 ======================= */
-let currentSortCol = COL.CAGR;
+let currentSortCol = COL.SAL;
 let currentSortDir = "desc";
-let currentMode = "cagr"; // "cagr" or "income"
+let currentMode = "sal"; // "sal" or "income"
 
 /* =======================
    UTILITY FUNCTIONS
@@ -84,11 +111,12 @@ function filterTable() {
     const issuer = document.getElementById("filterIssuer").value.toLowerCase();
     const priceMax = parseFloat(document.getElementById("filterPrice").value || "0");
     const currency = document.getElementById("filterCurrency").value;
+    const minRating = document.getElementById("filterMinRating").value;
     const minMat = document.getElementById("filterMinMat").value;
     const maxMat = document.getElementById("filterMaxMat").value;
     const minYield = parseFloat(document.getElementById("filterminYield").value || "0");
     const minCapitalAtMat = parseFloat(document.getElementById("filterMinCapitalAtMat").value || "0");
-    const minCagr = parseFloat(document.getElementById("filterMinCagr").value || "0");
+    const minSAL = parseFloat(document.getElementById("filterMinSAL").value || "0");
 
     const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -97,21 +125,30 @@ function filterTable() {
         const issuerCell = r.cells[COL.ISSUER].innerText.toLowerCase();
         const priceCell = parseNum(r.cells[COL.PRICE].innerText);
         const currencyCell = r.cells[COL.CURRENCY].innerText;
+        const ratingCell = r.cells[COL.RATING].innerText.trim();
         const mat = r.cells[COL.MATURITY].innerText;
         const currCoupon = parseNum(r.cells[COL.CURR_YIELD].innerText);
         const capitalAtMat = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
-        const cagr = parseNum(r.cells[COL.CAGR].innerText);
+        const sal = parseNum(r.cells[COL.SAL].innerText);
 
         let ok = true;
         if (isin && isinCell.indexOf(isin) === -1) ok = false;
         if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
         if (priceMax && priceMax < priceCell) ok = false;
         if (currency && currencyCell !== currency) ok = false;
+
+        // Rating: minimum rating filter (e.g., "≥ BBB" means rating must be BBB or better)
+        if (minRating) {
+            const ratingRank = RATING_RANK[ratingCell] || -100;
+            const minRatingRank = RATING_RANK[minRating] || -100;
+            if (ratingRank < minRatingRank) ok = false;
+        }
+
         if (minMat && mat < minMat) ok = false;
         if (maxMat && mat > maxMat) ok = false;
         if (currCoupon < minYield) ok = false;
         if (capitalAtMat < minCapitalAtMat) ok = false;
-        if (cagr < minCagr) ok = false;
+        if (sal < minSAL) ok = false;
 
         r.style.display = ok ? "" : "none";
     });
@@ -124,9 +161,10 @@ function clearColumnFilters() {
     document.getElementById("filterIssuer").value = "";
     document.getElementById("filterPrice").value = "";
     document.getElementById("filterCurrency").value = "";
+    document.getElementById("filterMinRating").value = "";
     document.getElementById("filterminYield").value = "";
     document.getElementById("filterMinCapitalAtMat").value = "";
-    document.getElementById("filterMinCagr").value = "";
+    document.getElementById("filterMinSAL").value = "";
     setDefaultMaturityFilters();
     filterTable();
     updatePresetButtons(null);
@@ -187,7 +225,7 @@ function applyHeatmap() {
                 bg = "rgb(50, 180, 50)";
             }
         } else {
-            // CAGR MODE: Light coloring
+            // SAL MODE: Light coloring
             if (v <= 1.5) {
                 bg = "rgba(255, 215, 215, 0.3)";
             } else if (v < 3.0) {
@@ -214,37 +252,37 @@ function applyHeatmap() {
         }
         r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
 
-        // === CAGR ===
-        const cagr = parseNum(r.cells[COL.CAGR].innerText);
+        // === SAL ===
+        const sal = parseNum(r.cells[COL.SAL].innerText);
         let bg3;
 
-        if (currentMode === "cagr") {
-            // CAGR MODE: Strong coloring
-            if (cagr <= 1.0) {
+        if (currentMode === "sal") {
+            // SAL MODE: Strong coloring
+            if (sal <= 1.0) {
                 bg3 = "rgb(" + red.join(",") + ")";
-            } else if (cagr <= 2.5) {
-                bg3 = lerpColor(red, yellow, (cagr - 1.0) / 1.5);
-            } else if (cagr <= 3.5) {
-                bg3 = lerpColor(yellow, green, (cagr - 2.5) / 1.0);
-            } else if (cagr <= 4.5) {
+            } else if (sal <= 2.5) {
+                bg3 = lerpColor(red, yellow, (sal - 1.0) / 1.5);
+            } else if (sal <= 3.5) {
+                bg3 = lerpColor(yellow, green, (sal - 2.5) / 1.0);
+            } else if (sal <= 4.5) {
                 const darkGreen = [100, 200, 100];
-                bg3 = lerpColor(green, darkGreen, (cagr - 3.5) / 1.0);
+                bg3 = lerpColor(green, darkGreen, (sal - 3.5) / 1.0);
             } else {
                 bg3 = "rgb(50, 180, 50)";
             }
         } else {
             // INCOME MODE: Light coloring
-            if (cagr <= 1.0) {
+            if (sal <= 1.0) {
                 bg3 = "rgba(255, 215, 215, 0.2)";
-            } else if (cagr <= 2.5) {
+            } else if (sal <= 2.5) {
                 bg3 = "rgba(255, 245, 190, 0.2)";
-            } else if (cagr <= 3.5) {
+            } else if (sal <= 3.5) {
                 bg3 = "rgba(215, 245, 215, 0.2)";
             } else {
                 bg3 = "rgba(215, 245, 215, 0.3)";
             }
         }
-        r.cells[COL.CAGR].style.backgroundColor = bg3;
+        r.cells[COL.SAL].style.backgroundColor = bg3;
     });
 }
 
@@ -286,7 +324,7 @@ function updateLegend() {
             </tr>
         `;
     } else {
-        legendTitle.textContent = "CAGR Heatmap (Capital Gain Mode)";
+        legendTitle.textContent = "SAL Heatmap (Capital Gain Mode)";
         legendTable.innerHTML = `
             <tr>
                 <td style="background: rgb(255, 215, 215); padding: 6px 8px;">< 1%</td>
@@ -387,7 +425,10 @@ function applyPreset(presetName) {
         clearColumnFilters();
 
         // Price
-        document.getElementById("filterPrice").value = preset.filters.maxPrice;
+        document.getElementById("filterPrice").value = preset.filters.maxPrice || "";
+
+        // Rating
+        document.getElementById("filterMinRating").value = preset.filters.minRating || "";
 
         // Maturity
         const today = new Date();
@@ -409,9 +450,9 @@ function applyPreset(presetName) {
         // Mode-specific filters
         document.getElementById("filterminYield").value = preset.filters.minYield || "";
         document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
-        document.getElementById("filterMinCagr").value = preset.filters.minCagr || "";
+        document.getElementById("filterMinSAL").value = preset.filters.minSAL || "";
 
-        currentMode = presetName.startsWith("cagr") ? "cagr" : "income";
+        currentMode = presetName.startsWith("sal") ? "sal" : "income";
         filterTable();
         updatePresetButtons(presetName);
         updateLegend();
@@ -421,14 +462,14 @@ function applyPreset(presetName) {
         if (presetName.startsWith("income"))
             sortTable(COL.CURR_YIELD, true);
         else
-            sortTable(COL.CAGR, true);
+            sortTable(COL.SAL, true);
 
         hideLoading();
     }, 100);
 }
 
 function updatePresetButtons(activePreset) {
-    const ids = ["cagrAggressive", "cagrConservative", "incomeHigh", "incomeModerate"];
+    const ids = ["salAggressive", "salConservative", "incomeHigh", "incomeModerate"];
     ids.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle("active", id === activePreset);
@@ -441,5 +482,5 @@ function updatePresetButtons(activePreset) {
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
     setDefaultMaturityFilters();
-    applyPreset("cagrAggressive");
+    applyPreset("salAggressive");
 });

@@ -86,6 +86,25 @@
             </#list>
             </select>
         </th>
+        <th onclick="sortTable(COL.RATING)">Rating<span class="arrow"></span><br>
+            <select id="filterMinRating" onchange="filterTable()" onclick="event.stopPropagation()">
+                <option value="">All</option>
+                <option value="AAA">≥ AAA</option>
+                <option value="AA+">≥ AA+</option>
+                <option value="AA">≥ AA</option>
+                <option value="AA-">≥ AA-</option>
+                <option value="A+">≥ A+</option>
+                <option value="A">≥ A</option>
+                <option value="A-">≥ A-</option>
+                <option value="BBB+">≥ BBB+</option>
+                <option value="BBB">≥ BBB</option>
+                <option value="BBB-">≥ BBB-</option>
+                <option value="BB+">≥ BB+</option>
+                <option value="BB">≥ BB</option>
+                <option value="B+">≥ B+</option>
+                <option value="B">≥ B</option>
+            </select>
+        </th>
         <th onclick="sortTable(COL.PRICE_R)">Price (${reportCurrency})<span class="arrow"></span></th>
         <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
         <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
@@ -101,10 +120,10 @@
             <input id="filterMinCapitalAtMat" type="number" step="500" placeholder="min"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
-        <th title="Annual Growth % (Compound Annual Growth Rate)"
-            onclick="sortTable(COL.CAGR)">
-            CAGR (%)<span class="arrow"></span><br>
-            <input id="filterMinCagr" type="number" step="0.5" placeholder="min %"
+        <th title="Simple Annual Yield % (Annual coupon income as a percentage of the bond’s current price)"
+            onclick="sortTable(COL.SAL)">
+            SAL (%)<span class="arrow"></span><br>
+            <input id="filterMinSAL" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
     </tr>
@@ -119,20 +138,23 @@
             ${b.getPrice()?string["0.00"]}
         </td>
         <td>${b.getCurrency()}</td>
-        <td>
-            ${b.getPriceEur()?string["0.00"]}
-        </td>
-        <td>${b.getCouponPct()?string["0.00"]}</td>
-        <td>${b.getMaturity()}</td>
-        <td>
-            ${b.getCurrentYield()?string["0.00"]}
-        </td>
-        <td>
-            ${b.getFinalCapitalToMat()?string["0"]}
-        </td>
-        <td>
-            ${b.getCagr()?string["0.00"]}
-        </td>
+        <td class="<#if (b.getRating() == "AAA" || b.getRating() == "AA+" || b.getRating() == "AA")>good<#elseif (b.getRating()?starts_with("BBB"))>neutral<#else>bad</#if>">
+    <strong>${b.getRating()}</strong>
+    </td>
+    <td>
+        ${b.getPriceEur()?string["0.00"]}
+    </td>
+    <td>${b.getCouponPct()?string["0.00"]}</td>
+    <td>${b.getMaturity()}</td>
+    <td>
+        ${b.getCurrentYield()?string["0.00"]}
+    </td>
+    <td>
+        ${b.getFinalCapitalToMat()?string["0"]}
+    </td>
+    <td>
+        ${b.getSimpleAnnualYield()?string["0.00"]}
+    </td>
     </tr>
     </#list>
     </tbody>
@@ -140,7 +162,7 @@
 
 <!-- Legend for heatmap -->
 <div class="legend">
-    <div class="legend-title" id="legendTitle">CAGR Heatmap (Capital Gain Mode)</div>
+    <div class="legend-title" id="legendTitle">SAL Heatmap (Capital Gain Mode)</div>
     <table class="legend-table" id="legendTable">
         <tr>
             <td style="background: rgb(255, 215, 215);">< 1%</td>

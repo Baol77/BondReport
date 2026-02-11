@@ -1,42 +1,38 @@
 profiles:
-  - id: cagrAggressive
-    label: CAGR Aggressive
+  - id: salAggressive
+    label: SAL Aggressive
     emoji: "📈🔥"
-    description: Cheap bonds, 10–20y maturity, high CAGR.
+    description: Cheap bonds, 10y maturity, high SAL.
     filters:
-      maxPrice: 85
-      minMatYears: 10
-      maxMatYears: 20
-      minCapitalAtMat: 1800
-      minCagr: 3.5
+      minMatYears: 1
+      maxMatYears: 10
+      minSAL: 5.0
 
-  - id: cagrConservative
-    label: CAGR Conservative
+  - id: salConservative
+    label: SAL Conservative
     emoji: "📈🛡️"
-    description: Stable bonds, price near par, broad maturity range.
+    description: Stable bonds, 20y maturity, conservative SAL, minimum BBB+ rating.
     filters:
-      maxPrice: 105
-      minMatYears: 5
-      maxMatYears: 35
-      minCapitalAtMat: 1400
-      minCagr: 2.8
+      minMatYears: 1
+      maxMatYears: 20
+      minSAL: 4.0
+      minRating: BBB+
 
   - id: incomeHigh
     label: Income High
-    emoji: "💵📬"
-    description: Maximum immediate yield (coupons > 5%), medium-to-long duration..
+    emoji: "💵🔥"
+    description: Maximum immediate yield (>= 5% current yield), >20y maturity.
     filters:
-      maxPrice: 115
-      minMatYears: 15
-      maxMatYears: 35
-      minYield: 4.75
+      minMatYears: 20
+      maxMatYears: 40
+      minYield: 5.0
 
   - id: incomeModerate
     label: Income Moderate
     emoji: "💵🌱"
-    description: Steady and reliable yield with coupons above 4%.
+    description: Steady and reliable yield (>= 3.5% current yield), >20y maturity, minimum BBB+ rating.
     filters:
-      maxPrice: 115
-      minMatYears: 10
-      maxMatYears: 35
-      minYield: 4.0
+      minMatYears: 20
+      maxMatYears: 40
+      minYield: 3.5
+      minRating: BBB+

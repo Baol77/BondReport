@@ -4,10 +4,10 @@ public final class CountryNormalizer {
 
     private CountryNormalizer() {}
 
-    public static String normalize(String raw) {
-        if (raw == null) return "";
+    public static String normalize(String country) {
+        if (country == null) return "";
 
-        String upper = raw.toUpperCase()
+        String upper = country.toUpperCase()
             .replace("GREEN", "")
             .replace("BOND", "")
             .replace("BTPI", "ITALY")
@@ -18,7 +18,7 @@ public final class CountryNormalizer {
             .trim();
 
         return switch (upper) {
-            case "ITALY", "ITALIA", "REPUBLIC OF ITALY", "REPUBBLICA ITALIANA", "ITALYi", "ITALY ITALIA" -> "ITALIA";
+            case "ITALY", "ITALIA", "REPUBLIC OF ITALY", "REPUBBLICA ITALIANA", "ITALYI", "ITALY ITALIA" -> "ITALIA";
             case "GERMANY", "DEUTSCHLAND", "BUNDESREPUBLIK DEUTSCHLAND", "GERMANIA" -> "GERMANIA";
             case "FRANCE", "FRANCIA" -> "FRANCIA";
             case "SPAIN", "ESPANA", "SPAGNA" -> "SPAGNA";

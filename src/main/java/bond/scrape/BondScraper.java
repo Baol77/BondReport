@@ -62,7 +62,7 @@ public class BondScraper {
                 LocalDate maturity = LocalDate.parse(r.get("Data scadenza"));
 
                 String ccy = r.get("Divisa");
-                if (ccy.equals("NOK")) continue;
+                if (ccy.equals("NOK") || ccy.equals("SEK")) continue;
 
                 double price = parse(r.get("Prezzo di riferimento"));
 

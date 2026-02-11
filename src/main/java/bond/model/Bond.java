@@ -3,6 +3,7 @@ package bond.model;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,8 @@ public class Bond {
     LocalDate maturity;
     double currentYield;
     double finalCapitalToMat;
-    double cagr;
+    double simpleAnnualYield;
+    String rating;  // Rating based on issuer
 
     public Bond(String isin, String issuer, double price, String currency,
                 double priceEur, double couponPct,
@@ -29,5 +31,11 @@ public class Bond {
         this.couponPct = couponPct;
         this.maturity = maturity;
         this.currentYield = couponPct * 100 / priceEur;
+    }
+
+    public int getYearsToMaturity() {
+        if (maturity == null) return -1;
+        long days = ChronoUnit.DAYS.between(LocalDate.now(), maturity);
+        return (int)Math.max(0.1, days / 365.25);
     }
 }

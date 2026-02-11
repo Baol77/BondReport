@@ -26,7 +26,7 @@ public class BondCalculatorTest {
     public void testBuildBondStandard() {
         Bond b = calc.buildBond(
             "IT0001234567",
-            "Italy",
+            "Spain",
             98.0,
             "EUR",
             95.0,
@@ -35,11 +35,11 @@ public class BondCalculatorTest {
         );
 
         BondScoreEngine engine = new BondScoreEngine();
-        engine.estimateFinalCapitalAtMaturity(List.of(b), b.getCurrency());
+        engine.calculateBondScores(List.of(b), b.getCurrency());
 
         assertNotNull(b);
         assertEquals("IT0001234567", b.getIsin());
-        assertEquals("Italy", b.getIssuer());
+        assertEquals("Spain", b.getIssuer());
         assertEquals(4.21, b.getCurrentYield(), 0.01);
         assertTrue(b.getFinalCapitalToMat() > 0);
     }
@@ -50,11 +50,11 @@ public class BondCalculatorTest {
     @Test
     public void testHigherPriceLowerYield() {
         Bond cheap = calc.buildBond(
-            "X1", "Issuer", 90, "EUR", 900, 4,
+            "X1", "Italy", 90, "EUR", 900, 4,
             LocalDate.now().plusYears(10));
 
         Bond expensive = calc.buildBond(
-            "X2", "Issuer", 110, "EUR", 1100, 4,
+            "X2", "Italy", 110, "EUR", 1100, 4,
             LocalDate.now().plusYears(10));
 
         assertTrue(cheap.getCurrentYield() > expensive.getCurrentYield());
@@ -67,7 +67,7 @@ public class BondCalculatorTest {
     public void testChfYieldCalculation() {
         Bond b = calc.buildBond(
             "CH0000000001",
-            "Swiss",
+            "SVIZZERA",
             100,
             "CHF",
             900,
@@ -84,7 +84,7 @@ public class BondCalculatorTest {
     @Test
     public void testShortMaturityReturnsNull() {
         Bond b = calc.buildBond(
-            "X3", "Issuer", 100,  "EUR", 1000, 4,
+            "X3", "Francia", 100,  "EUR", 1000, 4,
             LocalDate.now().plusMonths(10)
         );
 
@@ -97,7 +97,7 @@ public class BondCalculatorTest {
     @Test
     public void testRounding() {
         Bond b = calc.buildBond(
-            "X4", "Issuer", 100,  "EUR", 333.3333, 4,
+            "X4", "Romania", 100,  "EUR", 333.3333, 4,
             LocalDate.now().plusYears(10)
         );
 
@@ -110,11 +110,11 @@ public class BondCalculatorTest {
     @Test
     public void testCapitalToMaturityPositive() {
         Bond b = calc.buildBond(
-            "X5", "Issuer", 95, "EUR", 930, 4,
+            "X5", "Deutschland", 95, "EUR", 930, 4,
             LocalDate.now().plusYears(12));
 
         BondScoreEngine engine = new BondScoreEngine();
-        engine.estimateFinalCapitalAtMaturity(List.of(b), b.getCurrency());
+        engine.calculateBondScores(List.of(b), b.getCurrency());
 
         assertTrue(b.getFinalCapitalToMat() > 1000);
     }
@@ -125,12 +125,12 @@ public class BondCalculatorTest {
     @Test
     public void testZeroCouponBond() {
         Bond b = calc.buildBond(
-            "X6", "Issuer", 70,  "EUR", 700, 0,
+            "X6", "Slovenia", 70,  "EUR", 700, 0,
             LocalDate.now().plusYears(10)
         );
 
         BondScoreEngine engine = new BondScoreEngine();
-        engine.estimateFinalCapitalAtMaturity(List.of(b), b.getCurrency());
+        engine.calculateBondScores(List.of(b), b.getCurrency());
 
         assertEquals(0.0, b.getCurrentYield(), 0.0001);
         assertTrue(b.getFinalCapitalToMat() > 1000);

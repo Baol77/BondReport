@@ -34,7 +34,7 @@ public class BondApp {
         System.out.println("📊 Loaded " + bonds.size() + " bonds\n");
 
         BondScoreEngine engine = new BondScoreEngine();
-        engine.estimateFinalCapitalAtMaturity(bonds, "EUR");
+        engine.calculateBondScores(bonds, "EUR");
 
         HtmlReportWriter w = new HtmlReportWriter();
         w.writeEur(bonds, "docs/eur/index.html");
