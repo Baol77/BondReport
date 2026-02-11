@@ -145,7 +145,7 @@
         ${b.getPriceEur()?string["0.00"]}
     </td>
     <td>${b.getCouponPct()?string["0.00"]}</td>
-    <td>${b.getMaturity()}</td>
+    <td style="white-space: nowrap;">${b.getMaturity()}</td>
     <td>
         ${b.getCurrentYield()?string["0.00"]}
     </td>

@@ -45,6 +45,10 @@ button {
     min-width: 200px;
 }
 
+#bondTable input[type="text"] {
+    max-width: 160px;
+}
+
 /* =======================
    PROFILE PRESETS
 ======================= */
