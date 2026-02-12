@@ -1,27 +1,33 @@
 profiles:
-  - id: salAggressive
-    label: SAL Aggressive
+  - id: sayAggressive
+    label: SAY Aggressive
     emoji: "📈🔥"
-    description: Cheap bonds, 10y maturity, high SAL.
+    description: Cheap bonds, 10y maturity, high SAY.
+    profileType: SAY
+    sortedBy: SAY
     filters:
       minMatYears: 1
       maxMatYears: 10
-      minSAL: 5.0
+      minSAY: 5.0
 
-  - id: salConservative
-    label: SAL Conservative
+  - id: sayConservative
+    label: SAY Conservative
     emoji: "📈🛡️"
-    description: Stable bonds, 20y maturity, conservative SAL, minimum BBB+ rating.
+    description: Stable bonds, 20y maturity, conservative SAY, minimum BBB+ rating.
+    profileType: SAY
+    sortedBy: SAY
     filters:
       minMatYears: 1
       maxMatYears: 20
-      minSAL: 4.0
+      minSAY: 4.0
       minRating: BBB+
 
   - id: incomeHigh
     label: Income High
     emoji: "💵🔥"
     description: Maximum immediate yield (>= 5% current yield), >20y maturity.
+    profileType: income
+    sortedBy: CURR_YIELD
     filters:
       minMatYears: 20
       maxMatYears: 40
@@ -31,6 +37,8 @@ profiles:
     label: Income Moderate
     emoji: "💵🌱"
     description: Steady and reliable yield (>= 3.5% current yield), >20y maturity, minimum BBB+ rating.
+    profileType: income
+    sortedBy: CURR_YIELD
     filters:
       minMatYears: 20
       maxMatYears: 40

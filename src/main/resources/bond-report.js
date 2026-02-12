@@ -12,7 +12,7 @@ const COL = {
     MATURITY: 7,
     CURR_YIELD: 8,
     CAPITAL_AT_MAT: 9,
-    SAL: 10
+    SAY: 10
 };
 
 /* =======================
@@ -44,9 +44,10 @@ const RATING_RANK = {
 /* =======================
    GLOBAL STATE
 ======================= */
-let currentSortCol = COL.SAL;
+let currentSortCol = COL.SAY;
 let currentSortDir = "desc";
-let currentMode = "sal"; // "sal" or "income"
+let currentMode = "say"; // "say" or "income"
+let customProfileIds = []; // Track custom profile IDs for highlighting
 
 /* =======================
    UTILITY FUNCTIONS
@@ -70,7 +71,7 @@ function sortTable(col, initial) {
     const rows = Array.from(tbody.rows);
 
     const ths = table.tHead.rows[0].cells;
-    let dir = "asc";
+    let dir = "desc";  // Changed default from "asc" to "desc"
 
     if (!initial && col === currentSortCol) {
         dir = currentSortDir === "asc" ? "desc" : "asc";
@@ -109,14 +110,15 @@ function sortTable(col, initial) {
 function filterTable() {
     const isin = document.getElementById("filterIsin").value.toLowerCase();
     const issuer = document.getElementById("filterIssuer").value.toLowerCase();
-    const priceMax = parseFloat(document.getElementById("filterPrice").value || "0");
+    const priceMin = parseFloat(document.getElementById("filterPriceMin").value || "0");
+    const priceMax = parseFloat(document.getElementById("filterPriceMax").value || "0");
     const currency = document.getElementById("filterCurrency").value;
     const minRating = document.getElementById("filterMinRating").value;
     const minMat = document.getElementById("filterMinMat").value;
     const maxMat = document.getElementById("filterMaxMat").value;
     const minYield = parseFloat(document.getElementById("filterminYield").value || "0");
     const minCapitalAtMat = parseFloat(document.getElementById("filterMinCapitalAtMat").value || "0");
-    const minSAL = parseFloat(document.getElementById("filterMinSAL").value || "0");
+    const minSAY = parseFloat(document.getElementById("filterMinSAY").value || "0");
 
     const rows = document.querySelectorAll("#bondTable tbody tr");
 
@@ -129,11 +131,12 @@ function filterTable() {
         const mat = r.cells[COL.MATURITY].innerText;
         const currCoupon = parseNum(r.cells[COL.CURR_YIELD].innerText);
         const capitalAtMat = parseNum(r.cells[COL.CAPITAL_AT_MAT].innerText);
-        const sal = parseNum(r.cells[COL.SAL].innerText);
+        const say = parseNum(r.cells[COL.SAY].innerText);
 
         let ok = true;
         if (isin && isinCell.indexOf(isin) === -1) ok = false;
         if (issuer && issuerCell.indexOf(issuer) === -1) ok = false;
+        if (priceMin && priceMin > priceCell) ok = false;
         if (priceMax && priceMax < priceCell) ok = false;
         if (currency && currencyCell !== currency) ok = false;
 
@@ -148,7 +151,7 @@ function filterTable() {
         if (maxMat && mat > maxMat) ok = false;
         if (currCoupon < minYield) ok = false;
         if (capitalAtMat < minCapitalAtMat) ok = false;
-        if (sal < minSAL) ok = false;
+        if (say < minSAY) ok = false;
 
         r.style.display = ok ? "" : "none";
     });
@@ -159,12 +162,13 @@ function filterTable() {
 function clearColumnFilters() {
     document.getElementById("filterIsin").value = "";
     document.getElementById("filterIssuer").value = "";
-    document.getElementById("filterPrice").value = "";
+    document.getElementById("filterPriceMin").value = "";
+    document.getElementById("filterPriceMax").value = "";
     document.getElementById("filterCurrency").value = "";
     document.getElementById("filterMinRating").value = "";
     document.getElementById("filterminYield").value = "";
     document.getElementById("filterMinCapitalAtMat").value = "";
-    document.getElementById("filterMinSAL").value = "";
+    document.getElementById("filterMinSAY").value = "";
     setDefaultMaturityFilters();
     filterTable();
     updatePresetButtons(null);
@@ -225,7 +229,7 @@ function applyHeatmap() {
                 bg = "rgb(50, 180, 50)";
             }
         } else {
-            // SAL MODE: Light coloring
+            // SAY MODE: Light coloring
             if (v <= 1.5) {
                 bg = "rgba(255, 215, 215, 0.3)";
             } else if (v < 3.0) {
@@ -252,37 +256,37 @@ function applyHeatmap() {
         }
         r.cells[COL.CAPITAL_AT_MAT].style.backgroundColor = bg2;
 
-        // === SAL ===
-        const sal = parseNum(r.cells[COL.SAL].innerText);
+        // === SAY (Simple Annual Yield) ===
+        const say = parseNum(r.cells[COL.SAY].innerText);
         let bg3;
 
-        if (currentMode === "sal") {
-            // SAL MODE: Strong coloring
-            if (sal <= 1.0) {
+        if (currentMode === "say") {
+            // SAY MODE: Strong coloring
+            if (say <= 1.0) {
                 bg3 = "rgb(" + red.join(",") + ")";
-            } else if (sal <= 2.5) {
-                bg3 = lerpColor(red, yellow, (sal - 1.0) / 1.5);
-            } else if (sal <= 3.5) {
-                bg3 = lerpColor(yellow, green, (sal - 2.5) / 1.0);
-            } else if (sal <= 4.5) {
+            } else if (say <= 2.5) {
+                bg3 = lerpColor(red, yellow, (say - 1.0) / 1.5);
+            } else if (say <= 3.5) {
+                bg3 = lerpColor(yellow, green, (say - 2.5) / 1.0);
+            } else if (say <= 4.5) {
                 const darkGreen = [100, 200, 100];
-                bg3 = lerpColor(green, darkGreen, (sal - 3.5) / 1.0);
+                bg3 = lerpColor(green, darkGreen, (say - 3.5) / 1.0);
             } else {
                 bg3 = "rgb(50, 180, 50)";
             }
         } else {
             // INCOME MODE: Light coloring
-            if (sal <= 1.0) {
+            if (say <= 1.0) {
                 bg3 = "rgba(255, 215, 215, 0.2)";
-            } else if (sal <= 2.5) {
+            } else if (say <= 2.5) {
                 bg3 = "rgba(255, 245, 190, 0.2)";
-            } else if (sal <= 3.5) {
+            } else if (say <= 3.5) {
                 bg3 = "rgba(215, 245, 215, 0.2)";
             } else {
                 bg3 = "rgba(215, 245, 215, 0.3)";
             }
         }
-        r.cells[COL.SAL].style.backgroundColor = bg3;
+        r.cells[COL.SAY].style.backgroundColor = bg3;
     });
 }
 
@@ -324,7 +328,7 @@ function updateLegend() {
             </tr>
         `;
     } else {
-        legendTitle.textContent = "SAL Heatmap (Capital Gain Mode)";
+        legendTitle.textContent = "SAY Heatmap (Capital Gain Mode)";
         legendTable.innerHTML = `
             <tr>
                 <td style="background: rgb(255, 215, 215); padding: 6px 8px;">< 1%</td>
@@ -378,6 +382,8 @@ function setDefaultMaturityFilters() {
           ${p.id}: {
             name: "${p.label}",
             description: "${p.description}",
+            profileType: "${p.profileType!'SAY'}",
+            sortedBy: "${p.sortedBy!'SAY'}",
             filters: {
             <#list p.filters?keys as k>
               ${k}: ${p.filters[k]?is_number?then(p.filters[k]?c, '"' + p.filters[k] + '"')}<#if k_has_next>,</#if>
@@ -452,6 +458,12 @@ function parseYamlProfiles(yamlText) {
             else if (line.startsWith('description:')) {
                 currentProfile.description = line.split(':')[1].trim().replace(/['"]/g, '');
             }
+            else if (line.startsWith('profileType:')) {
+                currentProfile.profileType = line.split(':')[1].trim().replace(/['"]/g, '');
+            }
+            else if (line.startsWith('sortedBy:')) {
+                currentProfile.sortedBy = line.split(':')[1].trim().replace(/['"]/g, '');
+            }
             else if (line.startsWith('filters:')) {
                 inFilters = true;
             }
@@ -490,12 +502,20 @@ function mergeCustomProfiles(customProfiles) {
     const customButtons = presetsContainer.querySelectorAll('.preset-button.custom');
     customButtons.forEach(btn => btn.remove());
 
+    // Clear and rebuild custom profile IDs list
+    customProfileIds = [];
+
     // Add new custom profile buttons before reset button
     customProfiles.forEach(profile => {
-        // Add to PRESETS object
+        // Track this custom profile ID
+        customProfileIds.push(profile.id);
+
+        // Add to PRESETS object with profileType and sortedBy
         PRESETS[profile.id] = {
             name: profile.name || profile.id,
             description: profile.description || 'Custom profile',
+            profileType: profile.profileType || 'SAY',      // NEW: Capture profileType
+            sortedBy: profile.sortedBy || 'SAY',            // NEW: Capture sortedBy
             filters: profile.filters
         };
 
@@ -506,7 +526,7 @@ function mergeCustomProfiles(customProfiles) {
         button.onclick = () => applyPreset(profile.id);
         button.title = profile.description || 'Custom profile';
 
-        const emoji = profile.emoji || '\ud83c\udfaf'; // 🎯
+        const emoji = profile.emoji || '🎯';
         button.textContent = emoji + ' ' + (profile.name || profile.id);
 
         // Insert before reset button
@@ -552,7 +572,7 @@ function applyPreset(presetName) {
         clearColumnFilters();
 
         // Price
-        document.getElementById("filterPrice").value = preset.filters.maxPrice || "";
+        document.getElementById("filterPriceMax").value = preset.filters.maxPrice || "";
 
         // Rating
         document.getElementById("filterMinRating").value = preset.filters.minRating || "";
@@ -577,30 +597,58 @@ function applyPreset(presetName) {
         // Mode-specific filters
         document.getElementById("filterminYield").value = preset.filters.minYield || "";
         document.getElementById("filterMinCapitalAtMat").value = preset.filters.minCapitalAtMat || "";
-        document.getElementById("filterMinSAL").value = preset.filters.minSAL || "";
+        document.getElementById("filterMinSAY").value = preset.filters.minSAY || "";
 
-        currentMode = presetName.startsWith("sal") ? "sal" : "income";
+        // Apply profileType from preset (SAY or income)
+        currentMode = preset.profileType ? preset.profileType.toLowerCase() : "say";
+
         filterTable();
         updatePresetButtons(presetName);
         updateLegend();
         applyHeatmap();
         document.getElementById("presetDesc").textContent = "✓ " + preset.description;
 
-        if (presetName.startsWith("income"))
-            sortTable(COL.CURR_YIELD, true);
-        else
-            sortTable(COL.SAL, true);
+        // Apply sortedBy property: resolve column name to COL constant
+        let sortColumn = COL.SAY; // default
+        if (preset.sortedBy) {
+            const sortMap = {
+                "SAY": COL.SAY,
+                "CURR_YIELD": COL.CURR_YIELD,
+                "CAPITAL_AT_MAT": COL.CAPITAL_AT_MAT,
+                "PRICE": COL.PRICE,
+                "MATURITY": COL.MATURITY,
+                "ISIN": COL.ISIN,
+                "ISSUER": COL.ISSUER,
+                "COUPON": COL.COUPON,
+                "RATING": COL.RATING,
+                "PRICE_R": COL.PRICE_R,
+                "CURRENCY": COL.CURRENCY
+            };
+            sortColumn = sortMap[preset.sortedBy] !== undefined ? sortMap[preset.sortedBy] : COL.SAY;
+        }
+
+        // Always use DESC as initial sort direction
+        currentSortDir = "desc";
+        sortTable(sortColumn, true);
 
         hideLoading();
     }, 100);
 }
 
 function updatePresetButtons(activePreset) {
-    const ids = ["salAggressive", "salConservative", "incomeHigh", "incomeModerate"];
+    // Update built-in preset buttons
+    const ids = ["sayAggressive", "sayConservative", "incomeHigh", "incomeModerate"];
     ids.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle("active", id === activePreset);
     });
+
+    // Update custom profile buttons
+    customProfileIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.toggle("active", id === activePreset);
+    });
+
     document.getElementById("preset-reset").classList.remove("active");
 }
 
@@ -609,5 +657,5 @@ function updatePresetButtons(activePreset) {
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
     setDefaultMaturityFilters();
-    applyPreset("salAggressive");
+    applyPreset("sayAggressive");
 });

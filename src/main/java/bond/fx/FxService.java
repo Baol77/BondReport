@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
+import java.util.TreeMap;
 
 /**
  * Service to manage Foreign Exchange (FX) rates using the European Central Bank (ECB) as a source.
@@ -20,6 +21,26 @@ public class FxService {
 
     /** Internal cache to store rates after the first successful fetch */
     private Map<String, Double> cachedRates;
+
+    /** Risk model mapping years to maturity to capital and coupon haircuts */
+    private record RiskThreshold(double capitalHaircut, double couponHaircut) {}
+
+    private static final TreeMap<Integer, RiskThreshold> RISK_MODEL = new TreeMap<>();
+    static {
+        // Key represents the maximum year of the threshold level
+        RISK_MODEL.put(5,  new RiskThreshold(0.10, 0.050));
+        RISK_MODEL.put(10, new RiskThreshold(0.15, 0.075));
+        RISK_MODEL.put(15, new RiskThreshold(0.20, 0.100));
+        RISK_MODEL.put(20, new RiskThreshold(0.25, 0.125));
+        RISK_MODEL.put(Integer.MAX_VALUE, new RiskThreshold(0.30, 0.150));
+    }
+
+    /** Investment phases differently impacted by currency volatility */
+    public enum FxPhase {
+        BUY,      // Time of purchase (Current SPOT rate)
+        COUPON,   // Interest reception (Medium term)
+        MATURITY  // Capital repayment (Long term)
+    }
 
     /** Private constructor to enforce Singleton pattern */
     private FxService() {}
@@ -103,5 +124,34 @@ public class FxService {
         double rateTo = rates.getOrDefault(to, 1.0);
 
         return rateFrom / rateTo;
+    }
+
+    /**
+     * Calculates the expected FX multiplier with risk adjustment based on the investment phase and maturity.
+     * Applies a "Stress Test" logic to exchange rates where longer horizons receive stronger penalties
+     * to simulate a depreciation of the bond's currency.
+     *
+     * @param bondCurrency   The issuer's currency.
+     * @param reportCurrency The investor's reference currency.
+     * @param fxPhase        The investment phase (BUY, COUPON, or MATURITY).
+     * @param yearsToMaturity Years until bond maturity.
+     * @return The exchange rate adjusted by a risk coefficient based on maturity.
+     */
+    public static double fxExpectedMultiplier(String bondCurrency, String reportCurrency, FxPhase fxPhase, int yearsToMaturity) {
+        // No FX risk if currencies are identical
+        if (bondCurrency.equalsIgnoreCase(reportCurrency)) return 1.0;
+
+        double currentFx = getExchangeRate(reportCurrency, bondCurrency);
+
+        if (fxPhase == FxPhase.BUY) return currentFx;
+
+        // Retrieve the appropriate risk threshold for the given maturity
+        RiskThreshold threshold = RISK_MODEL.ceilingEntry(yearsToMaturity).getValue();
+
+        double haircut = (fxPhase == FxPhase.COUPON)
+            ? threshold.couponHaircut()
+            : threshold.capitalHaircut();
+
+        return currentFx * (1.0 - haircut);
     }
 }

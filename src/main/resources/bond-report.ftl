@@ -81,7 +81,9 @@
                    onclick="event.stopPropagation()" oninput="filterTable()">
         </th>
         <th onclick="sortTable(COL.PRICE)">Price<span class="arrow"></span><br>
-            <input id="filterPrice" type="number" step="10" placeholder="max"
+            <input id="filterPriceMin" type="number" step="10" placeholder="min"
+                   onclick="event.stopPropagation()" oninput="filterTable()" style="width:60px;">
+            <input id="filterPriceMax" type="number" step="10" placeholder="max"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:60px;">
         </th>
         <th onclick="sortTable(COL.CURRENCY)">Currency<span class="arrow"></span><br>
@@ -127,9 +129,9 @@
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
         <th title="Simple Annual Yield % (Annual coupon income as a percentage of the bond’s current price)"
-            onclick="sortTable(COL.SAL)">
-            SAL (%)<span class="arrow"></span><br>
-            <input id="filterMinSAL" type="number" step="0.5" placeholder="min %"
+            onclick="sortTable(COL.SAY)">
+            SAY (%)<span class="arrow"></span><br>
+            <input id="filterMinSAY" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
     </tr>
@@ -168,7 +170,7 @@
 
 <!-- Legend for heatmap -->
 <div class="legend">
-    <div class="legend-title" id="legendTitle">SAL Heatmap (Capital Gain Mode)</div>
+    <div class="legend-title" id="legendTitle">SAY Heatmap (Capital Gain Mode)</div>
     <table class="legend-table" id="legendTable">
         <tr>
             <td style="background: rgb(255, 215, 215);">< 1%</td>
