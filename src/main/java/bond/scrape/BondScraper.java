@@ -16,7 +16,9 @@ import java.util.*;
  */
 public class BondScraper {
 
-    /** Target URL for European Sovereign Bond monitor. */
+    /**
+     * Target URL for European Sovereign Bond monitor.
+     */
     private static final String SOURCE =
         "https://www.simpletoolsforinvestors.eu/monitor_info.php?monitor=europa&yieldtype=G&timescale=DUR";
 
@@ -29,6 +31,7 @@ public class BondScraper {
     /**
      * Connects to the source, parses the table, and filters bonds based on specific criteria.
      * * @param fx Map of exchange rates (Currency -> Rate) used for EUR conversion.
+     *
      * @return A list of valid, non-zero coupon bonds.
      * @throws Exception If connection or parsing fails.
      */
@@ -62,6 +65,10 @@ public class BondScraper {
             try {
                 String d = r.get("Descrizione");
                 String isin = r.get("Codice ISIN");
+
+                // Avoid buy constraints of high quantities
+                int lottoMinimo = Integer.parseInt(r.get("Lotto minimo"));
+                if (lottoMinimo > 5000) continue;
 
                 // Clean Issuer: Extract text before the first digit (usually the date/coupon start)
                 // Example: "ITALY 4.5% 2026" -> "ITALY"
@@ -102,6 +109,7 @@ public class BondScraper {
     /**
      * Sanitizes numeric strings by replacing commas and removing currency symbols.
      * * @param s Raw string from the table (e.g., "102,45 €")
+     *
      * @return Parsed double
      */
     private static double parse(String s) {
