@@ -1,7 +1,7 @@
-# Custom Bond Profiles - v4.0 Template
+# Custom Bond Profiles - v3.0 Template
 #
 # This file demonstrates how to create custom investment profiles
-# that can be imported into the Bond Analytics report (v4.0+).
+# that can be imported into the Bond Analytics report (v3.0+).
 #
 # YAML Format Requirements:
 # - Start with "profiles:" header
@@ -39,7 +39,7 @@ profiles:
   - id: longQuality
     label: Long Quality
     emoji: "🏛️📈"
-    description: Long-term (25-40y) investment-grade bonds with 4%+ yield
+    description: Long-term (25-40y) A- rated bonds with 4%+ current yield
     profileType: income
     sortedBy: CURR_YIELD
     filters:
@@ -48,11 +48,11 @@ profiles:
       minYield: 4.0
       minRating: A-
 
-  # Example 3: Balanced Total Return
-  - id: balancedReturn
-    label: Balanced Return
+  # Example 3: Medium-Term SAY Focus
+  - id: mediumSay
+    label: Medium SAY Focus
     emoji: "⚖️💼"
-    description: Medium-term (5-15y) bonds with 4.5%+ SAY, BBB+ minimum
+    description: Medium-term (5-15y) bonds with 4.5%+ SAY and BBB+ minimum rating
     profileType: SAY
     sortedBy: SAY
     filters:
@@ -77,7 +77,7 @@ profiles:
   - id: premiumBonds
     label: Premium Bonds
     emoji: "👑✨"
-    description: Premium-priced bonds (>105) with good current yield
+    description: Premium-priced bonds (105-120) with 3.5%+ current yield
     profileType: income
     sortedBy: CURR_YIELD
     filters:
@@ -104,7 +104,7 @@ profiles:
   - id: aggressiveGrowth
     label: Aggressive Growth
     emoji: "🚀📈"
-    description: Short to medium-term (2-12y) with maximum SAY focus
+    description: Short to medium-term (2-12y) with maximum SAY focus (5.5%+ minimum)
     profileType: SAY
     sortedBy: SAY
     filters:
@@ -116,7 +116,7 @@ profiles:
   - id: retirementIncome
     label: Retirement Income
     emoji: "🏖️💵"
-    description: Long-term stable income (20-35y) with quality focus
+    description: Long-term stable income (20-35y) with 4%+ yield and BBB+ minimum
     profileType: income
     sortedBy: CURR_YIELD
     filters:
@@ -138,11 +138,11 @@ profiles:
       minMatYears: 3
       maxMatYears: 20
 
-  # Example 10: Investment Grade Only
-  - id: investmentGrade
-    label: Investment Grade
+  # Example 10: Investment Grade Focus
+  - id: investmentGradeFocus
+    label: Investment Grade Focus
     emoji: "🛡️📊"
-    description: BBB minimum rating with balanced SAY and yield
+    description: BBB minimum rating with 3.5%+ SAY focus
     profileType: SAY
     sortedBy: SAY
     filters:
