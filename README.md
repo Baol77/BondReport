@@ -1,10 +1,12 @@
 # Sovereign Bond Analytics Platform
 
-A comprehensive Java application for analyzing and scoring sovereign bonds with **SAY (Simple Annual Yield)** rankings, credit ratings, preset investment profiles, FX risk assessment, and dual-mode reporting.
+A comprehensive Java application for analyzing and scoring sovereign bonds with **SAY (Simple Annual Yield)** rankings,
+credit ratings, preset investment profiles, FX risk assessment, and dual-mode reporting.
 
 ## 🎯 Overview
 
 This platform analyzes sovereign bonds across multiple currencies and generates interactive reports featuring:
+
 - **Dual-Mode Analysis**: Capital Gain (SAY-focused) or Income (Current Yield-focused)
 - **Price Range Filtering**: Filter bonds by minimum and maximum price for flexible portfolio construction
 - **4 Preset Investment Profiles**: Quick-start filters for different investor types with customizable profile types
@@ -19,11 +21,13 @@ This platform analyzes sovereign bonds across multiple currencies and generates 
 ## ✨ Recent Enhancements (v4.0+)
 
 ### 1. **Price Range Filtering**
+
 - Added **minimum price filter** (`priceMin`) alongside the existing maximum price filter
 - Unified filtering UI with separate min/max inputs in the Price column header
 - Enables precise portfolio construction for specific price ranges
 
 ### 2. **Improved FX Risk Modeling**
+
 - Moved `fxExpectedMultiplier()` from `BondScoreEngine` to `FxService`
 - Implemented **RiskThreshold** record with maturity-based haircuts:
     - **0-5 years**: 10% capital haircut, 5% coupon haircut
@@ -35,12 +39,14 @@ This platform analyzes sovereign bonds across multiple currencies and generates 
 - Enhanced documentation and centralized FX logic
 
 ### 3. **Custom Profile Enhancements**
+
 - Added `sortedBy` property to define default sort column per profile (e.g., "SAY", "CURR_YIELD")
 - Added `profileType` property to specify profile behavior: `"SAY"` or `"income"`
 - Enables more granular control over preset behavior
 - YAML format fully supports new properties for custom profile imports
 
 ### 4. **Terminology Correction**
+
 - Renamed **SAL** → **SAY** throughout the codebase:
     - JavaScript column identifier: `COL.SAY`
     - Filter element IDs: `filterMinSAY`
@@ -56,7 +62,9 @@ This platform analyzes sovereign bonds across multiple currencies and generates 
 Each profile now includes `profileType` and `sortedBy` properties:
 
 #### 1. **📈🔥 SAY Aggressive** (Maximum Returns)
+
 *Best for: Risk-tolerant investors seeking maximum total return*
+
 - **Profile Type**: SAY (Capital Gain)
 - **Sort By**: SAY (descending)
 - **Time Horizon**: 1-10 years (short to medium term)
@@ -65,7 +73,9 @@ Each profile now includes `profileType` and `sortedBy` properties:
 - **Typical Results**: ~15-25 high-yield bonds
 
 #### 2. **📈🛡️ SAY Conservative** (Quality + Returns)
+
 *Best for: Balanced investors wanting solid returns with credit safety*
+
 - **Profile Type**: SAY (Capital Gain)
 - **Sort By**: SAY (descending)
 - **Time Horizon**: 1-20 years (short to long term)
@@ -75,7 +85,9 @@ Each profile now includes `profileType` and `sortedBy` properties:
 - **Typical Results**: ~50-80 investment-grade bonds
 
 #### 3. **💵🔥 Income High** (Maximum Cash Flow)
+
 *Best for: Income-focused investors needing high annual payments*
+
 - **Profile Type**: income
 - **Sort By**: CURR_YIELD (descending)
 - **Time Horizon**: 20-40 years (long term)
@@ -84,7 +96,9 @@ Each profile now includes `profileType` and `sortedBy` properties:
 - **Typical Results**: ~10-20 high-income bonds
 
 #### 4. **💵🌱 Income Moderate** (Balanced Income + Quality)
+
 *Best for: Conservative income investors prioritizing safety*
+
 - **Profile Type**: income
 - **Sort By**: CURR_YIELD (descending)
 - **Time Horizon**: 20-40 years (long term)
@@ -98,12 +112,14 @@ Each profile now includes `profileType` and `sortedBy` properties:
 ### Toggle Between Two Investment Approaches
 
 **Capital Gain Mode (Default - SAY Focus)**
+
 - Emphasizes total return potential
 - Color gradient from red (SAY < 1%) → yellow (1-2.5%) → green (2.5%+)
 - Strong color intensity for maximum visibility
 - Best for growth-oriented investors
 
 **Income Mode (Current Yield Focus)**
+
 - Emphasizes immediate cash flow
 - Lighter color palette for sustainable viewing
 - Shows coupon-driven returns
@@ -144,6 +160,7 @@ profiles:
 ### Why FX Risk Matters for International Bonds
 
 When investing in non-EUR bonds, three critical phases face currency risk:
+
 1. **BUY Phase**: No haircut (immediate transaction)
 2. **COUPON Phase**: Progressive haircut as coupons arrive (moderate risk)
 3. **MATURITY Phase**: Larger haircut on principal repayment (long-term risk)
@@ -153,14 +170,23 @@ When investing in non-EUR bonds, three critical phases face currency risk:
 The FX risk model applies maturity-dependent haircuts:
 
 ```java
-RISK_MODEL.put(5,  new RiskThreshold(0.10, 0.050));    // 0-5 years
-RISK_MODEL.put(10, new RiskThreshold(0.15, 0.075));    // 5-10 years
-RISK_MODEL.put(15, new RiskThreshold(0.20, 0.100));    // 10-15 years
-RISK_MODEL.put(20, new RiskThreshold(0.25, 0.125));    // 15-20 years
-RISK_MODEL.put(Integer.MAX_VALUE, new RiskThreshold(0.30, 0.150));  // 20+ years
+RISK_MODEL.put(5,new RiskThreshold(0.10, 0.050));    // 0-5 years
+    RISK_MODEL.
+
+put(10,new RiskThreshold(0.15, 0.075));    // 5-10 years
+    RISK_MODEL.
+
+put(15,new RiskThreshold(0.20, 0.100));    // 10-15 years
+    RISK_MODEL.
+
+put(20,new RiskThreshold(0.25, 0.125));    // 15-20 years
+    RISK_MODEL.
+
+put(Integer.MAX_VALUE, new RiskThreshold(0.30, 0.150));  // 20+ years
 ```
 
 **Example**: A 7-year USD bond gets:
+
 - Coupon haircut: 7.5%
 - Capital haircut: 15%
 
@@ -190,18 +216,21 @@ src/main/resources/
 ### Key Classes
 
 #### FxService (Enhanced in v4.0)
+
 - **Responsibility**: Manage FX rates and apply risk-based adjustments
 - **New Static Method**: `fxExpectedMultiplier()`
 - **New Fields**: `RISK_MODEL` (TreeMap), `RiskThreshold` record
 - **Maturity-Aware**: Applies haircuts based on bond years-to-maturity
 
 #### BondScoreEngine (Simplified in v4.0)
+
 - **Responsibility**: Calculate bond scores (Final Capital and SAY)
 - **Change**: Now delegates FX risk calculations to `FxService`
 - **Cleaner**: Removed internal `fxExpectedMultiplier()` method
 - **Benefit**: Separation of concerns and code reuse
 
 #### BondProfile (Extended in v4.0)
+
 - **New Property**: `sortedBy` (default column to sort by)
 - **New Property**: `profileType` ("SAY" or "income")
 - **Use Case**: Enables profiles to control UI behavior
@@ -223,6 +252,7 @@ mvn javadoc:javadoc
 ## 🌍 Supported Currencies
 
 The platform pulls real-time FX rates from the European Central Bank (ECB) and supports:
+
 - EUR, USD, GBP, CHF, SEK, and other major currencies
 - Automatic rate caching (refreshed on demand)
 - Fallback to 1:1 for unknown currencies
@@ -230,6 +260,7 @@ The platform pulls real-time FX rates from the European Central Bank (ECB) and s
 ## 📈 Metrics Explained
 
 ### SAY (Simple Annual Yield) %
+
 The total return per year as a percentage of the bond's current purchase price:
 
 ```
@@ -237,11 +268,13 @@ SAY = (Annual Coupon Income + Capital Gain/Loss per Year) / Purchase Price
 ```
 
 **Example**: A €100 bond yielding 5% coupons with €2 annual appreciation:
+
 ```
 SAY = (5 + 2) / 100 = 7%
 ```
 
 ### Current Yield %
+
 Immediate income from the bond's coupon relative to current price:
 
 ```
@@ -249,11 +282,13 @@ Current Yield = (Annual Coupon / Current Price) × 100
 ```
 
 ### Final Capital at Maturity (on €1,000 investment)
+
 Total amount you'll have when the bond matures, including all coupons and principal, adjusted for FX risk.
 
 ## 🎬 Getting Started
 
 ### Prerequisites
+
 - Java 17+
 - Maven 3.8+
 - Modern web browser (Chrome, Firefox, Safari, Edge)
@@ -277,19 +312,19 @@ Total amount you'll have when the bond matures, including all coupons and princi
 
 ## 📋 Column Headers & Filters
 
-| Column | Type | Description | Filter |
-|--------|------|-------------|--------|
-| ISIN | Text | Unique bond identifier | Contains search |
-| Issuer | Text | Sovereign issuer | Contains search |
-| Price | Number | Current price in issuer currency | Min & Max range |
-| Currency | Select | Bond currency (EUR, USD, GBP, etc) | Dropdown |
-| Rating | Select | Sovereign credit rating | Minimum rating |
-| Price (EUR) | Number | Price converted to EUR | Display only |
-| Coupon % | Number | Annual coupon rate | Display only |
-| Maturity | Date | Bond maturity date | Min & Max date range |
-| Curr. Yield % | Number | Annual income as % of price | Minimum yield |
-| Total Return (1k€) | Number | Final capital on €1,000 investment | Minimum amount |
-| SAY (%) | Number | Simple Annual Yield | Minimum SAY |
+| Column             | Type   | Description                        | Filter               | YAML filter                 | SortedBy       |
+|--------------------|--------|------------------------------------|----------------------|-----------------------------|----------------|
+| ISIN               | Text   | Unique bond identifier             | Contains search      |                             | ISIN           |
+| Issuer             | Text   | Sovereign issuer                   | Contains search      |                             | ISSUER         |
+| Price              | Number | Current price in issuer currency   | Min & Max range      | minPrice<br/>maxPrice       | PRICE          |
+| Currency           | Select | Bond currency (EUR, USD, GBP, etc) | Dropdown             |                             |                |
+| Rating             | Select | Sovereign credit rating            | Minimum rating       | minRating                   | RATING         |
+| Price (EUR)        | Number | Price converted to EUR             | Display only         |                             | PRICE_R        |
+| Coupon %           | Number | Annual coupon rate                 | Display only         |                             | COUPON         |
+| Maturity           | Date   | Bond maturity date                 | Min & Max date range | minMatYears<br/>maxMatYears | MATURITY       |
+| Curr. Yield %      | Number | Annual income as % of price        | Minimum yield        | minYield                    | CURR_YIELD     |
+| Total Return (1k€) | Number | Final capital on €1,000 investment | Minimum amount       |                             | CAPITAL_AT_MAT |
+| SAY (%)            | Number | Simple Annual Yield                | Minimum SAY          | minSAY                      | SAY            |
 
 ## 🔐 Security & Performance
 
@@ -310,6 +345,7 @@ Total amount you'll have when the bond matures, including all coupons and princi
 ## 📞 Support & Contribution
 
 For questions, issues, or contributions:
+
 - Review the existing code documentation
 - Check the YAML profile examples in `docs/bond-profiles-custom.yaml`
 - Update all references when modifying terminology (SAY vs SAL)

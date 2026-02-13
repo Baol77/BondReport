@@ -572,6 +572,7 @@ function applyPreset(presetName) {
         clearColumnFilters();
 
         // Price
+        document.getElementById("filterPriceMin").value = preset.filters.minPrice || "";
         document.getElementById("filterPriceMax").value = preset.filters.maxPrice || "";
 
         // Rating
