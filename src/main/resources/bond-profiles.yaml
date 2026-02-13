@@ -29,11 +29,9 @@ profiles:
     profileType: income
     sortedBy: CURR_YIELD
     filters:
-      minPrice: 80
       maxPrice: 110
       minMatYears: 20
-      maxMatYears: 40
-      minYield: 5.0
+      minYield: 6.0
 
   - id: incomeModerate
     label: Income Moderate
@@ -42,9 +40,7 @@ profiles:
     profileType: income
     sortedBy: CURR_YIELD
     filters:
-      minPrice: 97
       maxPrice: 115
       minMatYears: 20
-      maxMatYears: 40
-      minYield: 3.5
+      minYield: 4.0
       minRating: BBB+

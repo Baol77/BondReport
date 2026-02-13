@@ -90,10 +90,10 @@ Each profile now includes `profileType` and `sortedBy` properties:
 
 - **Profile Type**: income
 - **Sort By**: CURR_YIELD (descending)
-- **Time Horizon**: 20-40 years (long term)
-- **Minimum Current Yield**: 5.0%+
+- **Time Horizon**: >20 years (long term)
+- **Minimum Current Yield**: 6.0%+
 - **Strategy**: Maximum immediate income from coupons
-- **Typical Results**: ~10-20 high-income bonds
+- **Typical Results**: ~2-5 high-income bonds
 
 #### 4. **💵🌱 Income Moderate** (Balanced Income + Quality)
 
@@ -101,11 +101,11 @@ Each profile now includes `profileType` and `sortedBy` properties:
 
 - **Profile Type**: income
 - **Sort By**: CURR_YIELD (descending)
-- **Time Horizon**: 20-40 years (long term)
-- **Minimum Current Yield**: 3.5%+
+- **Time Horizon**: >20 years (long term)
+- **Minimum Current Yield**: 4.0%+
 - **Minimum Rating**: BBB+ (investment grade)
 - **Strategy**: Reliable income from quality issuers
-- **Typical Results**: ~30-50 stable income bonds
+- **Typical Results**: ~20-50 stable income bonds
 
 ## 🎨 Dual-Mode Report Interface
 
@@ -357,5 +357,5 @@ This project is provided as-is for educational and analytical purposes.
 ---
 
 **Last Updated**: February 2026  
-**Version**: 3.0  
+**Version**: 4.0  
 **Key Changes**: Price range filtering, FX risk model refactoring, SAY terminology, custom profile enhancements
