@@ -235,6 +235,368 @@ US0378331005: €105.00 → €103.50 (↓ -€1.50)
 
 ---
 
+## 🎨 Advanced: Custom Investment Profiles (YAML)
+
+### What Are Custom Profiles?
+
+Beyond the 6 built-in presets, you can create **unlimited custom investment strategies** by uploading a YAML file. Perfect for:
+
+- Your personal investment thesis
+- Team-specific strategies
+- Client segments
+- Risk profiles
+- Currency preferences
+- Rating-specific portfolios
+
+### How to Create a Custom Profile
+
+#### Option 1: Click "📁 Import YAML" Button
+1. Click the **"📁 Import YAML"** button in the presets row
+2. Select your custom `.yaml` or `.yml` file
+3. New profile buttons appear instantly
+4. Click them like any preset
+
+#### Option 2: Manual YAML Format
+
+Create a file called `my-profiles.yaml` with this structure:
+
+```yaml
+profiles:
+  - id: my-income-strategy
+    label: "My Income Strategy"
+    emoji: "💰"
+    description: "High-yield bonds for retirement income"
+    profileType: "income"        # or "SAY" for capital gains
+    sortedBy: "CURR_YIELD"       # or "SAY", "PRICE", etc.
+    filters:
+      minMatYears: 10
+      maxMatYears: 25
+      minYield: 5.5
+      minRating: "A-"
+      maxPrice: 105
+```
+
+### Understanding Each Field
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| **id** | Unique identifier (no spaces) | `my-income-strategy` |
+| **label** | Display name on button | `"My Income Strategy"` |
+| **emoji** | Icon for the button | `"💰"` or `"🎯"` |
+| **description** | Tooltip when hovering | `"High-yield bonds for..."` |
+| **profileType** | "SAY" (growth) or "income" (yields) | `"income"` |
+| **sortedBy** | Default sort column | `"CURR_YIELD"` |
+| **filters** | Investment criteria | See below ↓ |
+
+### Available Filters in YAML
+
+```yaml
+filters:
+  minMatYears: 5              # Minimum years to maturity
+  maxMatYears: 15             # Maximum years to maturity
+  minPrice: 90                # Minimum bond price in EUR
+  maxPrice: 110               # Maximum bond price in EUR
+  minSAY: 3.5                 # Minimum Simple Annual Yield %
+  minYield: 4.0               # Minimum Current Yield %
+  minRating: "BBB"            # Minimum credit rating (AAA, AA, A, BBB, etc.)
+  currency: "EUR"             # Single currency (EUR, USD, GBP, etc.)
+```
+
+### Real-World YAML Examples
+
+#### Example 1: Retiree Income Portfolio
+```yaml
+profiles:
+  - id: retirement-income
+    label: "🏖️ Retirement Income"
+    emoji: "🏖️"
+    description: "Safe, high-yield bonds for retirement"
+    profileType: "income"
+    sortedBy: "CURR_YIELD"
+    filters:
+      minMatYears: 8
+      maxMatYears: 20
+      minYield: 5.0
+      minRating: "A"
+      maxPrice: 110
+```
+
+**What this does**:
+- Filters bonds paying 5%+ annual income
+- Only A-rated or better (safe)
+- 8-20 year maturity (predictable income)
+- Caps price at €110 (not overpaying for premium)
+- Sorts by Current Yield (shows highest income first)
+
+#### Example 2: Aggressive Growth Portfolio
+```yaml
+profiles:
+  - id: aggressive-growth
+    label: "📈 Aggressive Growth"
+    emoji: "📈"
+    description: "High SAY, ignore ratings, target capital gains"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      minMatYears: 1
+      maxMatYears: 10
+      minSAY: 5.0
+      minPrice: 75
+      maxPrice: 95
+```
+
+**What this does**:
+- Focuses on bonds trading below par (€75-€95)
+- Target: 5%+ total annual return (capital gains)
+- Short to medium-term (1-10 years)
+- Any rating acceptable (BB+ and below considered)
+- Sorts by SAY (shows best total returns first)
+
+#### Example 3: Safe Haven Portfolio
+```yaml
+profiles:
+  - id: safe-haven
+    label: "🏰 Safe Haven"
+    emoji: "🏰"
+    description: "Ultra-safe sovereigns only"
+    profileType: "income"
+    sortedBy: "CURR_YIELD"
+    filters:
+      minMatYears: 5
+      maxMatYears: 30
+      minRating: "AA"
+      minYield: 2.5
+      maxPrice: 120
+```
+
+**What this does**:
+- Only AA-rated or better (Germany, Switzerland, Netherlands)
+- Any maturity 5-30 years (very stable)
+- Lowest risk possible (flight-to-quality hedge)
+- Higher prices acceptable (willing to pay for safety)
+
+#### Example 4: Currency-Specific Portfolio
+```yaml
+profiles:
+  - id: eur-only
+    label: "€ EUR Only"
+    emoji: "€"
+    description: "No FX risk - EUR bonds only"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      currency: "EUR"
+      minMatYears: 3
+      maxMatYears: 15
+      minSAY: 3.5
+      minRating: "BBB-"
+```
+
+**What this does**:
+- Only EUR-denominated bonds (no currency risk)
+- 3-15 year maturity
+- 3.5%+ SAY
+- BBB- or better ratings
+
+### How Sorting Works
+
+The `sortedBy` field determines which column is auto-sorted when you click the profile:
+
+| Value | Result |
+|-------|--------|
+| `"SAY"` | Sorted by total return (best to worst) |
+| `"CURR_YIELD"` | Sorted by annual income (highest to lowest) |
+| `"PRICE"` | Sorted by price (cheapest first) |
+| `"RATING"` | Sorted by credit rating (safest first) |
+| `"MATURITY"` | Sorted by maturity date (soonest first) |
+| `"COUPON"` | Sorted by coupon rate (highest first) |
+
+### Profile Type: SAY vs Income
+
+**profileType: "SAY"**
+- Highlights bonds with high total returns
+- Used for growth investing
+- Heatmap shows SAY percentages
+- Sorts by capital appreciation potential
+
+**profileType: "income"**
+- Highlights bonds with high coupons
+- Used for income investing
+- Heatmap shows Current Yield percentages
+- Sorts by annual cash flow
+
+### Step-by-Step: Create Your First Custom Profile
+
+**Goal**: Create a profile for "Polish bonds, high yield, medium-term"
+
+**Step 1**: Create a text file and name it `my-profiles.yaml`
+
+**Step 2**: Add this content:
+```yaml
+profiles:
+  - id: poland-bonds
+    label: "🇵🇱 Poland Portfolio"
+    emoji: "🇵🇱"
+    description: "Polish bonds with 4%+ SAY, A rating, 5-15 years"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      minMatYears: 5
+      maxMatYears: 15
+      minSAY: 4.0
+      minRating: "A"
+```
+
+**Step 3**: Save the file to your computer
+
+**Step 4**: Open the bond platform
+
+**Step 5**: Click **"📁 Import YAML"**
+
+**Step 6**: Select your `my-profiles.yaml` file
+
+**Step 7**: A new button appears: **"🇵🇱 Poland Portfolio"**
+
+**Step 8**: Click it to instantly filter Polish bonds!
+
+### Combining Multiple Profiles
+
+You can combine multiple profiles in one YAML file:
+
+```yaml
+profiles:
+  - id: income-safe
+    label: "💵 Income Safe"
+    emoji: "💵"
+    description: "High yield, low risk"
+    profileType: "income"
+    sortedBy: "CURR_YIELD"
+    filters:
+      minYield: 5.0
+      minRating: "A"
+      maxPrice: 110
+
+  - id: growth-aggressive
+    label: "📈 Growth Aggressive"
+    emoji: "📈"
+    description: "Capital gains, all ratings"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      minSAY: 5.0
+      minPrice: 75
+      maxPrice: 95
+
+  - id: short-term
+    label: "⏱️ Short Term"
+    emoji: "⏱️"
+    description: "Quick returns, under 3 years"
+    profileType: "SAY"
+    sortedBy: "MATURITY"
+    filters:
+      minMatYears: 0
+      maxMatYears: 3
+      minSAY: 3.0
+```
+
+Now you'll have 3 new buttons: **💵 Income Safe**, **📈 Growth Aggressive**, **⏱️ Short Term**
+
+### Tips for Creating Profiles
+
+#### Tip 1: Profile Name Should Be Clear
+```yaml
+# GOOD
+label: "🏖️ Retirement Income"
+
+# CONFUSING
+label: "Profile 1"
+```
+
+#### Tip 2: Description Explains Your Strategy
+```yaml
+description: "High-yield bonds for retirees, A-rated minimum, 5% yield floor"
+```
+
+#### Tip 3: Set Realistic Filters
+```yaml
+# GOOD - Filters will match 20-50 bonds
+filters:
+  minSAY: 4.0
+  minRating: "BBB+"
+
+# TOO STRICT - Filters match 0-2 bonds
+filters:
+  minSAY: 6.0
+  minRating: "AAA"
+  maxPrice: 99
+```
+
+#### Tip 4: Use Emoji for Visual Recognition
+- 💰 = Income/yield
+- 📈 = Growth/capital gains
+- 🛡️ = Safe/defensive
+- 🚀 = Aggressive
+- 🏖️ = Retirement
+- 🌍 = Geographic (Poland, Germany, etc.)
+- ⏱️ = Time-based (short, medium, long)
+
+#### Tip 5: Test Before Sharing
+1. Create the YAML file
+2. Import it
+3. Click the profile and verify it shows expected bonds
+4. Adjust filters if needed
+5. Re-import the updated file
+
+### Sharing Profiles with Your Team
+
+**Create team profiles**:
+1. Build a master `team-profiles.yaml` with 5-10 standard strategies
+2. Share with your team members
+3. Everyone imports the same file
+4. Everyone uses consistent criteria
+
+**Example team file**:
+```yaml
+profiles:
+  # Conservative strategy for clients over 65
+  - id: conservative-65plus
+    label: "👵 Conservative 65+"
+    emoji: "👵"
+    description: "Team standard for retirees"
+    profileType: "income"
+    sortedBy: "CURR_YIELD"
+    filters:
+      minYield: 4.0
+      minRating: "AA-"
+      minMatYears: 5
+      maxMatYears: 20
+
+  # Balanced strategy for most clients
+  - id: balanced-standard
+    label: "⚖️ Balanced Standard"
+    emoji: "⚖️"
+    description: "Team standard for balanced growth"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      minSAY: 4.0
+      minRating: "A"
+      minMatYears: 3
+      maxMatYears: 15
+
+  # Aggressive strategy for young investors
+  - id: aggressive-young
+    label: "🚀 Aggressive Young"
+    emoji: "🚀"
+    description: "Team standard for young growth investors"
+    profileType: "SAY"
+    sortedBy: "SAY"
+    filters:
+      minSAY: 5.0
+      minMatYears: 1
+      maxMatYears: 20
+```
+
 ## 🔧 Advanced: Custom Filters
 
 Don't like the presets? Build your own filter in 3 clicks.
