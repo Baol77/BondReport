@@ -538,34 +538,49 @@ class PortfolioAnalyzer {
         this.updateStatistics();
     }
 
-
-
     mergeBond(isin) {
-        // Find all entries for this specific ISIN
         const matches = this.portfolio.filter(b => b.isin === isin);
         if (matches.length < 2) return;
 
-        // Calculate weighted average price (Cost Basis)
-        const totalInvestment = matches.reduce((sum, b) => sum + (b.priceEur * b.quantity), 0);
-        const totalQty = matches.reduce((sum, b) => sum + b.quantity, 0);
-        const weightedAvgPrice = totalInvestment / totalQty;
+        // REAL invested capital (what user paid)
+        const totalInvested = matches.reduce(
+            (sum, b) => sum + (b.totalEur || 0),
+            0
+        );
 
-        // Keep the market metrics (SAY, Maturity, etc.) from the most recent entry
+        // Total quantity
+        const totalQty = matches.reduce(
+            (sum, b) => sum + b.quantity,
+            0
+        );
+
+        // True weighted average cost basis
+        const weightedAvgPrice = totalQty > 0
+            ? totalInvested / totalQty
+            : 0;
+
+        // Keep latest market data
         const latestData = matches[matches.length - 1];
 
-        // Remove all old entries and push the new consolidated one
+        // Remove old entries
         this.portfolio = this.portfolio.filter(b => b.isin !== isin);
+
+        // Push consolidated bond
         this.portfolio.push({
             ...latestData,
-            priceEur: weightedAvgPrice,
-            quantity: totalQty
+            quantity: totalQty,
+            totalEur: totalInvested,        // 🔥 VERY IMPORTANT
+            priceEur: latestData.priceEur   // keep current market price
         });
 
         this.savePortfolio();
         this.updatePortfolioTable();
         this.updateStatistics();
 
-        console.log(`Consolidated ${matches.length} entries for ${isin}. New Avg Price: €${weightedAvgPrice.toFixed(2)}`);
+        console.log(
+            `Consolidated ${matches.length} entries for ${isin}.
+             New Avg Cost: €${weightedAvgPrice.toFixed(2)}`
+        );
     }
 
     updatePortfolioTable() {
@@ -836,7 +851,10 @@ class PortfolioAnalyzer {
                     return;
                 }
 
-                this.portfolio = newPortfolio;
+                // Append imported bonds (do NOT replace existing ones)
+                newPortfolio.forEach(bond => {
+                    this.portfolio.push(bond);
+                });
                 this.savePortfolio();
                 this.updatePortfolioTable();
                 this.updateStatistics();
