@@ -233,6 +233,16 @@ class PortfolioAnalyzer {
                         <div style="font-size:11px;color:#666;font-weight:600;margin-bottom:6px;">Weighted Rating</div>
                         <p id="statWeightedRating" style="margin:0;font-size:16px;font-weight:bold;color:#9C27B0;">-</p>
                     </div>
+                    <div style="background:white;padding:12px;border-radius:4px;border-left:4px solid #4CAF50;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="font-size:11px;color:#666;font-weight:600;margin-bottom:6px;">Total Profit</div>
+                        <p id="statTotalProfit" style="margin:0;font-size:16px;font-weight:bold;color:#4CAF50;">€0.00</p>
+                    </div>
+
+                    <div style="background:white;padding:12px;border-radius:4px;border-left:4px solid #673AB7;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="font-size:11px;color:#666;font-weight:600;margin-bottom:6px;">Coupon Income (Current Year)</div>
+                        <p id="statTotalCouponIncome" style="margin:0;font-size:16px;font-weight:bold;color:#673AB7;">€0.00</p>
+                    </div>
+
                 </div>
 
                 <!-- Currency Breakdown -->
@@ -365,6 +375,7 @@ class PortfolioAnalyzer {
         document.getElementById('quantity').value = '';
         document.getElementById('amount').value = '';
         document.getElementById('grossQuantityInfo').textContent = 'Gross quantity: –';
+        document.getElementById('totalCost').textContent = "-";
 
         const originalWrapper = document.getElementById('originalCurrencyWrapper');
         const originalLabel = document.getElementById('originalCurrencyLabel');
@@ -594,7 +605,7 @@ class PortfolioAnalyzer {
                            style="width:60px;padding:4px;font-size:12px;">
                 </td>
 
-                <td>€${(bond.priceEur * bond.quantity).toFixed(2)}</td>
+                <td>€${(bond.totalEur ?? 0).toFixed(2)}</td>
                 <td>${bond.maturity}</td>
                 <td>${bond.currentYield.toFixed(2)}%</td>
                 <td>${bond.say.toFixed(2)}%</td>
@@ -622,6 +633,8 @@ class PortfolioAnalyzer {
             document.getElementById('statWeightedRisk').textContent = '0.00 yrs';
             document.getElementById('statWeightedRating').textContent = '-';
             document.getElementById('currencyBreakdown').innerHTML = '';
+            document.getElementById('statTotalProfit').textContent = '€0.00';
+            document.getElementById('statTotalCouponIncome').textContent = '€0.00';
             return;
         }
 
@@ -631,26 +644,47 @@ class PortfolioAnalyzer {
         let weightedCoupon = 0;
         let weightedRisk = 0;
         let currencyTotals = {}; // Track investment by currency
+        let totalProfit = 0;
+        let totalCouponIncome = 0;
 
         this.portfolio.forEach(bond => {
-            const investment = bond.priceEur * bond.quantity;
-            totalInvestment += investment;
 
-            weightedSAY += (bond.say * investment);
-            weightedYield += (bond.currentYield * investment);
-            weightedCoupon += (bond.coupon * investment);
+            const currentValue = bond.priceEur * bond.quantity;   // market value
+            const investedAmount = bond.totalEur || 0;            // what you paid
 
-            // Calculate years to maturity from maturity date
+            totalInvestment += currentValue;
+
+            weightedSAY += (bond.say * currentValue);
+            weightedYield += (bond.currentYield * currentValue);
+            weightedCoupon += (bond.coupon * currentValue);
+
+            // TOTAL PROFIT (correct now)
+            totalProfit += (currentValue - investedAmount);
+
+            // TOTAL COUPON INCOME (ANNUAL, IN EUR)
+            const nominal = bond.nominal || 100;
+            const annualCouponOriginal = (bond.coupon / 100) * nominal * bond.quantity;
+
+            const annualCouponEur = bond.currency === 'EUR'
+                ? annualCouponOriginal
+                : annualCouponOriginal * (bond.priceEur / bond.price);
+
+            totalCouponIncome += annualCouponEur;
+
+            // Risk (years to maturity)
             const maturityDate = new Date(bond.maturity);
             const today = new Date();
-            const yearsToMaturity = (maturityDate - today) / (365.25 * 24 * 60 * 60 * 1000);
-            weightedRisk += (Math.max(0, yearsToMaturity) * investment);
+            const yearsToMaturity =
+                (maturityDate - today) / (365.25 * 24 * 60 * 60 * 1000);
 
-            // Track currency totals
+            weightedRisk += (Math.max(0, yearsToMaturity) * currentValue);
+
+            // Currency breakdown
             if (!currencyTotals[bond.currency]) {
                 currencyTotals[bond.currency] = 0;
             }
-            currencyTotals[bond.currency] += investment;
+            currencyTotals[bond.currency] += currentValue;
+
         });
 
         const totalQty = this.portfolio.reduce((sum, b) => sum + b.quantity, 0);
@@ -665,10 +699,10 @@ class PortfolioAnalyzer {
         const ratingOrder = ['AAA', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+', 'BBB', 'BBB-', 'BB+', 'BB', 'BB-', 'B+', 'B', 'B-', 'CCC', 'CC', 'C', 'D'];
         let weightedRatingScore = 0;
         this.portfolio.forEach(bond => {
-            const investment = bond.priceEur * bond.quantity;
+            const marketValue = bond.priceEur * bond.quantity;
             const ratingIndex = ratingOrder.indexOf(bond.rating);
             const ratingScore = ratingIndex >= 0 ? ratingIndex : 20; // Default to lowest if not found
-            weightedRatingScore += (ratingScore * investment);
+            weightedRatingScore += (ratingScore * marketValue);
         });
         const avgRatingScore = weightedRatingScore / totalInvestment;
         const weightedRating = ratingOrder[Math.round(avgRatingScore)] || '-';
@@ -682,6 +716,19 @@ class PortfolioAnalyzer {
         document.getElementById('statBondCount').textContent = uniqueISINs.size;
         document.getElementById('statWeightedRisk').textContent = `${weightedRiskYears.toFixed(2)} yrs`;
         document.getElementById('statWeightedRating').textContent = weightedRating;
+
+        // Total Profit
+        const profitElement = document.getElementById('statTotalProfit');
+        if (profitElement) {
+            profitElement.textContent = `€${totalProfit.toFixed(2)}`;
+            profitElement.style.color = totalProfit >= 0 ? '#4CAF50' : '#f44336';
+        }
+
+        // Total Coupon Income (Current Year)
+        const couponElement = document.getElementById('statTotalCouponIncome');
+        if (couponElement) {
+            couponElement.textContent = `€${totalCouponIncome.toFixed(2)}`;
+        }
 
         // Display currency breakdown
         this.updateCurrencyBreakdown(currencyTotals, totalInvestment);
@@ -718,7 +765,7 @@ class PortfolioAnalyzer {
         let csv = 'ISIN,Issuer,Quantity,Investment EUR,Coupon %,Rating,Currency,Maturity\n';
 
         this.portfolio.forEach(bond => {
-            const investment = bond.priceEur * bond.quantity;
+            const investment = bond.totalEur ?? 0;
 
             csv += `${bond.isin},"${bond.issuer}",${bond.quantity},${investment.toFixed(2)},${bond.coupon},"${bond.rating}",${bond.currency},${bond.maturity}\n`;
         });
@@ -764,6 +811,11 @@ class PortfolioAnalyzer {
                     const isin = parts[0].trim();
                     const issuer = parts[1].trim().replace(/^"|"$/g, '');
                     const quantity = parseFloat(parts[2]);
+                    const totalEur = parseFloat(
+                        parts[3]
+                            ?.toString()
+                            .replace(/[^\d.-]/g, '')
+                    ) || 0;
 
                     // Find bond in allBonds to get CURRENT market data
                     const currentBondData = this.allBonds.find(b => b.isin === isin);
@@ -771,7 +823,8 @@ class PortfolioAnalyzer {
                     if (currentBondData) {
                         newPortfolio.push({
                             ...currentBondData,
-                            quantity: quantity
+                            quantity: quantity,
+                            totalEur: totalEur
                         });
                     } else {
                         notFoundBonds.push(isin);
