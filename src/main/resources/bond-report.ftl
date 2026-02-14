@@ -54,24 +54,26 @@
 </div>
 
 <div class="controls">
-    <label>
-        Maturity from:
-        <input id="filterMinMat" type="date" onchange="filterTable()">
-    </label>
+    <!-- Maturity controls on same row (mobile: 2 columns) -->
+    <div class="maturity-row">
+        <label>
+            Maturity from:
+            <input id="filterMinMat" type="date" onchange="filterTable()">
+        </label>
+        <label>
+            to:
+            <input id="filterMaxMat" type="date" onchange="filterTable()">
+        </label>
+    </div>
 
-    <label>
-        to:
-        <input id="filterMaxMat" type="date" onchange="filterTable()">
-    </label>
-
-    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">🧹 Clear column filters
+    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">
+        🧹 Clear column filters
     </button>
 
     <div class="spacer"></div>
+
     <button onclick="exportCSV()">📥 Export CSV</button>
-    <button onclick="window.portfolioAnalyzer?.openModal()"
-            style="margin-left: 20px;"
-            title="Create and analyze custom bond portfolios">
+    <button onclick="window.portfolioAnalyzer?.openModal()" title="Create and analyze custom bond portfolios">
         🎯 Portfolio Analysis
     </button>
 </div>

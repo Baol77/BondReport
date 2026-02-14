@@ -1,52 +1,129 @@
 /* ========================================
-   RESPONSIVE TABLE COLUMNS
+   MOBILE LAYOUT IMPROVEMENTS
    ======================================== */
 
-/* DESKTOP (1024px+): Show all columns */
-@media (min-width: 1024px) {
-    th, td { display: table-cell !important; }
-}
-
-/* TABLET & MOBILE (≤1023px): Hide non-essential columns */
-@media (max-width: 1023px) {
-    /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
-    th:nth-child(2),  /* Issuer */
-    td:nth-child(2),
-    th:nth-child(4),  /* Currency - keep for now */
-    td:nth-child(4),
-    th:nth-child(5),  /* Rating */
-    td:nth-child(5),
-    th:nth-child(6),  /* Price EUR */
-    td:nth-child(6),
-    th:nth-child(7),  /* Coupon */
-    td:nth-child(7),
-    th:nth-child(10), /* Capital at Mat */
-    td:nth-child(10) {
-        display: none !important;
-    }
-}
-
-/* MOBILE (≤480px): Hide even more, keep only 6 columns */
+/* MOBILE (≤480px) */
 @media (max-width: 480px) {
-    /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
-    th:nth-child(2),  /* Issuer */
-    td:nth-child(2),
-    th:nth-child(4),  /* Currency - HIDE on mobile */
-    td:nth-child(4),
-    th:nth-child(5),  /* Rating */
-    td:nth-child(5),
-    th:nth-child(6),  /* Price EUR */
-    td:nth-child(6),
-    th:nth-child(7),  /* Coupon */
-    td:nth-child(7),
-    th:nth-child(10), /* Capital at Mat */
-    td:nth-child(10) {
-        display: none !important;
+    /* === HEADER & TITLE === */
+    h2 {
+        font-size: 18px;
+        margin: 10px 0 5px 0;
     }
 
-    /* Make table more compact for mobile */
+    /* Timestamp on same line as title */
+    h2 span {
+        display: inline;
+        font-size: 12px;
+        margin-left: 5px;
+    }
+
+    /* === PROFILE PRESETS SECTION === */
+    .profile-presets {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+        background: #f0f8ff;
+        border-left: 4px solid #2196F3;
+        align-items: stretch;
+    }
+
+    .profile-presets label {
+        grid-column: 1 / -1;  /* Full width */
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .preset-button {
+        padding: 10px 8px;
+        font-size: 11px;
+        border-radius: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: auto;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .preset-description {
+        grid-column: 1 / -1;
+        font-size: 10px;
+        margin-top: 5px;
+        margin-left: 0;
+    }
+
+    /* === CONTROLS SECTION === */
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 4px;
+    }
+
+    .controls label {
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .controls input,
+    .controls select {
+        font-size: 14px;  /* Prevent iOS zoom */
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .controls button {
+        padding: 10px 12px;
+        font-size: 12px;
+        height: auto;
+        min-height: 40px;
+        border-radius: 4px;
+    }
+
+    /* Group maturity controls horizontally */
+    .maturity-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .maturity-row label {
+        grid-column: span 1;
+    }
+
+    /* === BUTTONS === */
+    button {
+        padding: 10px 12px;
+        font-size: 12px;
+        min-height: 40px;
+        border-radius: 4px;
+    }
+
+    .controls .spacer {
+        display: none;  /* Hide spacer on mobile */
+    }
+
+    /* Stack action buttons vertically */
+    .controls > button {
+        width: 100%;
+    }
+
+    /* === TABLE === */
     table {
         font-size: 12px;
+        margin-top: 10px;
     }
 
     th, td {
@@ -54,18 +131,72 @@
         text-align: center;
     }
 
-    /* Left-align text columns */
-    td:first-child,
-    th:first-child {
+    th:first-child,
+    td:first-child {
         text-align: left;
     }
 
-    /* Make header sticky on mobile */
     thead th {
         position: sticky;
         top: 0;
         background: #f2f2f2;
-        z-index: 2;
+        z-index: 10;
         padding: 8px 4px;
+    }
+
+    /* === LEGEND === */
+    .legend {
+        margin-top: 15px;
+        padding: 10px;
+        font-size: 11px;
+    }
+
+    .legend-title {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+}
+
+/* TABLET (481px - 1023px) */
+@media (min-width: 481px) and (max-width: 1023px) {
+    .profile-presets {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .preset-button {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    button {
+        min-height: 40px;
+    }
+}
+
+/* DESKTOP (≥1024px) */
+@media (min-width: 1024px) {
+    .profile-presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    button {
+        padding: 8px 16px;
+        min-height: auto;
     }
 }
