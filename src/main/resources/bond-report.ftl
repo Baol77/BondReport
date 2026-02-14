@@ -67,6 +67,11 @@
 
     <div class="spacer"></div>
     <button onclick="exportCSV()">📥 Export CSV</button>
+    <button onclick="window.portfolioAnalyzer?.openModal()"
+            style="margin-left: 20px;"
+            title="Create and analyze custom bond portfolios">
+        🎯 Portfolio Analysis
+    </button>
 </div>
 
 <table id="bondTable">
@@ -198,6 +203,9 @@
 <!-- External JavaScript -->
 <script>
     <#include "bond-report.js">
+</script>
+<script>
+    <#include "portfolio-analyzer.js" parse=false>
 </script>
 </body>
 </html>

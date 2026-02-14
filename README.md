@@ -1,7 +1,7 @@
 # Sovereign Bond Analytics Platform
 
 A comprehensive Java application for analyzing and scoring sovereign bonds with **SAY (Simple Annual Yield)** rankings,
-credit ratings, preset investment profiles, FX risk assessment, and dual-mode reporting.
+credit ratings, preset investment profiles, FX risk assessment, dual-mode reporting, and **integrated portfolio analysis**.
 
 ## 🎯 Overview
 
@@ -17,6 +17,7 @@ This platform analyzes sovereign bonds across multiple currencies and generates 
 - **Multi-Currency Support**: EUR, USD, GBP, CHF, SEK, and others
 - **Interactive Heatmaps**: Color-coded bands for SAY or Yield (mode-dependent)
 - **YAML Profile Customization**: Import custom investor profiles from external YAML files
+- **🎯 Portfolio Analyzer**: Client-side portfolio management with real-time statistics and CSV import/export
 
 ## ✨ Recent Enhancements (v4.0+)
 
@@ -54,6 +55,136 @@ This platform analyzes sovereign bonds across multiple currencies and generates 
     - Profile IDs: `sayAggressive`, `sayConservative`
     - Comments and documentation updated
 - SAY correctly stands for **Simple Annual Yield**
+
+### 5. **🎯 Portfolio Analyzer (NEW - v5.0)**
+
+A powerful client-side tool for building and analyzing custom bond portfolios with comprehensive real-time statistics.
+
+#### Key Features
+
+- **🔍 Search & Add**: Find bonds by ISIN and add them to your portfolio
+- **💰 Flexible Input**: Enter quantity OR € amount (auto-calculates the other)
+- **🔄 Draggable Modal**: Move the portfolio window aside to see the bond table while building
+- **✏️ Editable Quantities**: Click Qty in portfolio table to adjust quantities in real-time
+- **💾 Persistent Storage**: Data saved in browser's localStorage, survives page refresh
+- **✅ Price Tracking**: When reimporting a saved portfolio, automatically updates prices to current market values and shows which bonds moved
+- **📥 Export Portfolio**: Save your portfolio as CSV for backup or sharing
+- **📤 Import Portfolio**: Load saved portfolios with automatic market price updates
+
+#### Portfolio Table (11 Columns - v5.0)
+
+Each bond in your portfolio shows:
+
+| Column | Description | Notes |
+|--------|-------------|-------|
+| ISIN | Bond identifier | - |
+| Issuer | Bond issuer name | - |
+| Currency | Original currency | USD, GBP, EUR, CHF, SEK, etc. |
+| Price | Price in EUR | - |
+| Qty | Quantity (EDITABLE) | Click to change, updates instantly |
+| Investment | Total € amount | Price × Quantity |
+| SAY | Simple Annual Yield % | - |
+| Curr. Yield | Current Yield % | Income yield |
+| Rating | Credit rating | AAA, AA+, BBB+, etc. |
+| Maturity | Bond maturity date | When capital is repaid |
+| Action | Delete bond | ❌ Delete button |
+
+#### Portfolio Statistics Dashboard (v5.0)
+
+**Financial Metrics (8 metrics):**
+- Total Investment (€) - Total portfolio value
+- Avg Price (€) - Average € price per unit
+- Weighted SAY (%) - Portfolio's total return
+- Weighted Yield (%) - Portfolio's income return
+- Avg Coupon (%) - Weighted average coupon rate
+- Bond Count - Number of different bonds
+- Avg Risk (Maturity) - Weighted years to maturity
+- **Weighted Rating** - Weighted average credit rating
+
+**Currency Breakdown (NEW - v5.0):**
+- Shows portfolio allocation by currency
+- Displays % of total investment per currency
+- Shows € amount invested in each currency
+- Perfect for FX risk analysis
+
+#### Example: Multi-Currency Portfolio Analysis
+
+**Portfolio Table Example Row:**
+```
+XS1313004928 | VOLKSWAG | EUR | €96.50 | 10 | €965.00 | 4.32% | 2.35% | BBB+ | 2025-04-15 | ❌
+```
+
+**Statistics Dashboard Shows:**
+```
+Total Investment: €10,500.00
+Weighted SAY: 4.32%
+Weighted Rating: BBB+ (Investment Grade)
+Avg Risk: 7.71 years (Medium-term duration)
+
+Currency Breakdown:
+EUR    65.2%  €6,820.00
+USD    25.8%  €2,700.00
+GBP     8.9%    €930.00
+```
+
+#### How to Use Portfolio Analyzer
+
+1. **Open Portfolio**: Click the **🎯 Portfolio Analysis** button in the controls
+2. **Search for Bond**:
+    - Type ISIN code (e.g., `US0378331005`)
+    - Click 🔍 Search or press Enter
+3. **Add to Portfolio**:
+    - Enter Quantity (how many units) OR € Amount
+    - Click ➕ Add to Portfolio
+4. **Review Portfolio**:
+    - See all added bonds with full details (currency, rating, maturity, yield)
+    - View real-time statistics below
+5. **Manage Quantities**:
+    - Click on Qty field to edit
+    - Statistics update instantly
+    - Perfect for "what-if" analysis
+6. **Manage Portfolio**:
+    - Delete individual bonds with ❌ Delete button
+    - Export portfolio with 📥 Export CSV
+    - Import previously saved portfolios with 📤 Import CSV
+    - Clear entire portfolio with 🗑️ Clear Portfolio
+
+#### Portfolio Import with Automatic Price Updates
+
+When you reimport a saved portfolio CSV file:
+
+1. **Quantities are preserved** - keeps your original investment amounts
+2. **Prices are updated** - uses current market values from the bond table
+3. **Statistics recalculate** - all metrics based on new prices
+4. **Changes shown** - alert displays which bonds moved and by how much
+5. **Weighted metrics update** - rating, maturity, currency breakdown all recalculate
+
+**Example Import Alert**:
+```
+Imported 2 bonds!
+
+📊 Price Updates (Market has changed):
+XS1313004928: €96.50 → €98.75 (+€2.25)
+US0378331005: €105.20 → €103.80 (-€1.40)
+```
+
+Perfect for tracking portfolio performance over time!
+
+#### CSV Format
+
+**Export**: Creates a CSV with this structure:
+```
+ISIN,Issuer,Price EUR,Quantity,Investment EUR,SAY %,Current Yield %,Coupon %,Rating,Currency,Maturity
+XS1313004928,"VOLKSWAG",96.50,10,965.00,4.32,2.35,3.50,BBB+,EUR,2025-04-15
+US0378331005,"USA",98.00,10,980.00,3.75,1.90,2.75,AA+,USD,2030-05-15
+```
+
+**Import**: Accepts the same CSV format. The tool:
+- Matches bonds by ISIN
+- Restores quantities from CSV
+- Updates all prices from current bond table
+- Recalculates statistics automatically
+- Shows which prices changed
 
 ## 📊 Built-In Investment Profiles
 
@@ -171,18 +302,10 @@ The FX risk model applies maturity-dependent haircuts:
 
 ```java
 RISK_MODEL.put(5,new RiskThreshold(0.10, 0.050));    // 0-5 years
-    RISK_MODEL.
-
-put(10,new RiskThreshold(0.15, 0.075));    // 5-10 years
-    RISK_MODEL.
-
-put(15,new RiskThreshold(0.20, 0.100));    // 10-15 years
-    RISK_MODEL.
-
-put(20,new RiskThreshold(0.25, 0.125));    // 15-20 years
-    RISK_MODEL.
-
-put(Integer.MAX_VALUE, new RiskThreshold(0.30, 0.150));  // 20+ years
+RISK_MODEL.put(10,new RiskThreshold(0.15, 0.075));   // 5-10 years
+RISK_MODEL.put(15,new RiskThreshold(0.20, 0.100));   // 10-15 years
+RISK_MODEL.put(20,new RiskThreshold(0.25, 0.125));   // 15-20 years
+RISK_MODEL.put(Integer.MAX_VALUE, new RiskThreshold(0.30, 0.150));  // 20+ years
 ```
 
 **Example**: A 7-year USD bond gets:
@@ -206,9 +329,10 @@ src/main/java/bond/
 ├── model/
 │   └── Bond.java               # Bond data structure
 └── ...
-src/main/resources/
-├── bond-report.ftl             # HTML template
+src/main/resources/templates/
+├── bond-report.ftl             # FreeMarker HTML template
 ├── bond-report.js              # Interactive UI logic
+├── portfolio-analyzer-v2.js    # Portfolio Analyzer tool (NEW)
 ├── bond-profiles.yaml          # Default profiles
 └── bond-report.css             # Styling
 ```
@@ -285,6 +409,16 @@ Current Yield = (Annual Coupon / Current Price) × 100
 
 Total amount you'll have when the bond matures, including all coupons and principal, adjusted for FX risk.
 
+### Weighted SAY / Weighted Current Yield (Portfolio)
+
+For portfolios with multiple bonds, the weighted average metric accounting for investment amount in each bond:
+
+```
+Weighted SAY = Σ(SAY × Investment Amount) / Total Investment
+```
+
+This shows your portfolio's average return, weighted by how much you invested in each bond.
+
 ## 🎬 Getting Started
 
 ### Prerequisites
@@ -306,9 +440,10 @@ Total amount you'll have when the bond matures, including all coupons and princi
    ```
 
 3. **Open Report**:
-    - File is generated to `target/bond-report.html`
+    - File is generated to `docs/eur/index.html` (for GitHub Pages)
     - Open in your browser
     - Apply profiles, adjust filters, toggle modes
+    - Use Portfolio Analyzer to build custom portfolios
 
 ## 📋 Column Headers & Filters
 
@@ -332,15 +467,18 @@ Total amount you'll have when the bond matures, including all coupons and princi
 - **ECB FX Rate Caching**: Single HTTP call per session
 - **Large Bond Lists**: Efficient JavaScript filtering and sorting
 - **Responsive UI**: Sub-second filter updates even with 500+ bonds
+- **Portfolio Data**: Stored in browser's localStorage only (never sent to server)
 
 ## 🚀 Future Enhancements
 
 - Real-time bond data integration
 - Historical SAY analysis
-- Portfolio simulation engine
+- Advanced portfolio simulation engine
 - PDF report export
 - Advanced charting with TradingView Lightweight Charts
 - Multi-currency portfolio optimization
+- Server-side portfolio persistence
+- Collaborative portfolio sharing
 
 ## 📞 Support & Contribution
 
@@ -349,6 +487,7 @@ For questions, issues, or contributions:
 - Review the existing code documentation
 - Check the YAML profile examples in `docs/bond-profiles-custom.yaml`
 - Update all references when modifying terminology (SAY vs SAL)
+- Portfolio Analyzer is fully client-side; check browser console (F12) for debugging
 
 ## 📄 License
 
@@ -357,5 +496,5 @@ This project is provided as-is for educational and analytical purposes.
 ---
 
 **Last Updated**: February 2026  
-**Version**: 4.0  
-**Key Changes**: Price range filtering, FX risk model refactoring, SAY terminology, custom profile enhancements
+**Version**: 5.0  
+**Key Changes**: Portfolio Analyzer v5.0 - Editable quantities, currency tracking, weighted rating, currency breakdown, comprehensive portfolio analytics
