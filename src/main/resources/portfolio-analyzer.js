@@ -186,6 +186,7 @@ class PortfolioAnalyzer {
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Maturity</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Curr. Yield</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">SAY</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Profit (€)</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Action</th>
                             </tr>
                         </thead>
@@ -363,6 +364,7 @@ class PortfolioAnalyzer {
         // Reset fields
         document.getElementById('quantity').value = '';
         document.getElementById('amount').value = '';
+        document.getElementById('grossQuantityInfo').textContent = 'Gross quantity: –';
 
         const originalWrapper = document.getElementById('originalCurrencyWrapper');
         const originalLabel = document.getElementById('originalCurrencyLabel');
@@ -405,6 +407,8 @@ class PortfolioAnalyzer {
             eurInput.oninput = () => {
                 const eur = parseFloat(eurInput.value) || 0;
                 totalDisplay.textContent = `€${eur.toFixed(2)}`;
+
+                 this.updateGrossQuantity();
             };
             return;
         }
@@ -457,10 +461,25 @@ class PortfolioAnalyzer {
 
         const qty = parseFloat(document.getElementById('quantity').value) || 1;
 
-        // Always add as new entry, don't combine with existing
+        // Get invested EUR
+        const totalEur = parseFloat(
+            document.getElementById('totalCost')
+                .textContent
+                .replace(/[^\d.-]/g, '')
+        ) || 0;
+
+        // Get original currency total (if exists)
+        const totalOriginalField = document.getElementById('totalOriginal');
+        const totalOriginal = totalOriginalField
+            ? parseFloat(totalOriginalField.value) || 0
+            : totalEur;
+
+        // Keep it simple
         this.portfolio.push({
             ...this.currentBond,
-            quantity: qty
+            quantity: qty,
+            totalEur: totalEur,
+            totalOriginal: totalOriginal
         });
 
         this.savePortfolio();
@@ -471,7 +490,9 @@ class PortfolioAnalyzer {
         document.getElementById('addBondForm').style.display = 'none';
         document.getElementById('searchResults').innerHTML = '';
 
-        alert(`✅ Bond added! Total in portfolio: ${qty}`);
+        this.currentBond = null;
+
+        alert(`✅ Bond added! Quantity added: ${qty}`);
     }
 
     removeBond(index) {
@@ -490,11 +511,22 @@ class PortfolioAnalyzer {
             return;
         }
 
-        this.portfolio[index].quantity = qty;
+        const bond = this.portfolio[index];
+
+        // Calculate unit cost BEFORE changing quantity
+        const unitCost = bond.totalEur / bond.quantity;
+
+        // Update quantity
+        bond.quantity = qty;
+
+        // Scale invested proportionally
+        bond.totalEur = unitCost * qty;
 
         this.savePortfolio();
+        this.updatePortfolioTable();
         this.updateStatistics();
     }
+
 
 
     mergeBond(isin) {
@@ -545,6 +577,9 @@ class PortfolioAnalyzer {
         tbody.innerHTML = this.portfolio.map((bond, idx) => {
             const hasDuplicates = isinCounts[bond.isin] > 1;
 
+            const currentValueEur = bond.quantity * bond.priceEur;
+            const gainLoss = currentValueEur - bond.totalEur;
+
             return `<tr style="border-bottom:1px solid #eee;">
                 <td>${bond.isin}</td>
                 <td>${bond.issuer}</td>
@@ -563,6 +598,9 @@ class PortfolioAnalyzer {
                 <td>${bond.maturity}</td>
                 <td>${bond.currentYield.toFixed(2)}%</td>
                 <td>${bond.say.toFixed(2)}%</td>
+                <td class="${gainLoss >= 0 ? 'good' : 'bad'}">
+                    ${gainLoss.toFixed(2)}
+                </td>
                 <td>
                    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;width:100%;">
                        ${hasDuplicates ? `<span onclick="window.portfolioAnalyzer.mergeBond('${bond.isin}')" title="Merge duplicates" style="cursor:pointer;font-size:18px;transition:opacity 0.15s ease;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">🔄</span>` : ''}
