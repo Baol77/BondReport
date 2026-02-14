@@ -558,10 +558,13 @@ class PortfolioAnalyzer {
             return;
         }
 
-        let csv = 'ISIN,Issuer,Price EUR,Quantity,Investment EUR,SAY %,Current Yield %,Coupon %,Rating,Currency,Maturity\n';
+        // New reduced header
+        let csv = 'ISIN,Issuer,Quantity,Investment EUR,Coupon %,Rating,Currency,Maturity\n';
+
         this.portfolio.forEach(bond => {
             const investment = bond.priceEur * bond.quantity;
-            csv += `${bond.isin},"${bond.issuer}",${bond.priceEur},${bond.quantity},${investment},${bond.say},${bond.currentYield},${bond.coupon},"${bond.rating}",${bond.currency},${bond.maturity}\n`;
+
+            csv += `${bond.isin},"${bond.issuer}",${bond.quantity},${investment.toFixed(2)},${bond.coupon},"${bond.rating}",${bond.currency},${bond.maturity}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -574,6 +577,7 @@ class PortfolioAnalyzer {
         link.click();
         document.body.removeChild(link);
     }
+
 
     importPortfolio(event) {
         const file = event.target.files[0];
@@ -599,33 +603,20 @@ class PortfolioAnalyzer {
                     const line = lines[i];
                     const parts = this.parseCSVLine(line);
 
-                    if (parts.length < 5) continue;
+                    if (parts.length < 3) continue;
 
                     const isin = parts[0].trim();
                     const issuer = parts[1].trim().replace(/^"|"$/g, '');
-                    const oldPriceEur = parseFloat(parts[2]);
-                    const quantity = parseFloat(parts[3]);
+                    const quantity = parseFloat(parts[2]);
 
                     // Find bond in allBonds to get CURRENT market data
                     const currentBondData = this.allBonds.find(b => b.isin === isin);
 
                     if (currentBondData) {
-                        const priceChanged = currentBondData.priceEur !== oldPriceEur;
-
                         newPortfolio.push({
                             ...currentBondData,
                             quantity: quantity
                         });
-
-                        if (priceChanged) {
-                            updatedBonds.push({
-                                isin: isin,
-                                issuer: issuer,
-                                oldPrice: oldPriceEur,
-                                newPrice: currentBondData.priceEur,
-                                change: currentBondData.priceEur - oldPriceEur
-                            });
-                        }
                     } else {
                         notFoundBonds.push(isin);
                     }
