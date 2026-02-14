@@ -190,54 +190,45 @@ US0378331005,"USA",98.00,10,980.00,3.75,1.90,2.75,AA+,USD,2030-05-15
 
 ### Updated Profile Structure (v4.0+)
 
-Each profile now includes `profileType` and `sortedBy` properties:
+These 6 profiles represent the standard strategic configurations for the platform:
 
-#### 1. **📈🔥 SAY Aggressive** (Maximum Returns)
+### 1. 📈🔥 SAY Aggressive
+*Best for: Risk-tolerant investors seeking maximum total return via capital gains.*
+- **Profile Type**: `SAY` | **Sort By**: `SAY`
+- **Filters**: 1-10y maturity, Min 5.0% SAY, Max Price 95.
+- **Strategy**: Focuses on "Pull to Par" effects where bonds at a discount provide high annual returns.
 
-*Best for: Risk-tolerant investors seeking maximum total return*
+### 2. ⚖️🛡️ Balanced Core
+*Best for: Balanced investors seeking solid returns with investment-grade safety.*
+- **Profile Type**: `SAY` | **Sort By**: `SAY`
+- **Filters**: 1-20y maturity, Min 4.5% SAY, Min Rating `BBB+`.
+- **Strategy**: Targets the "sweet spot" of reliable issuers with competitive total yields.
 
-- **Profile Type**: SAY (Capital Gain)
-- **Sort By**: SAY (descending)
-- **Time Horizon**: 1-10 years (short to medium term)
-- **Minimum SAY**: 5.0%+
-- **Strategy**: High-return opportunities regardless of rating
-- **Typical Results**: ~15-25 high-yield bonds
+### 3. 💵🔥 Max Income
+*Best for: Investors needing maximum immediate cash flow.*
+- **Profile Type**: `income` | **Sort By**: `CURR_YIELD`
+- **Filters**: >15y maturity, Min 6.0% Current Yield, Max Price 110.
+- **Strategy**: Prioritizes high coupons while capping prices to prevent overpaying for premiums.
 
-#### 2. **📈🛡️ SAY Conservative** (Quality + Returns)
+### 4. 📉🚀 Deep Discount
+*Best for: Long-term capital building and tax-efficient growth.*
+- **Profile Type**: `SAY` | **Sort By**: `SAY`
+- **Filters**: 3-20y maturity, Max Price 90, Min Rating `BBB`.
+- **Strategy**: Targets bonds trading significantly below par for guaranteed capital appreciation at maturity.
 
-*Best for: Balanced investors wanting solid returns with credit safety*
+### 5. 🅿️🛡️ Cash Parking
+*Best for: Ultra-short term liquidity management (Bank Account Alternative).*
+- **Profile Type**: `SAY` | **Sort By**: `MATURITY`
+- **Filters**: <1.5y maturity, Min 3.5% Yield, Min Rating `BBB+`.
+- **Strategy**: Minimizes interest-rate risk while seeking a safe return on idle cash.
 
-- **Profile Type**: SAY (Capital Gain)
-- **Sort By**: SAY (descending)
-- **Time Horizon**: 1-20 years (short to long term)
-- **Minimum SAY**: 4.0%+
-- **Minimum Rating**: BBB+ (investment grade)
-- **Strategy**: Quality bonds with good total returns
-- **Typical Results**: ~50-80 investment-grade bonds
+### 6. 🏰🛡️ AAA/AA Fortress
+*Best for: Wealth preservation and hedging against market volatility.*
+- **Profile Type**: `income` | **Sort By**: `RATING`
+- **Filters**: 5-30y maturity, Min 3.0% SAY, Min Rating `AA-`.
+- **Strategy**: Only the highest quality sovereign debt to provide a "flight to quality" hedge.
 
-#### 3. **💵🔥 Income High** (Maximum Cash Flow)
-
-*Best for: Income-focused investors needing high annual payments*
-
-- **Profile Type**: income
-- **Sort By**: CURR_YIELD (descending)
-- **Time Horizon**: >20 years (long term)
-- **Minimum Current Yield**: 6.0%+
-- **Strategy**: Maximum immediate income from coupons
-- **Typical Results**: ~2-5 high-income bonds
-
-#### 4. **💵🌱 Income Moderate** (Balanced Income + Quality)
-
-*Best for: Conservative income investors prioritizing safety*
-
-- **Profile Type**: income
-- **Sort By**: CURR_YIELD (descending)
-- **Time Horizon**: >20 years (long term)
-- **Minimum Current Yield**: 4.0%+
-- **Minimum Rating**: BBB+ (investment grade)
-- **Strategy**: Reliable income from quality issuers
-- **Typical Results**: ~20-50 stable income bonds
-
+---
 ## 🎨 Dual-Mode Report Interface
 
 ### Toggle Between Two Investment Approaches
