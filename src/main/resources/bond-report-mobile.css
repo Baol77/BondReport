@@ -1,36 +1,150 @@
 /* ========================================
-   MOBILE LAYOUT IMPROVEMENTS
+   RESPONSIVE TABLE & LAYOUT
    ======================================== */
 
-/* DESKTOP (1024px+): Show all columns */
+/* DESKTOP (≥1024px): Show all columns */
 @media (min-width: 1024px) {
     th, td { display: table-cell !important; }
 }
 
+/* ========================================
+   MOBILE LANDSCAPE (≤480px width + landscape)
+   ======================================== */
 
-/* MOBILE (≤480px) */
-@media (max-width: 480px) {
-  /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
-     th:nth-child(2),  /* Issuer */
-     td:nth-child(2),
-     th:nth-child(5),  /* Rating */
-     td:nth-child(5),
-     th:nth-child(6),  /* Price EUR */
-     td:nth-child(6),
-     th:nth-child(7),  /* Coupon */
-     td:nth-child(7),
-     th:nth-child(10), /* Capital at Mat */
-     td:nth-child(10) {
-         display: none !important;
-     }
+@media (max-width: 480px) and (orientation: landscape) {
+    body {
+        margin: 10px;
+    }
 
+    h2 {
+        font-size: 16px;
+        margin: 5px 0 3px 0;
+    }
+
+    /* Compress profile presets in landscape */
+    .profile-presets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .profile-presets label {
+        display: none;  /* Hide label in landscape */
+    }
+
+    .preset-button {
+        padding: 6px 4px;
+        font-size: 10px;
+        min-height: 36px;
+        white-space: normal;
+    }
+
+    .preset-description {
+        display: none;  /* Hide description in landscape */
+    }
+
+    /* Compress controls */
+    .controls {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .controls label {
+        font-size: 11px;
+        gap: 2px;
+    }
+
+    .controls input,
+    .controls select {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    .controls button {
+        padding: 6px 8px;
+        font-size: 11px;
+        min-height: 36px;
+    }
+
+    /* Maturity row in landscape */
+    .maturity-row {
+        grid-column: 1 / -1;  /* Full width */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .maturity-row label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 11px;
+    }
+
+    .maturity-row input {
+        padding: 6px;
+        font-size: 13px;
+    }
+
+    /* Action buttons full width */
+    .controls > button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .controls .spacer {
+        display: none;
+    }
+
+    /* Hide table legend in landscape */
+    .legend {
+        display: none;
+    }
+
+    /* Compact table in landscape */
+    table {
+        font-size: 11px;
+    }
+
+    th, td {
+        padding: 4px 2px;
+    }
+
+    thead th {
+        padding: 5px 2px;
+    }
+
+    /* Hide columns for mobile */
+    th:nth-child(2),  /* Issuer */
+    td:nth-child(2),
+    th:nth-child(5),  /* Rating */
+    td:nth-child(5),
+    th:nth-child(6),  /* Price EUR */
+    td:nth-child(6),
+    th:nth-child(7),  /* Coupon */
+    td:nth-child(7),
+    th:nth-child(10), /* Capital at Mat */
+    td:nth-child(10) {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   MOBILE PORTRAIT (≤480px + portrait)
+   ======================================== */
+
+@media (max-width: 480px) and (orientation: portrait) {
     /* === HEADER & TITLE === */
     h2 {
         font-size: 18px;
         margin: 10px 0 5px 0;
     }
 
-    /* Timestamp on same line as title */
     h2 span {
         display: inline;
         font-size: 12px;
@@ -110,6 +224,7 @@
         height: auto;
         min-height: 40px;
         border-radius: 4px;
+        width: 100%;
     }
 
     /* Group maturity controls horizontally */
@@ -121,6 +236,18 @@
 
     .maturity-row label {
         grid-column: span 1;
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .maturity-row input {
+        font-size: 14px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
     }
 
     /* === BUTTONS === */
@@ -175,11 +302,28 @@
         font-size: 12px;
         margin-bottom: 8px;
     }
+
+    /* === HIDE TABLE COLUMNS FOR MOBILE === */
+    th:nth-child(2),  /* Issuer */
+    td:nth-child(2),
+    th:nth-child(5),  /* Rating */
+    td:nth-child(5),
+    th:nth-child(6),  /* Price EUR */
+    td:nth-child(6),
+    th:nth-child(7),  /* Coupon */
+    td:nth-child(7),
+    th:nth-child(10), /* Capital at Mat */
+    td:nth-child(10) {
+        display: none !important;
+    }
 }
 
-/* TABLET (481px - 1023px) */
+/* ========================================
+   TABLET (481px - 1023px)
+   ======================================== */
+
 @media (min-width: 481px) and (max-width: 1023px) {
- /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
+    /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
     th:nth-child(2),  /* Issuer */
     td:nth-child(2),
     th:nth-child(5),  /* Rating */
@@ -213,9 +357,20 @@
     button {
         min-height: 40px;
     }
+
+    table {
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 6px 6px;
+    }
 }
 
-/* DESKTOP (≥1024px) */
+/* ========================================
+   DESKTOP (≥1024px)
+   ======================================== */
+
 @media (min-width: 1024px) {
     .profile-presets {
         display: flex;
@@ -223,14 +378,50 @@
         gap: 10px;
     }
 
+    .profile-presets label {
+        display: block !important;
+    }
+
+    .preset-description {
+        display: block !important;
+    }
+
     .controls {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
+        align-items: center;
+    }
+
+    .controls .spacer {
+        display: block !important;
     }
 
     button {
         padding: 8px 16px;
         min-height: auto;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        display: table-cell !important;
+        padding: 6px 8px;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #f2f2f2;
+        z-index: 10;
+    }
+
+    .legend {
+        display: block !important;
+        margin-top: 15px;
+        padding: 10px;
+        font-size: 12px;
     }
 }
