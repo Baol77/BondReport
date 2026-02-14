@@ -21,7 +21,7 @@ public class BondProfilesConfig {
     public static BondProfilesConfig load() {
         try (InputStream in = BondProfilesConfig.class
             .getClassLoader()
-            .getResourceAsStream("bond-profiles.yaml")) {
+            .getResourceAsStream("yaml/bond-profiles.yaml")) {
 
             if (in == null) {
                 throw new IllegalStateException("bond-profiles.yaml not found on classpath");

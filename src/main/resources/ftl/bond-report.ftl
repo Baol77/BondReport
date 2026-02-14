@@ -6,8 +6,9 @@
     <!-- External CSS -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <style>
-        <#include "bond-report.css">
-        <#include "bond-report-mobile.css">
+        <#include "../css/bond-report.css">
+        <#include "../css/bond-report-mobile.css">
+        <#include "../css/portfolio-analyzer.css">
     </style>
 </head>
 
@@ -213,15 +214,17 @@
     </table>
 </div>
 
+<#include "portfolio-analyzer.ftl">
+
 <!-- External JavaScript -->
 <script>
-    <#include "bond-report.js">
+    <#include "../js/bond-report.js">
 </script>
 <script>
-    <#include "portfolio-analyzer.js" parse=false>
+    <#include "../js/portfolio-analyzer.js" parse=false>
 </script>
 <script>
-    <#include "bond-report-mobile-adapter.js" parse=false>
+    <#include "../js/bond-report-mobile-adapter.js" parse=false>
 </script>
 </body>
 </html>
