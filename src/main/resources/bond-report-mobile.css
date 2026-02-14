@@ -13,8 +13,6 @@
   /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
      th:nth-child(2),  /* Issuer */
      td:nth-child(2),
-     th:nth-child(4),  /* Currency - HIDE on mobile */
-     td:nth-child(4),
      th:nth-child(5),  /* Rating */
      td:nth-child(5),
      th:nth-child(6),  /* Price EUR */
@@ -184,8 +182,6 @@
  /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
     th:nth-child(2),  /* Issuer */
     td:nth-child(2),
-    th:nth-child(4),  /* Currency - keep for now */
-    td:nth-child(4),
     th:nth-child(5),  /* Rating */
     td:nth-child(5),
     th:nth-child(6),  /* Price EUR */
