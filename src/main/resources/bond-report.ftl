@@ -54,7 +54,7 @@
 </div>
 
 <div class="controls">
-    <!-- Maturity controls on same row (mobile: 2 columns) -->
+    <!-- Maturity row -->
     <div class="maturity-row">
         <label>
             Maturity from:
@@ -66,16 +66,20 @@
         </label>
     </div>
 
-    <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">
-        🧹 Clear column filters
-    </button>
+    <!-- Filter buttons group -->
+    <div class="control-group-filters">
+        <button onclick="clearColumnFilters()" title="Remove all filters except the maturity range">
+            🧹 Clear column filters
+        </button>
+    </div>
 
-    <div class="spacer"></div>
-
-    <button onclick="exportCSV()">📥 Export CSV</button>
-    <button onclick="window.portfolioAnalyzer?.openModal()" title="Create and analyze custom bond portfolios">
-        🎯 Portfolio Analysis
-    </button>
+    <!-- Action buttons group -->
+    <div class="control-group-actions">
+        <button onclick="exportCSV()">📥 Export CSV</button>
+        <button onclick="window.portfolioAnalyzer?.openModal()" title="Create and analyze custom bond portfolios">
+            🎯 Portfolio Analysis
+        </button>
+    </div>
 </div>
 
 <table id="bondTable">
