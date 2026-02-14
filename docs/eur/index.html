@@ -455,7 +455,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-14 17:26
+        — 📅 2026-02-14 19:01
     </span>
 </h2>
 
@@ -13632,33 +13632,86 @@ class PortfolioAnalyzer {
                 <div id="searchResults" style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:14px;min-height:20px;"></div>
             </div>
 
-            <!-- Add Form -->
-            <div id="addBondForm" style="display:none;background:#f9f9f9;padding:15px;border-radius:4px;margin-bottom:20px;border-left:4px solid #2196F3;">
-                <h4 style="margin-top:0;">Bond Details</h4>
-                <div id="bondDetails" style="background:white;padding:10px;border-radius:4px;margin-bottom:15px;font-size:13px;"></div>
+           <!-- Add Form -->
+           <div id="addBondForm"
+                style="display:none;background:#f9f9f9;padding:15px;border-radius:4px;margin-bottom:20px;border-left:4px solid #2196F3;">
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
-                    <label style="display:flex;flex-direction:column;font-weight:500;">
-                        Quantity:
-                        <input type="number" id="quantity" min="1" value="1" onchange="window.portfolioAnalyzer.updateCost()"
-                               style="padding:8px;border:1px solid #ddd;border-radius:4px;margin-top:5px;">
-                    </label>
-                    <label style="display:flex;flex-direction:column;font-weight:500;">
-                        OR Amount (€):
-                        <input type="number" id="amount" min="0" step="100" onchange="window.portfolioAnalyzer.updateQuantityInPortfolio()"
-                               style="padding:8px;border:1px solid #ddd;border-radius:4px;margin-top:5px;">
-                    </label>
-                </div>
+               <h4 style="margin-top:0;">Bond Details</h4>
 
-                <div style="background:white;padding:10px;border-radius:4px;margin-bottom:15px;font-size:14px;">
-                    Total Investment: <strong id="totalCost">€0.00</strong>
-                </div>
+               <div id="bondDetails"
+                    style="background:white;padding:10px;border-radius:4px;margin-bottom:15px;font-size:13px;">
+               </div>
 
-                <button onclick="window.portfolioAnalyzer.addBondToPortfolio()"
-                        style="width:100%;padding:12px;background:#2196F3;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:500;">
-                    ➕ Add to Portfolio
-                </button>
-            </div>
+               <!-- INPUT GRID -->
+               <div style="display:grid;
+                           grid-template-columns:1fr 1fr;
+                           gap:15px;
+                           margin-bottom:15px;
+                           align-items:start;">
+
+                   <!-- LEFT COLUMN -->
+                   <div style="display:flex;flex-direction:column;gap:15px;">
+                       <label style="display:flex;flex-direction:column;font-weight:500;gap:5px;">
+                           Quantity:
+                           <input type="number"
+                                  id="quantity"
+                                  min="0"
+                                  step="1"
+                                  style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+
+                           <small id="grossQuantityInfo"
+                                  style="color:#666;font-weight:normal;font-size:12px;">
+                               Gross quantity: –
+                           </small>
+                       </label>
+
+                   </div>
+
+                   <!-- RIGHT COLUMN -->
+                   <div style="display:flex;flex-direction:column;gap:15px;">
+
+                       <!-- EUR -->
+                       <label style="display:flex;flex-direction:column;font-weight:500;">
+                           Total Investment (€):
+                           <input type="number"
+                                  id="amount"
+                                  min="0"
+                                  step="0.01"
+                                  style="padding:8px;border:1px solid #ddd;border-radius:4px;margin-top:5px;">
+                       </label>
+
+                       <!-- ORIGINAL -->
+                       <label id="originalCurrencyWrapper"
+                              style="display:none;flex-direction:column;font-weight:500;gap:5px;">
+
+                           <span>
+                               Total Investment (<span id="originalCurrencyLabel"></span>)
+                           </span>
+                           <input type="number"
+                                  id="amountOriginal"
+                                  min="0"
+                                  step="0.01"
+                                  style="padding:8px;border:1px solid #ddd;border-radius:4px;">
+                       </label>
+
+
+                   </div>
+
+               </div>
+
+
+               <!-- SUMMARY -->
+               <div style="background:white;padding:10px;border-radius:4px;margin-bottom:15px;font-size:14px;">
+                   Total Investment (EUR): <strong id="totalCost">€0.00</strong>
+               </div>
+
+               <button onclick="window.portfolioAnalyzer.addBondToPortfolio()"
+                       style="width:100%;padding:12px;background:#2196F3;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:500;">
+                   ➕ Add to Portfolio
+               </button>
+
+           </div>
+
 
             <!-- Portfolio Table -->
             <div style="margin-bottom:30px;">
@@ -13847,35 +13900,100 @@ class PortfolioAnalyzer {
         detailsDiv.innerHTML = `
             <strong>${bond.issuer}</strong><br>
             ISIN: ${bond.isin}<br>
-            Price: €${bond.priceEur.toFixed(2)}<br>
+            Price: ${bond.currency} ${bond.price.toFixed(2)}${bond.currency !== 'EUR' ? ` (€ ${bond.priceEur.toFixed(2)})` : ''}<br>
             Rating: ${bond.rating} | Coupon: ${bond.coupon.toFixed(2)}% | SAY: ${bond.say.toFixed(2)}%
         `;
 
-        document.getElementById('quantity').value = '1';
+        // Reset fields
+        document.getElementById('quantity').value = '';
         document.getElementById('amount').value = '';
 
-        this.updateCost();
-        document.getElementById('addBondForm').style.display = 'block';
+        const originalWrapper = document.getElementById('originalCurrencyWrapper');
+        const originalLabel = document.getElementById('originalCurrencyLabel');
+        const originalInput = document.getElementById('amountOriginal');
+
+        if (bond.currency === 'EUR') {
+            originalWrapper.style.display = 'none';
+            originalInput.value = '';
+        } else {
+            originalWrapper.style.display = 'flex';
+            originalLabel.textContent = bond.currency;
+            originalInput.value = '';
+        }
+
+        // Update displayed total live (only EUR total shown)
+        document.getElementById('amount').addEventListener('input', () => {
+            const eur = parseFloat(document.getElementById('amount').value) || 0;
+            document.getElementById('totalCost').textContent = `€${eur.toFixed(2)}`;
+        });
+
+       // Call alignment logic
+       this.alignTotalAmounts();
+
+       document.getElementById('addBondForm').style.display = 'block';
     }
 
-    updateCost() {
+    alignTotalAmounts() {
         if (!this.currentBond) return;
 
-        const qty = parseFloat(document.getElementById('quantity').value) || 1;
-        const totalCost = qty * this.currentBond.priceEur;
+        const eurInput = document.getElementById('amount');
+        const originalInput = document.getElementById('amountOriginal');
+        const totalDisplay = document.getElementById('totalCost');
 
-        document.getElementById('totalCost').textContent = `€${totalCost.toFixed(2)}`;
-        document.getElementById('amount').value = totalCost.toFixed(2);
+        if (!eurInput) return;
+
+        const bond = this.currentBond;
+
+        // If EUR bond → only update total display
+        if (bond.currency === 'EUR') {
+            eurInput.oninput = () => {
+                const eur = parseFloat(eurInput.value) || 0;
+                totalDisplay.textContent = `€${eur.toFixed(2)}`;
+            };
+            return;
+        }
+
+        const fxRate = bond.priceEur / bond.price;
+
+        // EUR → Original
+        eurInput.oninput = () => {
+            const eur = parseFloat(eurInput.value) || 0;
+            const original = eur / fxRate;
+
+            originalInput.value = original.toFixed(2);
+            totalDisplay.textContent = `€${eur.toFixed(2)}`;
+
+            this.updateGrossQuantity();
+        };
+
+        // Original → EUR
+        originalInput.oninput = () => {
+            const original = parseFloat(originalInput.value) || 0;
+            const eur = original * fxRate;
+
+            eurInput.value = eur.toFixed(2);
+            totalDisplay.textContent = `€${eur.toFixed(2)}`;
+
+            this.updateGrossQuantity();
+        };
     }
 
-    updateQuantity() {
+    updateGrossQuantity() {
         if (!this.currentBond) return;
 
-        const amount = parseFloat(document.getElementById('amount').value) || 0;
-        const qty = Math.floor(amount / this.currentBond.priceEur);
+        const eurInput = document.getElementById('amount');
+        const grossInfo = document.getElementById('grossQuantityInfo');
 
-        document.getElementById('quantity').value = Math.max(1, qty);
-        this.updateCost();
+        const eur = parseFloat(eurInput.value) || 0;
+
+        if (eur === 0) {
+            grossInfo.textContent = 'Gross quantity: –';
+            return;
+        }
+
+        const grossQty = eur / this.currentBond.priceEur;
+
+        grossInfo.textContent = `Gross quantity: ${grossQty.toFixed(2)}`;
     }
 
     addBondToPortfolio() {
