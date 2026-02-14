@@ -638,7 +638,7 @@ function applyPreset(presetName) {
 
 function updatePresetButtons(activePreset) {
     // Update built-in preset buttons
-    const ids = ["sayAggressive", "sayConservative", "incomeHigh", "incomeModerate"];
+    const ids = ["cashParking", "ultraShortHigh", "balancedCore", "maxIncome", "deepDiscount", "fortressSafe"];
     ids.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle("active", id === activePreset);
@@ -658,5 +658,5 @@ function updatePresetButtons(activePreset) {
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
     setDefaultMaturityFilters();
-    applyPreset("sayAggressive");
+    applyPreset("cashParking");
 });

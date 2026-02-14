@@ -1,46 +1,70 @@
 profiles:
-  - id: sayAggressive
-    label: SAY Aggressive
-    emoji: "📈🔥"
-    description: Cheap bonds, 10y maturity, high SAY.
-    profileType: SAY
-    sortedBy: SAY
+  # 1. LIQUIDITY / SAFETY (The "Bank Replacement")
+  # Short term, high quality. Safe place to park cash.
+  - id: cashParking
+    label: Cash Parking
+    emoji: "🅿️🛡️"
+    description: Short (<3y) investment grade for liquidity
     filters:
-      minMatYears: 1
-      maxMatYears: 10
-      minSAY: 5.0
-
-  - id: sayConservative
-    label: SAY Conservative
-    emoji: "📈🛡️"
-    description: Stable bonds, 20y maturity, conservative SAY, minimum BBB+ rating.
-    profileType: SAY
-    sortedBy: SAY
-    filters:
-      minMatYears: 1
-      maxMatYears: 20
-      minSAY: 4.0
+      maxMatYears: 3
       minRating: BBB+
+      minYield: 3.5
 
-  - id: incomeHigh
-    label: Income High
-    emoji: "💵🔥"
-    description: Maximum immediate yield (>= 5% current yield), >20y maturity.
-    profileType: income
-    sortedBy: CURR_YIELD
+  # 2. SHORT-TERM YIELD (The "Aggressive Short")
+  # Taking risk for high returns in the near term (1-3y).
+  - id: ultraShortHigh
+    label: Ultra Short High
+    emoji: "⚡💰"
+    description: Short-term (1-3y) bonds with very high yield (6%+)
     filters:
-      maxPrice: 110
-      minMatYears: 20
+      minMatYears: 1
+      maxMatYears: 3
       minYield: 6.0
 
-  - id: incomeModerate
-    label: Income Moderate
-    emoji: "💵🌱"
-    description: Steady and reliable yield (>= 3.5% current yield), >20y maturity, minimum BBB+ rating.
-    profileType: income
-    sortedBy: CURR_YIELD
+  # 3. BALANCED CORE (The "Sleep Well" Profile)
+  # Merged your 'balancedReturn' and 'sayConservative'.
+  - id: balancedCore
+    label: Balanced Core
+    emoji: "⚖️🌲"
+    description: Mid-term (5-15y), Investment Grade, >4.5% SAY
     filters:
-      maxPrice: 115
-      minMatYears: 20
-      minYield: 4.0
+      minMatYears: 5
+      maxMatYears: 15
+      minSAY: 4.5
       minRating: BBB+
+
+  # 4. MAX INCOME (The "Cashflow Machine")
+  # Based on your 'incomeHigh' - excellent for retirees living on coupons.
+  - id: maxIncome
+    label: Max Income
+    emoji: "💵🔥"
+    description: High current yield (>6%) with price protection (<110)
+    filters:
+      maxPrice: 110
+      minMatYears: 15
+      minYield: 6.0
+      minRating: BB+
+
+  # 5. DEEP DISCOUNT (The "Capital Builder")
+  # Modified your 'sayAggressive' to actually target "Cheap" bonds.
+  - id: deepDiscount
+    label: Deep Discount
+    emoji: "📉🚀"
+    description: Bonds trading <90% par. Profit comes from pull-to-par.
+    filters:
+      maxPrice: 90
+      minMatYears: 3
+      maxMatYears: 20
+      minSAY: 5.0
+
+  # 6. FORTRESS (The "Crisis Hedge")
+  # Kept your 'topRated' - crucial for times of market panic.
+  - id: fortressSafe
+    label: AAA/AA Fortress
+    emoji: "🏰🛡️"
+    description: Top-tier sovereigns (AA-/AAA) only
+    filters:
+      minRating: AA-
+      minSAL: 3.0
+      minMatYears: 5
+      maxMatYears: 30

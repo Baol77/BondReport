@@ -274,7 +274,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-14 12:29
+        — 📅 2026-02-14 12:42
     </span>
 </h2>
 
@@ -284,28 +284,40 @@ tr:hover {
 <div class="profile-presets">
     <label>Investor profiles:</label>
     <button class="preset-button"
-            id="sayAggressive"
-            onclick="applyPreset('sayAggressive')"
-            title="Cheap bonds, 10y maturity, high SAY.">
-        📈🔥 SAY Aggressive
+            id="cashParking"
+            onclick="applyPreset('cashParking')"
+            title="Short (<3y) investment grade for liquidity">
+        🅿️🛡️ Cash Parking
     </button>
     <button class="preset-button"
-            id="sayConservative"
-            onclick="applyPreset('sayConservative')"
-            title="Stable bonds, 20y maturity, conservative SAY, minimum BBB+ rating.">
-        📈🛡️ SAY Conservative
+            id="ultraShortHigh"
+            onclick="applyPreset('ultraShortHigh')"
+            title="Short-term (1-3y) bonds with very high yield (6%+)">
+        ⚡💰 Ultra Short High
     </button>
     <button class="preset-button"
-            id="incomeHigh"
-            onclick="applyPreset('incomeHigh')"
-            title="Maximum immediate yield (>= 5% current yield), >20y maturity.">
-        💵🔥 Income High
+            id="balancedCore"
+            onclick="applyPreset('balancedCore')"
+            title="Mid-term (5-15y), Investment Grade, >4.5% SAY">
+        ⚖️🌲 Balanced Core
     </button>
     <button class="preset-button"
-            id="incomeModerate"
-            onclick="applyPreset('incomeModerate')"
-            title="Steady and reliable yield (>= 3.5% current yield), >20y maturity, minimum BBB+ rating.">
-        💵🌱 Income Moderate
+            id="maxIncome"
+            onclick="applyPreset('maxIncome')"
+            title="High current yield (>6%) with price protection (<110)">
+        💵🔥 Max Income
+    </button>
+    <button class="preset-button"
+            id="deepDiscount"
+            onclick="applyPreset('deepDiscount')"
+            title="Bonds trading <90% par. Profit comes from pull-to-par.">
+        📉🚀 Deep Discount
+    </button>
+    <button class="preset-button"
+            id="fortressSafe"
+            onclick="applyPreset('fortressSafe')"
+            title="Top-tier sovereigns (AA-/AAA) only">
+        🏰🛡️ AAA/AA Fortress
     </button>
 <button class="preset-button" id="preset-reset"
         onclick="applyPreset('reset')">🧹 Reset
@@ -12998,50 +13010,74 @@ function setDefaultMaturityFilters() {
         ======================= */
 
         const PRESETS = {
-                  sayAggressive: {
-            name: "SAY Aggressive",
-            description: "Cheap bonds, 10y maturity, high SAY.",
+                  cashParking: {
+            name: "Cash Parking",
+            description: "Short (<3y) investment grade for liquidity",
+            profileType: "SAY",
+            sortedBy: "SAY",
+            filters: {
+              maxMatYears: 3,
+              minRating: "BBB+",
+              minYield: 3.5
+            }
+          },
+          ultraShortHigh: {
+            name: "Ultra Short High",
+            description: "Short-term (1-3y) bonds with very high yield (6%+)",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
               minMatYears: 1,
-              maxMatYears: 10,
-              minSAY: 5
-            }
-          },
-          sayConservative: {
-            name: "SAY Conservative",
-            description: "Stable bonds, 20y maturity, conservative SAY, minimum BBB+ rating.",
-            profileType: "SAY",
-            sortedBy: "SAY",
-            filters: {
-              minMatYears: 1,
-              maxMatYears: 20,
-              minSAY: 4,
-              minRating: "BBB+"
-            }
-          },
-          incomeHigh: {
-            name: "Income High",
-            description: "Maximum immediate yield (>= 5% current yield), >20y maturity.",
-            profileType: "income",
-            sortedBy: "CURR_YIELD",
-            filters: {
-              maxPrice: 110,
-              minMatYears: 20,
+              maxMatYears: 3,
               minYield: 6
             }
           },
-          incomeModerate: {
-            name: "Income Moderate",
-            description: "Steady and reliable yield (>= 3.5% current yield), >20y maturity, minimum BBB+ rating.",
-            profileType: "income",
-            sortedBy: "CURR_YIELD",
+          balancedCore: {
+            name: "Balanced Core",
+            description: "Mid-term (5-15y), Investment Grade, >4.5% SAY",
+            profileType: "SAY",
+            sortedBy: "SAY",
             filters: {
-              maxPrice: 115,
-              minMatYears: 20,
-              minYield: 4,
+              minMatYears: 5,
+              maxMatYears: 15,
+              minSAY: 4.5,
               minRating: "BBB+"
+            }
+          },
+          maxIncome: {
+            name: "Max Income",
+            description: "High current yield (>6%) with price protection (<110)",
+            profileType: "SAY",
+            sortedBy: "SAY",
+            filters: {
+              maxPrice: 110,
+              minMatYears: 15,
+              minYield: 6,
+              minRating: "BB+"
+            }
+          },
+          deepDiscount: {
+            name: "Deep Discount",
+            description: "Bonds trading <90% par. Profit comes from pull-to-par.",
+            profileType: "SAY",
+            sortedBy: "SAY",
+            filters: {
+              maxPrice: 90,
+              minMatYears: 3,
+              maxMatYears: 20,
+              minSAY: 5
+            }
+          },
+          fortressSafe: {
+            name: "AAA/AA Fortress",
+            description: "Top-tier sovereigns (AA-/AAA) only",
+            profileType: "SAY",
+            sortedBy: "SAY",
+            filters: {
+              minRating: "AA-",
+              minSAL: 3,
+              minMatYears: 5,
+              maxMatYears: 30
             }
           }
         };
@@ -13291,7 +13327,7 @@ function applyPreset(presetName) {
 
 function updatePresetButtons(activePreset) {
     // Update built-in preset buttons
-    const ids = ["sayAggressive", "sayConservative", "incomeHigh", "incomeModerate"];
+    const ids = ["cashParking", "ultraShortHigh", "balancedCore", "maxIncome", "deepDiscount", "fortressSafe"];
     ids.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle("active", id === activePreset);
@@ -13311,7 +13347,7 @@ function updatePresetButtons(activePreset) {
 ======================= */
 document.addEventListener("DOMContentLoaded", () => {
     setDefaultMaturityFilters();
-    applyPreset("sayAggressive");
+    applyPreset("cashParking");
 });</script>
 <script>
 // Portfolio Analyzer - Client-Side Portfolio Management
