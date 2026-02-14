@@ -274,7 +274,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-14 12:42
+        — 📅 2026-02-14 12:54
     </span>
 </h2>
 
@@ -13047,8 +13047,8 @@ function setDefaultMaturityFilters() {
           maxIncome: {
             name: "Max Income",
             description: "High current yield (>6%) with price protection (<110)",
-            profileType: "SAY",
-            sortedBy: "SAY",
+            profileType: "income",
+            sortedBy: "CURR_YIELD",
             filters: {
               maxPrice: 110,
               minMatYears: 15,

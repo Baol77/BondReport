@@ -5,6 +5,8 @@ profiles:
     label: Cash Parking
     emoji: "🅿️🛡️"
     description: Short (<3y) investment grade for liquidity
+    profileType: SAY
+    sortedBy: SAY
     filters:
       maxMatYears: 3
       minRating: BBB+
@@ -16,6 +18,8 @@ profiles:
     label: Ultra Short High
     emoji: "⚡💰"
     description: Short-term (1-3y) bonds with very high yield (6%+)
+    profileType: SAY
+    sortedBy: SAY
     filters:
       minMatYears: 1
       maxMatYears: 3
@@ -27,6 +31,8 @@ profiles:
     label: Balanced Core
     emoji: "⚖️🌲"
     description: Mid-term (5-15y), Investment Grade, >4.5% SAY
+    profileType: SAY
+    sortedBy: SAY
     filters:
       minMatYears: 5
       maxMatYears: 15
@@ -39,6 +45,8 @@ profiles:
     label: Max Income
     emoji: "💵🔥"
     description: High current yield (>6%) with price protection (<110)
+    profileType: income
+    sortedBy: CURR_YIELD
     filters:
       maxPrice: 110
       minMatYears: 15
@@ -51,6 +59,8 @@ profiles:
     label: Deep Discount
     emoji: "📉🚀"
     description: Bonds trading <90% par. Profit comes from pull-to-par.
+    profileType: SAY
+    sortedBy: SAY
     filters:
       maxPrice: 90
       minMatYears: 3
@@ -63,6 +73,8 @@ profiles:
     label: AAA/AA Fortress
     emoji: "🏰🛡️"
     description: Top-tier sovereigns (AA-/AAA) only
+    profileType: SAY
+    sortedBy: SAY
     filters:
       minRating: AA-
       minSAL: 3.0
