@@ -260,122 +260,51 @@ tr:hover {
     font-weight: bold;
     margin-top: 10px;
 }/* ========================================
-   MOBILE LAYOUT IMPROVEMENTS
+   MOBILE PORTRAIT (≤480px + portrait)
    ======================================== */
 
-/* DESKTOP (1024px+): Show all columns */
-@media (min-width: 1024px) {
-    th, td { display: table-cell !important; }
-}
-
-
-/* MOBILE (≤480px) */
-@media (max-width: 480px) {
-  /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
-     th:nth-child(2),  /* Issuer */
-     td:nth-child(2),
-     th:nth-child(4),  /* Currency - HIDE on mobile */
-     td:nth-child(4),
-     th:nth-child(5),  /* Rating */
-     td:nth-child(5),
-     th:nth-child(6),  /* Price EUR */
-     td:nth-child(6),
-     th:nth-child(7),  /* Coupon */
-     td:nth-child(7),
-     th:nth-child(10), /* Capital at Mat */
-     td:nth-child(10) {
-         display: none !important;
-     }
-
-    /* === HEADER & TITLE === */
+@media (max-width: 480px) and (orientation: portrait) {
     h2 {
         font-size: 18px;
         margin: 10px 0 5px 0;
     }
 
-    /* Timestamp on same line as title */
-    h2 span {
-        display: inline;
-        font-size: 12px;
-        margin-left: 5px;
-    }
-
-    /* === PROFILE PRESETS SECTION === */
     .profile-presets {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
         padding: 10px;
         margin-bottom: 15px;
-        background: #f0f8ff;
-        border-left: 4px solid #2196F3;
-        align-items: stretch;
-    }
-
-    .profile-presets label {
-        grid-column: 1 / -1;  /* Full width */
-        font-size: 13px;
-        margin-bottom: 5px;
     }
 
     .preset-button {
         padding: 10px 8px;
         font-size: 11px;
-        border-radius: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        height: auto;
         min-height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
     }
 
-    .preset-description {
-        grid-column: 1 / -1;
-        font-size: 10px;
-        margin-top: 5px;
-        margin-left: 0;
-    }
-
-    /* === CONTROLS SECTION === */
     .controls {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        margin-bottom: 15px;
         padding: 10px;
-        background: #f9f9f9;
-        border-radius: 4px;
-    }
-
-    .controls label {
-        font-size: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+        margin-bottom: 15px;
     }
 
     .controls input,
     .controls select {
-        font-size: 14px;  /* Prevent iOS zoom */
+        font-size: 14px;
         padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
         width: 100%;
     }
 
     .controls button {
+        width: 100%;
         padding: 10px 12px;
         font-size: 12px;
-        height: auto;
         min-height: 40px;
-        border-radius: 4px;
     }
 
-    /* Group maturity controls horizontally */
     .maturity-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -383,40 +312,31 @@ tr:hover {
     }
 
     .maturity-row label {
-        grid-column: span 1;
-    }
-
-    /* === BUTTONS === */
-    button {
-        padding: 10px 12px;
         font-size: 12px;
-        min-height: 40px;
-        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
     }
 
     .controls .spacer {
-        display: none;  /* Hide spacer on mobile */
+        display: none;
     }
 
-    /* Stack action buttons vertically */
-    .controls > button {
-        width: 100%;
+    /* Hide table columns for mobile */
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7),
+    th:nth-child(10), td:nth-child(10) {
+        display: none !important;
     }
 
-    /* === TABLE === */
     table {
         font-size: 12px;
-        margin-top: 10px;
     }
 
     th, td {
         padding: 6px 4px;
-        text-align: center;
-    }
-
-    th:first-child,
-    td:first-child {
-        text-align: left;
     }
 
     thead th {
@@ -424,51 +344,101 @@ tr:hover {
         top: 0;
         background: #f2f2f2;
         z-index: 10;
-        padding: 8px 4px;
-    }
-
-    /* === LEGEND === */
-    .legend {
-        margin-top: 15px;
-        padding: 10px;
-        font-size: 11px;
-    }
-
-    .legend-title {
-        font-size: 12px;
-        margin-bottom: 8px;
     }
 }
 
-/* TABLET (481px - 1023px) */
-@media (min-width: 481px) and (max-width: 1023px) {
- /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
-    th:nth-child(2),  /* Issuer */
-    td:nth-child(2),
-    th:nth-child(4),  /* Currency - keep for now */
-    td:nth-child(4),
-    th:nth-child(5),  /* Rating */
-    td:nth-child(5),
-    th:nth-child(6),  /* Price EUR */
-    td:nth-child(6),
-    th:nth-child(7),  /* Coupon */
-    td:nth-child(7),
-    th:nth-child(10), /* Capital at Mat */
-    td:nth-child(10) {
-        display: none !important;
+/* ========================================
+   MOBILE LANDSCAPE FIX (≤480px + landscape)
+   ======================================== */
+
+@media (max-width: 480px) and (orientation: landscape) {
+    body {
+        margin: 10px;
+    }
+
+    h2 {
+        font-size: 16px;
+        margin: 5px 0 3px 0;
     }
 
     .profile-presets {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        display: none;  /* Hide presets in landscape - too cramped */
     }
 
-    .preset-button {
-        font-size: 12px;
-        padding: 10px;
+    .preset-description {
+        display: none;
     }
 
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    /* Maturity row aligned horizontally */
+    .maturity-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .maturity-row label {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        font-size: 11px;
+    }
+
+    .maturity-row input,
+    .maturity-row select {
+        width: 100%;
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    /* Action buttons perfectly aligned */
+    .controls > button {
+        width: 100%;
+        padding: 8px;
+        font-size: 11px;
+        min-height: 36px;
+    }
+
+    .controls .spacer {
+        display: none;
+    }
+
+    /* Hide legend in landscape */
+    .legend {
+        display: none;
+    }
+
+    /* Compact table */
+    table {
+        font-size: 11px;
+    }
+
+    th, td {
+        padding: 4px 2px;
+    }
+
+    /* Hide table columns for mobile */
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7),
+    th:nth-child(10), td:nth-child(10) {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   TABLET (481px - 1023px)
+   ======================================== */
+
+@media (min-width: 481px) and (max-width: 1023px) {
     .controls {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -478,25 +448,42 @@ tr:hover {
     button {
         min-height: 40px;
     }
+
+    /* Hide table columns */
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7),
+    th:nth-child(10), td:nth-child(10) {
+        display: none !important;
+    }
 }
 
-/* DESKTOP (≥1024px) */
-@media (min-width: 1024px) {
-    .profile-presets {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
+/* ========================================
+   DESKTOP (≥1024px)
+   ======================================== */
 
+@media (min-width: 1024px) {
     .controls {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
+        align-items: center;
     }
 
     button {
         padding: 8px 16px;
         min-height: auto;
+    }
+
+    .controls .spacer {
+        display: block;
+        margin-left: auto;
+    }
+
+    /* Show all table columns */
+    th, td {
+        display: table-cell !important;
     }
 }    </style>
 </head>
@@ -514,7 +501,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-14 16:01
+        — 📅 2026-02-14 16:24
     </span>
 </h2>
 
@@ -14295,7 +14282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });</script>
 <script>
 /* ========================================
-   Bond Report Mobile Adaptation Layer (MINIMAL)
+   MINIMAL MOBILE ADAPTATION (No Layout Breaking)
    ======================================== */
 
 class MobileAdaptation {
@@ -14308,7 +14295,6 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
-        this.addTouchOptimizations();
         this.logDeviceInfo();
     }
 
@@ -14322,24 +14308,8 @@ class MobileAdaptation {
         meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover');
     }
 
-    addTouchOptimizations() {
-        if (!this.touchDevice) return;
-
-        const buttons = document.querySelectorAll('button, .btn');
-        buttons.forEach(btn => {
-            btn.style.minHeight = '44px';
-            btn.style.minWidth = '44px';
-        });
-
-        const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.style.minHeight = '44px';
-            input.style.fontSize = '16px';
-        });
-    }
-
     logDeviceInfo() {
-        console.log('📱 Mobile Adaptation Initialized:', {
+        console.log('📱 Mobile Adaptation initialized:', {
             isMobile: this.isMobile,
             isTablet: this.isTablet,
             isTouchDevice: this.touchDevice,

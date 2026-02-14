@@ -1,5 +1,5 @@
 /* ========================================
-   Bond Report Mobile Adaptation Layer (MINIMAL)
+   MINIMAL MOBILE ADAPTATION (No Layout Breaking)
    ======================================== */
 
 class MobileAdaptation {
@@ -12,7 +12,6 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
-        this.addTouchOptimizations();
         this.logDeviceInfo();
     }
 
@@ -26,24 +25,8 @@ class MobileAdaptation {
         meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover');
     }
 
-    addTouchOptimizations() {
-        if (!this.touchDevice) return;
-
-        const buttons = document.querySelectorAll('button, .btn');
-        buttons.forEach(btn => {
-            btn.style.minHeight = '44px';
-            btn.style.minWidth = '44px';
-        });
-
-        const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.style.minHeight = '44px';
-            input.style.fontSize = '16px';
-        });
-    }
-
     logDeviceInfo() {
-        console.log('📱 Mobile Adaptation Initialized:', {
+        console.log('📱 Mobile Adaptation initialized:', {
             isMobile: this.isMobile,
             isTablet: this.isTablet,
             isTouchDevice: this.touchDevice,
