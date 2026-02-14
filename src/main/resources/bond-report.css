@@ -26,6 +26,13 @@ button {
     align-items: center;
 }
 
+.control-group-actions {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+        margin-left: auto;
+}
+
 .controls .spacer {
     margin-left: auto;
 }

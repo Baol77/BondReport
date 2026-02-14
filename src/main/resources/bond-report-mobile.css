@@ -1,125 +1,99 @@
 /* ========================================
-   MOBILE PORTRAIT (≤480px + portrait)
-   ======================================== */
+   GLOBAL DEFAULT (Desktop First)
+======================================== */
 
-@media (max-width: 480px) and (orientation: portrait) {
-    h2 {
-        font-size: 18px;
-        margin: 10px 0 5px 0;
-    }
+.maturity-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
 
-    /* === PROFILE PRESETS === */
-    .profile-presets {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        padding: 10px;
-        margin-bottom: 15px;
-    }
+.maturity-row > div {
+    display: flex;
+    align-items: center;
+}
 
-    .profile-presets label {
-        grid-column: 1 / -1;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
+.maturity-row input {
+    margin-left: 6px;
+}
 
-    .preset-button {
-        padding: 10px 8px;
-        font-size: 11px;
-        min-height: 40px;
-    }
+/* ========================================
+   MOBILE (≤768px)
+======================================== */
 
-    /* === CONTROLS === */
-    .controls {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px;
-        margin-bottom: 15px;
-    }
+@media (max-width: 768px) {
 
-    .controls label {
-        font-size: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
+   body {
+       margin: 10px;
+   }
 
-    .controls input,
-    .controls select {
-        font-size: 14px;
-        padding: 10px;
-        width: 100%;
-    }
+   h2 {
+       font-size: 18px;
+       margin: 8px 0;
+   }
 
-    .controls button {
-        width: 100%;
-        padding: 10px 12px;
-        font-size: 12px;
-        min-height: 40px;
-    }
+   /* Controls stacked and LEFT aligned */
+   .controls {
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;   /* 🔥 force left alignment */
+       gap: 10px;
+       padding: 10px;
+   }
 
-    /* === MATURITY ROW FIX === */
-    .maturity-row {
-        display: grid;
-        grid-template-columns: auto 1fr auto 1fr;
-        gap: 8px;
-        align-items: center;
-        width: 100%;
-    }
+   .controls label {
+       display: flex;
+       flex-direction: column;
+       font-size: 13px;
+       gap: 4px;
+       width: 100%;
+   }
 
-    .maturity-row label {
-        display: contents;  /* Remove label wrapper, flatten to grid */
-    }
+   .controls input,
+   .controls select {
+       width: 100%;
+       padding: 8px;
+       font-size: 14px;
+       box-sizing: border-box;
+   }
 
-    .maturity-row label:first-child {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        grid-column: 1 / 2;
-    }
+   /* Buttons LEFT (not full width anymore) */
+   .control-group-actions {
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;   /* 🔥 left */
+       gap: 8px;
+       width: 100%;
+       margin-left: 0;           /* remove desktop push */
+   }
 
-    .maturity-row label:first-child input {
-        width: 120px;
-        font-size: 14px;
-        padding: 8px;
-    }
+   .control-group-actions button {
+       width: auto;              /* 🔥 no full width */
+       padding: 8px 12px;
+       font-size: 13px;
+       min-height: 36px;
+   }
 
-    .maturity-row label:last-child {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        grid-column: 3 / 4;
-    }
+   /* Maturity stacked and LEFT */
+   .maturity-row {
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;   /* 🔥 left */
+       gap: 8px;
+       width: 100%;
+   }
 
-    .maturity-row label:last-child input {
-        width: 120px;
-        font-size: 14px;
-        padding: 8px;
-    }
+   .maturity-row > div {
+       width: 100%;
+   }
 
-    .maturity-row input {
-        width: 100%;
-    }
+   .maturity-row input {
+       width: 100%;
+       margin-left: 0;
+   }
 
-    /* === CONTROL GROUPS === */
-    .control-group-filters,
-    .control-group-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .control-group-actions button {
-        width: 100%;
-    }
-
-    .controls .spacer {
-        display: none;
-    }
-
-    /* === TABLE === */
+    /* Hide less important columns */
     th:nth-child(2), td:nth-child(2),
     th:nth-child(5), td:nth-child(5),
     th:nth-child(6), td:nth-child(6),
@@ -136,30 +110,27 @@
         padding: 6px 4px;
     }
 
-    thead th {
-        position: sticky;
-        top: 0;
-        background: #f2f2f2;
-        z-index: 10;
+    .legend {
+        display: none !important;
     }
 }
 
 /* ========================================
-   TABLET (481px - 1023px)
-   ======================================== */
+   TABLET (769px - 1023px)
+======================================== */
 
-@media (min-width: 481px) and (max-width: 1023px) {
+@media (min-width: 769px) and (max-width: 1023px) {
+
     .controls {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
-    button {
+    .controls button {
         min-height: 40px;
     }
 
-    /* Hide table columns */
     th:nth-child(2), td:nth-child(2),
     th:nth-child(5), td:nth-child(5),
     th:nth-child(6), td:nth-child(6),
@@ -171,9 +142,16 @@
 
 /* ========================================
    DESKTOP (≥1024px)
-   ======================================== */
+======================================== */
 
 @media (min-width: 1024px) {
+
+    .profile-presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
     .controls {
         display: flex;
         flex-wrap: wrap;
@@ -181,17 +159,14 @@
         align-items: center;
     }
 
-    button {
-        padding: 8px 16px;
-        min-height: auto;
-    }
-
     .controls .spacer {
-        display: block;
         margin-left: auto;
     }
 
-    /* Show all table columns */
+    button {
+        padding: 8px 16px;
+    }
+
     th, td {
         display: table-cell !important;
     }
