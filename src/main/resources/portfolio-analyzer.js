@@ -101,7 +101,7 @@ class PortfolioAnalyzer {
                     </label>
                     <label style="display:flex;flex-direction:column;font-weight:500;">
                         OR Amount (€):
-                        <input type="number" id="amount" min="0" step="100" onchange="window.portfolioAnalyzer.updateQuantity()"
+                        <input type="number" id="amount" min="0" step="100" onchange="window.portfolioAnalyzer.updateQuantityInPortfolio()"
                                style="padding:8px;border:1px solid #ddd;border-radius:4px;margin-top:5px;">
                     </label>
                 </div>
@@ -125,14 +125,14 @@ class PortfolioAnalyzer {
                             <tr style="background:#f0f0f0;">
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">ISIN</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Issuer</th>
-                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Currency</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Price</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Currency</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Rating</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Qty</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Investment</th>
-                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">SAY</th>
-                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Curr. Yield</th>
-                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Rating</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Maturity</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Curr. Yield</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">SAY</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Action</th>
                             </tr>
                         </thead>
@@ -356,67 +356,102 @@ class PortfolioAnalyzer {
         alert(`✅ Bond added! Total in portfolio: ${qty}`);
     }
 
-    removeBond(isin) {
-        this.portfolio = this.portfolio.filter(b => b.isin !== isin);
+    removeBond(index) {
+        this.portfolio.splice(index, 1);
         this.savePortfolio();
         this.updatePortfolioTable();
         this.updateStatistics();
     }
 
-    updateQuantityInPortfolio(isin, newQuantity) {
+    updateQuantityInPortfolio(index, newQuantity) {
         const qty = parseFloat(newQuantity);
+
         if (isNaN(qty) || qty < 1) {
             alert('Quantity must be at least 1');
             this.updatePortfolioTable();
             return;
         }
 
-        const bond = this.portfolio.find(b => b.isin === isin);
-        if (bond) {
-            bond.quantity = qty;
-            this.savePortfolio();
-            this.updatePortfolioTable();
-            this.updateStatistics();
-        }
+        this.portfolio[index].quantity = qty;
+
+        this.savePortfolio();
+        this.updateStatistics();
+    }
+
+
+    mergeBond(isin) {
+        // Find all entries for this specific ISIN
+        const matches = this.portfolio.filter(b => b.isin === isin);
+        if (matches.length < 2) return;
+
+        // Calculate weighted average price (Cost Basis)
+        const totalInvestment = matches.reduce((sum, b) => sum + (b.priceEur * b.quantity), 0);
+        const totalQty = matches.reduce((sum, b) => sum + b.quantity, 0);
+        const weightedAvgPrice = totalInvestment / totalQty;
+
+        // Keep the market metrics (SAY, Maturity, etc.) from the most recent entry
+        const latestData = matches[matches.length - 1];
+
+        // Remove all old entries and push the new consolidated one
+        this.portfolio = this.portfolio.filter(b => b.isin !== isin);
+        this.portfolio.push({
+            ...latestData,
+            priceEur: weightedAvgPrice,
+            quantity: totalQty
+        });
+
+        this.savePortfolio();
+        this.updatePortfolioTable();
+        this.updateStatistics();
+
+        console.log(`Consolidated ${matches.length} entries for ${isin}. New Avg Price: €${weightedAvgPrice.toFixed(2)}`);
     }
 
     updatePortfolioTable() {
         const tbody = document.getElementById('portfolioTableBody');
-        const emptyMsg = document.getElementById('emptyPortfolioMsg');
+        const empty = document.getElementById('emptyPortfolioMsg');
 
         if (this.portfolio.length === 0) {
             tbody.innerHTML = '';
-            emptyMsg.style.display = 'block';
+            empty.style.display = 'block';
             return;
         }
+        empty.style.display = 'none';
 
-        emptyMsg.style.display = 'none';
-        tbody.innerHTML = this.portfolio.map(bond => {
-            const investment = bond.priceEur * bond.quantity;
-            return `
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:8px;font-size:12px;">${bond.isin}</td>
-                    <td style="padding:8px;font-size:12px;">${bond.issuer}</td>
-                    <td style="padding:8px;font-size:12px;"><strong>${bond.currency}</strong></td>
-                    <td style="padding:8px;font-size:12px;">€${bond.priceEur.toFixed(2)}</td>
-                    <td style="padding:8px;font-size:12px;">
-                        <input type="number" value="${bond.quantity}" min="1"
-                               onchange="window.portfolioAnalyzer.updateQuantityInPortfolio('${bond.isin}', this.value)"
-                               style="width:50px;padding:4px;border:1px solid #ddd;border-radius:3px;">
-                    </td>
-                    <td style="padding:8px;font-size:12px;">€${investment.toFixed(2)}</td>
-                    <td style="padding:8px;font-size:12px;">${bond.say.toFixed(2)}%</td>
-                    <td style="padding:8px;font-size:12px;">${bond.currentYield.toFixed(2)}%</td>
-                    <td style="padding:8px;font-size:12px;"><strong>${bond.rating}</strong></td>
-                    <td style="padding:8px;font-size:12px;white-space:nowrap;">${bond.maturity}</td>
-                    <td style="padding:8px;font-size:12px;">
-                        <button onclick="window.portfolioAnalyzer.removeBond('${bond.isin}')"
-                                style="background:#f44336;color:white;border:none;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:11px;">
-                            ❌ Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
+        // Count ISINs to identify which ones need a merge button
+        const isinCounts = this.portfolio.reduce((acc, b) => {
+            acc[b.isin] = (acc[b.isin] || 0) + 1;
+            return acc;
+        }, {});
+
+        tbody.innerHTML = this.portfolio.map((bond, idx) => {
+            const hasDuplicates = isinCounts[bond.isin] > 1;
+
+            return `<tr style="border-bottom:1px solid #eee;">
+                <td>${bond.isin}</td>
+                <td>${bond.issuer}</td>
+                <td>€${bond.priceEur.toFixed(2)}</td>
+                <td>${bond.currency}</td>
+                <td>${bond.rating}</td>
+                <td>
+                    <input type="number"
+                           value="${bond.quantity}"
+                           min="1"
+                           onchange="window.portfolioAnalyzer.updateQuantityInPortfolio(${idx}, this.value)"
+                           style="width:60px;padding:4px;font-size:12px;">
+                </td>
+
+                <td>€${(bond.priceEur * bond.quantity).toFixed(2)}</td>
+                <td>${bond.maturity}</td>
+                <td>${bond.currentYield.toFixed(2)}%</td>
+                <td>${bond.say.toFixed(2)}%</td>
+                <td>
+                   <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;width:100%;">
+                       ${hasDuplicates ? `<span onclick="window.portfolioAnalyzer.mergeBond('${bond.isin}')" title="Merge duplicates" style="cursor:pointer;font-size:18px;transition:opacity 0.15s ease;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">🔄</span>` : ''}
+                       <span onclick="window.portfolioAnalyzer.removeBond(${idx})" title="Delete bond" style="cursor:pointer;font-size:18px;transition:opacity 0.15s ease;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">❌</span>
+                   </div>
+                </td>
+            </tr>`;
         }).join('');
     }
 
