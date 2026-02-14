@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <title>Bond Yield Ranking</title>
     <!-- External CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <style>
         <#include "bond-report.css">
+        <#include "bond-report-mobile.css">
     </style>
 </head>
 
@@ -206,6 +208,9 @@
 </script>
 <script>
     <#include "portfolio-analyzer.js" parse=false>
+</script>
+<script>
+    <#include "bond-report-mobile-adapter.js" parse=false>
 </script>
 </body>
 </html>

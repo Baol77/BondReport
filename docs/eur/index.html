@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Bond Yield Ranking</title>
     <!-- External CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <style>
         /* =======================
    GENERAL STYLES
@@ -258,6 +259,76 @@ tr:hover {
     font-size: 16px;
     font-weight: bold;
     margin-top: 10px;
+}/* ========================================
+   RESPONSIVE TABLE COLUMNS
+   ======================================== */
+
+/* DESKTOP (1024px+): Show all columns */
+@media (min-width: 1024px) {
+    th, td { display: table-cell !important; }
+}
+
+/* TABLET & MOBILE (≤1023px): Hide non-essential columns */
+@media (max-width: 1023px) {
+    /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
+    th:nth-child(2),  /* Issuer */
+    td:nth-child(2),
+    th:nth-child(4),  /* Currency - keep for now */
+    td:nth-child(4),
+    th:nth-child(5),  /* Rating */
+    td:nth-child(5),
+    th:nth-child(6),  /* Price EUR */
+    td:nth-child(6),
+    th:nth-child(7),  /* Coupon */
+    td:nth-child(7),
+    th:nth-child(10), /* Capital at Mat */
+    td:nth-child(10) {
+        display: none !important;
+    }
+}
+
+/* MOBILE (≤480px): Hide even more, keep only 6 columns */
+@media (max-width: 480px) {
+    /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
+    th:nth-child(2),  /* Issuer */
+    td:nth-child(2),
+    th:nth-child(4),  /* Currency - HIDE on mobile */
+    td:nth-child(4),
+    th:nth-child(5),  /* Rating */
+    td:nth-child(5),
+    th:nth-child(6),  /* Price EUR */
+    td:nth-child(6),
+    th:nth-child(7),  /* Coupon */
+    td:nth-child(7),
+    th:nth-child(10), /* Capital at Mat */
+    td:nth-child(10) {
+        display: none !important;
+    }
+
+    /* Make table more compact for mobile */
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 6px 4px;
+        text-align: center;
+    }
+
+    /* Left-align text columns */
+    td:first-child,
+    th:first-child {
+        text-align: left;
+    }
+
+    /* Make header sticky on mobile */
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #f2f2f2;
+        z-index: 2;
+        padding: 8px 4px;
+    }
 }    </style>
 </head>
 
@@ -274,7 +345,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-14 14:03
+        — 📅 2026-02-14 15:46
     </span>
 </h2>
 
@@ -14051,5 +14122,69 @@ class PortfolioAnalyzer {
 document.addEventListener('DOMContentLoaded', () => {
     window.portfolioAnalyzer = new PortfolioAnalyzer();
 });</script>
+<script>
+/* ========================================
+   Bond Report Mobile Adaptation Layer (MINIMAL)
+   ======================================== */
+
+class MobileAdaptation {
+    constructor() {
+        this.isMobile = window.innerWidth <= 480;
+        this.isTablet = window.innerWidth > 480 && window.innerWidth <= 1024;
+        this.touchDevice = ('ontouchstart' in window);
+        this.init();
+    }
+
+    init() {
+        this.setupViewportMeta();
+        this.addTouchOptimizations();
+        this.logDeviceInfo();
+    }
+
+    setupViewportMeta() {
+        let meta = document.querySelector('meta[name="viewport"]');
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.name = 'viewport';
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover');
+    }
+
+    addTouchOptimizations() {
+        if (!this.touchDevice) return;
+
+        const buttons = document.querySelectorAll('button, .btn');
+        buttons.forEach(btn => {
+            btn.style.minHeight = '44px';
+            btn.style.minWidth = '44px';
+        });
+
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.style.minHeight = '44px';
+            input.style.fontSize = '16px';
+        });
+    }
+
+    logDeviceInfo() {
+        console.log('📱 Mobile Adaptation Initialized:', {
+            isMobile: this.isMobile,
+            isTablet: this.isTablet,
+            isTouchDevice: this.touchDevice,
+            viewportWidth: window.innerWidth
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.mobileAdapter = new MobileAdaptation();
+});
+
+const ResponsiveHelper = {
+    isMobileDevice: () => window.innerWidth <= 480,
+    isTabletDevice: () => window.innerWidth > 480 && window.innerWidth <= 1024,
+    isTouchDevice: () => 'ontouchstart' in window
+};</script>
 </body>
 </html>
