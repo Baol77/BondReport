@@ -2,8 +2,30 @@
    MOBILE LAYOUT IMPROVEMENTS
    ======================================== */
 
+/* DESKTOP (1024px+): Show all columns */
+@media (min-width: 1024px) {
+    th, td { display: table-cell !important; }
+}
+
+
 /* MOBILE (≤480px) */
 @media (max-width: 480px) {
+  /* Keep: ISIN(1), PRICE(2), CURRENCY(3), CURR_YIELD(8), MATURITY(7), SAY(10) */
+     th:nth-child(2),  /* Issuer */
+     td:nth-child(2),
+     th:nth-child(4),  /* Currency - HIDE on mobile */
+     td:nth-child(4),
+     th:nth-child(5),  /* Rating */
+     td:nth-child(5),
+     th:nth-child(6),  /* Price EUR */
+     td:nth-child(6),
+     th:nth-child(7),  /* Coupon */
+     td:nth-child(7),
+     th:nth-child(10), /* Capital at Mat */
+     td:nth-child(10) {
+         display: none !important;
+     }
+
     /* === HEADER & TITLE === */
     h2 {
         font-size: 18px;
@@ -159,6 +181,22 @@
 
 /* TABLET (481px - 1023px) */
 @media (min-width: 481px) and (max-width: 1023px) {
+ /* Hide: ISSUER, RATING, PRICE_R, COUPON, CAPITAL_AT_MAT */
+    th:nth-child(2),  /* Issuer */
+    td:nth-child(2),
+    th:nth-child(4),  /* Currency - keep for now */
+    td:nth-child(4),
+    th:nth-child(5),  /* Rating */
+    td:nth-child(5),
+    th:nth-child(6),  /* Price EUR */
+    td:nth-child(6),
+    th:nth-child(7),  /* Coupon */
+    td:nth-child(7),
+    th:nth-child(10), /* Capital at Mat */
+    td:nth-child(10) {
+        display: none !important;
+    }
+
     .profile-presets {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
