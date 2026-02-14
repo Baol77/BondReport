@@ -64,7 +64,7 @@ class PortfolioAnalyzer {
     createModal() {
         const modalHTML = `
 <div id="portfolioModal" class="portfolio-modal" style="pointer-events:none; display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:10000;overflow-y:auto;padding:20px;">
-    <div id="modalContent" style="pointer-events:auto; background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:1200px;width:90%;margin:20px auto;cursor:move;">
+    <div id="modalContent" style="pointer-events:auto; background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:1000px;width:90%;margin:20px auto;cursor:move;">
 
         <div id="modalHeader" style="background:linear-gradient(135deg,#2196F3,#1976D2);color:white;padding:20px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;cursor:move;user-select:none;">
             <h2 style="margin:0;">🎯 Portfolio Analyzer</h2>
@@ -339,16 +339,11 @@ class PortfolioAnalyzer {
 
         const qty = parseFloat(document.getElementById('quantity').value) || 1;
 
-        const existing = this.portfolio.find(b => b.isin === this.currentBond.isin);
-
-        if (existing) {
-            existing.quantity += qty;
-        } else {
-            this.portfolio.push({
-                ...this.currentBond,
-                quantity: qty
-            });
-        }
+        // Always add as new entry, don't combine with existing
+        this.portfolio.push({
+            ...this.currentBond,
+            quantity: qty
+        });
 
         this.savePortfolio();
         this.updatePortfolioTable();
@@ -492,7 +487,8 @@ class PortfolioAnalyzer {
         document.getElementById('statWeightedSAY').textContent = `${weightedSAYPercent.toFixed(2)}%`;
         document.getElementById('statWeightedYield').textContent = `${weightedYieldPercent.toFixed(2)}%`;
         document.getElementById('statAvgCoupon').textContent = `${weightedCouponPercent.toFixed(2)}%`;
-        document.getElementById('statBondCount').textContent = this.portfolio.length;
+        const uniqueISINs = new Set(this.portfolio.map(b => b.isin));
+        document.getElementById('statBondCount').textContent = uniqueISINs.size;
         document.getElementById('statWeightedRisk').textContent = `${weightedRiskYears.toFixed(2)} yrs`;
         document.getElementById('statWeightedRating').textContent = weightedRating;
 
