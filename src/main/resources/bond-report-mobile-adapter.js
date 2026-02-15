@@ -12,19 +12,25 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
-        this.shortenColumnTitles();
-        window.addEventListener('resize', () => this.shortenColumnTitles());
+        this.adaptColumnTitles();
+        window.addEventListener('resize', () => this.adaptColumnTitles());
         this.logDeviceInfo();
     }
 
-    shortenColumnTitles() {
-        if (!this.isMobile) return;
+    adaptColumnTitles() {
+        const isMobile = window.innerWidth <= 480;
 
         document.querySelectorAll('th[data-short]').forEach(th => {
             const title = th.querySelector('.column-title');
-            if (title) {
-                title.textContent = th.dataset.short;
+            if (!title) return;
+
+            if (!th.dataset.full) {
+                th.dataset.full = title.textContent.trim();
             }
+
+            title.textContent = isMobile
+                ? th.dataset.short
+                : th.dataset.full;
         });
     }
 
