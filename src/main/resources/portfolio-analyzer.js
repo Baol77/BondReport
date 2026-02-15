@@ -55,7 +55,8 @@ class PortfolioAnalyzer {
                     maturity: cells[7].textContent.trim(),
                     currentYield: parseFloat(cells[8].textContent.trim()),
                     capitalAtMat: parseFloat(cells[9].textContent.trim()),
-                    say: cells.length > 10 ? parseFloat(cells[10].textContent.trim()) : 0
+                    say: cells.length > 10 ? parseFloat(cells[10].textContent.trim()) : 0,
+                    includeInStatistics: true
                 });
             }
         });
@@ -187,6 +188,15 @@ class PortfolioAnalyzer {
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Curr. Yield</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">SAY</th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Profit (€)</th>
+                                <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;" title="Toggle to include/exclude all the bonds from statistics calculations">
+                                        <span>Σ</span>
+                                        <input type="checkbox"
+                                               id="toggleAllStatistics"
+                                               checked
+                                               onchange="window.portfolioAnalyzer.toggleAllStatistics(this.checked)">
+                                    </div>
+                                </th>
                                 <th style="padding:10px;text-align:left;font-weight:bold;border-bottom:2px solid #ddd;font-size:12px;">Action</th>
                             </tr>
                         </thead>
@@ -490,7 +500,8 @@ class PortfolioAnalyzer {
             ...this.currentBond,
             quantity: qty,
             totalEur: totalEur,
-            totalOriginal: totalOriginal
+            totalOriginal: totalOriginal,
+            includeInStatistics: true
         });
 
         this.savePortfolio();
@@ -569,7 +580,7 @@ class PortfolioAnalyzer {
         this.portfolio.push({
             ...latestData,
             quantity: totalQty,
-            totalEur: totalInvested,        // 🔥 VERY IMPORTANT
+            totalEur: totalInvested,        // VERY IMPORTANT
             priceEur: latestData.priceEur   // keep current market price
         });
 
@@ -617,15 +628,20 @@ class PortfolioAnalyzer {
                            value="${bond.quantity}"
                            min="1"
                            onchange="window.portfolioAnalyzer.updateQuantityInPortfolio(${idx}, this.value)"
-                           style="width:60px;padding:4px;font-size:12px;">
+                           style="width:30px;padding:4px;font-size:12px;">
                 </td>
 
                 <td>€${(bond.totalEur ?? 0).toFixed(2)}</td>
-                <td>${bond.maturity}</td>
+                <td style="white-space: nowrap;">${bond.maturity}</td>
                 <td>${bond.currentYield.toFixed(2)}%</td>
                 <td>${bond.say.toFixed(2)}%</td>
                 <td class="${gainLoss >= 0 ? 'good' : 'bad'}">
                     ${gainLoss.toFixed(2)}
+                </td>
+                <td>
+                    <input type="checkbox" title="Toggle to include/exclude this bond from statistics calculations"
+                           ${bond.includeInStatistics ? 'checked' : ''}
+                           onchange="window.portfolioAnalyzer.toggleStatistics(${idx})">
                 </td>
                 <td>
                    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;width:100%;">
@@ -635,6 +651,24 @@ class PortfolioAnalyzer {
                 </td>
             </tr>`;
         }).join('');
+    }
+
+    toggleAllStatistics(checked) {
+        this.portfolio.forEach(b => {
+            b.includeInStatistics = checked;
+        });
+
+        this.savePortfolio();
+        this.updatePortfolioTable();
+        this.updateStatistics();
+    }
+
+    toggleStatistics(index) {
+        this.portfolio[index].includeInStatistics =
+            !this.portfolio[index].includeInStatistics;
+
+        this.savePortfolio();
+        this.updateStatistics();
     }
 
     updateStatistics() {
@@ -662,7 +696,8 @@ class PortfolioAnalyzer {
         let totalProfit = 0;
         let totalCouponIncome = 0;
 
-        this.portfolio.forEach(bond => {
+        const bonds = this.portfolio.filter(b => b.includeInStatistics);
+        bonds.forEach(bond => {
 
             const currentValue = bond.priceEur * bond.quantity;   // market value
             const investedAmount = bond.totalEur || 0;            // what you paid
