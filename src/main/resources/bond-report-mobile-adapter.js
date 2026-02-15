@@ -12,7 +12,19 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
+        this.shortenColumnTitles();
         this.logDeviceInfo();
+    }
+
+    shortenColumnTitles() {
+        if (!this.isMobile) return;
+
+        document.querySelectorAll('th[data-short]').forEach(th => {
+            const title = th.querySelector('.column-title');
+            if (title) {
+                title.textContent = th.dataset.short;
+            }
+        });
     }
 
     setupViewportMeta() {

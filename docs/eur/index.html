@@ -371,11 +371,57 @@ tr:hover {
     }
 
     table {
-        font-size: 12px;
+        font-size: 10px;
     }
 
     th, td {
         padding: 6px 4px;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+        max-width: 100px;
+    }
+    th:nth-child(3), td:nth-child(3){
+        max-width: 50px;
+    }
+    th:nth-child(4), td:nth-child(4){
+        max-width: 35px;
+    }
+    th:nth-child(8), td:nth-child(8),
+    th:nth-child(9), td:nth-child(9),{
+        max-width; 30px;
+    }
+
+    #bondTable th input[type="text"] {
+        display:none;
+    }
+    #bondTable th:nth-child(1) input[type="text"] {
+        display:inline;
+        max-width: 60px;
+        font-size: 10px;
+    }
+    #bondTable th input[type="number"] {
+       display:none;
+    }
+
+    /* Target only the select in the currency column */
+    table select {
+      /* 1. Remove default browser styling (removes the default arrow) */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+
+      /* 2. Set the desired smaller width */
+      width: 35px;
+
+      /* 3. Adjust padding and alignment */
+      padding: 2px 5px;
+      font-size: 8px;
+
+      /* 4. Optional: Add a custom background color or border to make it look clean */
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
 
     .legend {
@@ -455,7 +501,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-15 14:49
+        — 📅 2026-02-15 23:18
     </span>
 </h2>
 
@@ -563,7 +609,7 @@ tr:hover {
             <input id="filterPriceMax" type="number" step="10" placeholder="max"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:60px;">
         </th>
-        <th onclick="sortTable(COL.CURRENCY)">Currency<span class="arrow"></span><br>
+        <th onclick="sortTable(COL.CURRENCY)" data-short="Curr."><span class="column-title">Currency</span><span class="arrow"></span><br>
             <select id="filterCurrency" onchange="filterTable()" onclick="event.stopPropagation()">
                 <option value="">All</option>
                 <option value="EUR">EUR</option>
@@ -592,10 +638,10 @@ tr:hover {
         </th>
         <th onclick="sortTable(COL.PRICE_R)">Price (EUR)<span class="arrow"></span></th>
         <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
-        <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
+        <th onclick="sortTable(COL.MATURITY)" data-short="Mat."><span class="column-title">Maturity</span><span class="arrow"></span></th>
         <th title="Supposing an investment of EUR 100, what would the gain be?"
-            onclick="sortTable(COL.CURR_YIELD)">
-            Curr. Yield %<span class="arrow"></span><br>
+            onclick="sortTable(COL.CURR_YIELD)" data-short="CY%">
+            <span class="column-title">Curr. Yield %</span><span class="arrow"></span><br>
             <input id="filterminYield" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
@@ -606,8 +652,8 @@ tr:hover {
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
         <th title="Simple Annual Yield % (Annual coupon income as a percentage of the bond’s current price)"
-            onclick="sortTable(COL.SAY)">
-            SAY (%)<span class="arrow"></span><br>
+            onclick="sortTable(COL.SAY)" data-short="SAY">
+            <span class="column-title">SAY (%)</span><span class="arrow"></span><br>
             <input id="filterMinSAY" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
@@ -14471,7 +14517,19 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
+        this.shortenColumnTitles();
         this.logDeviceInfo();
+    }
+
+    shortenColumnTitles() {
+        if (!this.isMobile) return;
+
+        document.querySelectorAll('th[data-short]').forEach(th => {
+            const title = th.querySelector('.column-title');
+            if (title) {
+                title.textContent = th.dataset.short;
+            }
+        });
     }
 
     setupViewportMeta() {

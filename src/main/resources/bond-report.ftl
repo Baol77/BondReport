@@ -104,7 +104,7 @@
             <input id="filterPriceMax" type="number" step="10" placeholder="max"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:60px;">
         </th>
-        <th onclick="sortTable(COL.CURRENCY)">Currency<span class="arrow"></span><br>
+        <th onclick="sortTable(COL.CURRENCY)" data-short="Curr."><span class="column-title">Currency</span><span class="arrow"></span><br>
             <select id="filterCurrency" onchange="filterTable()" onclick="event.stopPropagation()">
                 <option value="">All</option>
                 <#list currencies as c>
@@ -133,10 +133,10 @@
         </th>
         <th onclick="sortTable(COL.PRICE_R)">Price (${reportCurrency})<span class="arrow"></span></th>
         <th onclick="sortTable(COL.COUPON)">Coupon %<span class="arrow"></span></th>
-        <th onclick="sortTable(COL.MATURITY)">Maturity<span class="arrow"></span></th>
+        <th onclick="sortTable(COL.MATURITY)" data-short="Mat."><span class="column-title">Maturity</span><span class="arrow"></span></th>
         <th title="Supposing an investment of EUR 100, what would the gain be?"
-            onclick="sortTable(COL.CURR_YIELD)">
-            Curr. Yield %<span class="arrow"></span><br>
+            onclick="sortTable(COL.CURR_YIELD)" data-short="CY%">
+            <span class="column-title">Curr. Yield %</span><span class="arrow"></span><br>
             <input id="filterminYield" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:70px;">
         </th>
@@ -147,8 +147,8 @@
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>
         <th title="Simple Annual Yield % (Annual coupon income as a percentage of the bond’s current price)"
-            onclick="sortTable(COL.SAY)">
-            SAY (%)<span class="arrow"></span><br>
+            onclick="sortTable(COL.SAY)" data-short="SAY">
+            <span class="column-title">SAY (%)</span><span class="arrow"></span><br>
             <input id="filterMinSAY" type="number" step="0.5" placeholder="min %"
                    onclick="event.stopPropagation()" oninput="filterTable()" style="width:80px;">
         </th>

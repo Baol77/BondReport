@@ -103,11 +103,57 @@
     }
 
     table {
-        font-size: 12px;
+        font-size: 10px;
     }
 
     th, td {
         padding: 6px 4px;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+        max-width: 100px;
+    }
+    th:nth-child(3), td:nth-child(3){
+        max-width: 50px;
+    }
+    th:nth-child(4), td:nth-child(4){
+        max-width: 35px;
+    }
+    th:nth-child(8), td:nth-child(8),
+    th:nth-child(9), td:nth-child(9),{
+        max-width; 30px;
+    }
+
+    #bondTable th input[type="text"] {
+        display:none;
+    }
+    #bondTable th:nth-child(1) input[type="text"] {
+        display:inline;
+        max-width: 60px;
+        font-size: 10px;
+    }
+    #bondTable th input[type="number"] {
+       display:none;
+    }
+
+    /* Target only the select in the currency column */
+    table select {
+      /* 1. Remove default browser styling (removes the default arrow) */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+
+      /* 2. Set the desired smaller width */
+      width: 35px;
+
+      /* 3. Adjust padding and alignment */
+      padding: 2px 5px;
+      font-size: 8px;
+
+      /* 4. Optional: Add a custom background color or border to make it look clean */
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
 
     .legend {
