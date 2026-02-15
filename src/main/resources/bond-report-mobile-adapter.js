@@ -13,6 +13,7 @@ class MobileAdaptation {
     init() {
         this.setupViewportMeta();
         this.shortenColumnTitles();
+        window.addEventListener('resize', () => this.shortenColumnTitles());
         this.logDeviceInfo();
     }
 

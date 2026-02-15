@@ -501,7 +501,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-15 23:18
+        — 📅 2026-02-15 23:24
     </span>
 </h2>
 
@@ -14518,6 +14518,7 @@ class MobileAdaptation {
     init() {
         this.setupViewportMeta();
         this.shortenColumnTitles();
+        window.addEventListener('resize', () => this.shortenColumnTitles());
         this.logDeviceInfo();
     }
 
