@@ -46,14 +46,14 @@ public class BondScoreEngine {
             bond.setFinalCapitalToMat(capitalFromBondNbrEUR + capitalGainEUR);
 
             // --- 3. Calculate Simple Annual Yield (SAY %) ---
-            // Coupon yield relative to purchase price
-            double annualCouponEUR = bond.getCurrentYield() * fxCurrent;
+            // Coupon relative to purchase price
+            double annualCouponEUR = bond.getCouponPct() * fxCurrent;
 
             // Capital performance (gain or loss) linearized per year, adjusted for FX risk
-            double finalCapitalEUR = (100 * fxFuture - bond.getPrice() * fxInitial) / bond.getYearsToMaturity();
+            double annualRentFromCapGainEUR = (100 * fxFuture - bond.getPrice() * fxInitial) / bond.getYearsToMaturity();
 
             // Total annual yield calculation relative to initial entry cost
-            double simpleAnnualYield = 100 * (annualCouponEUR + finalCapitalEUR) / (bond.getPrice() * fxInitial);
+            double simpleAnnualYield = 100 * (annualCouponEUR + annualRentFromCapGainEUR) / (bond.getPrice() * fxInitial);
 
             bond.setSimpleAnnualYield(simpleAnnualYield);
         }
