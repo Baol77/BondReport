@@ -4,13 +4,8 @@ import bond.config.BondProfilesConfig;
 import bond.model.Bond;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
-import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +26,7 @@ public class HtmlReportWriter {
     }
 
     private void write(List<Bond> bonds, String file, String reportCurrency) throws Exception {
-        Template t = cfg.getTemplate("bond-report.ftl");
+        Template t = cfg.getTemplate("ftl/bond-report.ftl");
 
         Map<String, Object> model = new HashMap<>();
         model.put("bonds", bonds);
