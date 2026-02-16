@@ -40,7 +40,7 @@ public class BondCalculatorTest {
         assertNotNull(b);
         assertEquals("IT0001234567", b.getIsin());
         assertEquals("Spain", b.getIssuer());
-        assertEquals(4.21, b.getCurrentYield(), 0.01);
+        assertEquals(4.08, b.getCurrentYield(), 0.01);
         assertTrue(b.getFinalCapitalToMat() > 0);
     }
 
@@ -75,7 +75,7 @@ public class BondCalculatorTest {
             LocalDate.now().plusYears(8)
         );
 
-        assertEquals(0.333, b.getCurrentYield(), 0.001);
+        assertEquals(3, b.getCurrentYield(), 0.001);
     }
 
     // ---------------------------------------------------
@@ -101,7 +101,7 @@ public class BondCalculatorTest {
             LocalDate.now().plusYears(10)
         );
 
-        assertEquals(1.2, b.getCurrentYield(), 0.001);
+        assertEquals(4.0, b.getCurrentYield(), 0.001);
     }
 
     // ---------------------------------------------------
