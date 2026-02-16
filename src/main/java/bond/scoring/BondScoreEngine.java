@@ -47,8 +47,7 @@ public class BondScoreEngine {
 
             // --- 3. Calculate Simple Annual Yield (SAY %) ---
             // Coupon yield relative to purchase price
-            double annualCouponDev = 100 * bond.getCouponPct() / bond.getPrice();
-            double annualCouponEUR = annualCouponDev * fxCurrent;
+            double annualCouponEUR = bond.getCurrentYield() * fxCurrent;
 
             // Capital performance (gain or loss) linearized per year, adjusted for FX risk
             double finalCapitalEUR = (100 * fxFuture - bond.getPrice() * fxInitial) / bond.getYearsToMaturity();

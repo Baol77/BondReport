@@ -83,7 +83,7 @@
         </button>
         <button onclick="exportCSV()">📥 Export CSV</button>
         <button onclick="window.portfolioAnalyzer?.openModal()" title="Create and analyze custom bond portfolios">
-            🎯 Portfolio Analysis
+            🎯 Portfolio Analyzer
         </button>
     </div>
 </div>

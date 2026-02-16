@@ -156,9 +156,10 @@ class PortfolioAnalyzer {
         const detailsDiv = document.getElementById('bondDetails');
         detailsDiv.innerHTML = `
             <strong>${bond.issuer}</strong><br>
-            ISIN: ${bond.isin}<br>
-            Price: ${bond.currency} ${bond.price.toFixed(2)}${bond.currency !== 'EUR' ? ` (€ ${bond.priceEur.toFixed(2)})` : ''}<br>
-            Rating: ${bond.rating} | Coupon: ${bond.coupon.toFixed(2)}% | SAY: ${bond.say.toFixed(2)}%
+            ISIN: <i>${bond.isin}</i><br>
+            Maturity: <i>${bond.maturity}</i><br>
+            Price: <i>${bond.currency} ${bond.price.toFixed(2)}${bond.currency !== 'EUR' ? ` (€ ${bond.priceEur.toFixed(2)})` : ''}</i><br>
+            Rating: <i>${bond.rating}</i> | Coupon: <i>${bond.coupon.toFixed(2)}%</i> | SAY: <i>${bond.say.toFixed(2)}%</i>
         `;
 
         // Reset fields

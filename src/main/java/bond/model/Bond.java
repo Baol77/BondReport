@@ -30,7 +30,7 @@ public class Bond {
         this.priceEur = priceEur;
         this.couponPct = couponPct;
         this.maturity = maturity;
-        this.currentYield = couponPct * 100 / priceEur;
+        this.currentYield = couponPct * 100 / price;
     }
 
     public int getYearsToMaturity() {

@@ -10,8 +10,8 @@ public final class CountryNormalizer {
         String upper = country.toUpperCase()
             .replace("GREEN", "")
             .replace("BOND", "")
-            .replace("BTPI", "ITALY")
-            .replace("BTP", "ITALY")
+            .replace("BTPI", "ITALIA")
+            .replace("BTP", "ITALIA")
             .replace("FUTURA", "")
             .replace(" PIU'", "")
             .replace("VALORE", "")
@@ -47,7 +47,7 @@ public final class CountryNormalizer {
             case "LATVIA", "LETTONIA" -> "LETTONIA";
             case "LITHUANIA", "LITUANIA" -> "LITUANIA";
             case "CHILE", "CILE" -> "CILE";
-            case "MEXICO" -> "MESSICO";
+            case "MEXICO", "MEXICAN STATES" -> "MESSICO";
             case "CYPRUS", "CIPRO" -> "CIPRO";
             case "TURKEY", "TURCHIA", "TÜRKIYE" -> "TURCHIA";
             case "BRAZIL" -> "BRASILE";

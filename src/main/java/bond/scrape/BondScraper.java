@@ -9,18 +9,31 @@ import org.jsoup.select.Elements;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Scraper service to extract European bond data from SimpleToolsForInvestors.
- * It parses the HTML yield table and transforms raw rows into Bond objects.
+ * Scraper service that retrieves sovereign bond data from multiple
+ * SimpleToolsForInvestors monitoring pages.
+ * <p>
+ * Responsibilities:
+ * - Connect to several monitoring URLs
+ * - Parse HTML yield tables
+ * - Transform raw rows into Bond domain objects
+ * - Convert prices to EUR using provided FX rates
+ * - Apply filtering rules (lot size, currency, coupon, etc.)
+ * - Merge duplicate bonds by ISIN across sources
  */
 public class BondScraper {
 
     /**
-     * Target URL for European Sovereign Bond monitor.
+     * Monitoring pages containing sovereign bond yield tables.
+     * Each page may contain overlapping instruments.
      */
-    private static final String SOURCE =
-        "https://www.simpletoolsforinvestors.eu/monitor_info.php?monitor=europa&yieldtype=G&timescale=DUR";
+    private static final List<String> SOURCES = List.of(
+        "https://www.simpletoolsforinvestors.eu/monitor_info.php?monitor=europa&yieldtype=G&timescale=DUR",
+        "https://www.simpletoolsforinvestors.eu/monitor_info.php?monitor=43&yieldtype=G&timescale=DUR",
+        "https://www.simpletoolsforinvestors.eu/monitor_info.php?monitor=58&yieldtype=G&timescale=DUR"
+    );
 
     private final BondCalculator calculator;
 
@@ -29,17 +42,62 @@ public class BondScraper {
     }
 
     /**
-     * Connects to the source, parses the table, and filters bonds based on specific criteria.
-     * * @param fx Map of exchange rates (Currency -> Rate) used for EUR conversion.
+     * Scrapes all configured monitoring sources and aggregates the results.
+     * <p>
+     * Processing steps:
+     * 1. Fetch each monitoring page
+     * 2. Parse its yield table into Bond objects
+     * 3. Merge all results into a single collection
+     * 4. Remove duplicate bonds based on ISIN (first occurrence kept)
      *
-     * @return A list of valid, non-zero coupon bonds.
-     * @throws Exception If connection or parsing fails.
+     * @param fx Map of FX rates (currency → EUR conversion factor)
+     * @return Deduplicated list of bonds from all sources
+     * @throws Exception if any HTTP request or parsing operation fails
      */
     public List<Bond> scrape(Map<String, Double> fx) throws Exception {
+        Map<String, Bond> all = new HashMap<>();
+
+        for (String source : SOURCES) {
+            System.out.println("🌐 Scraping: " + source);
+            List<Bond> sourceBonds = scrapeSingleSource(source, fx);
+
+            for (Bond bond : sourceBonds) {
+                // putIfAbsent keeps the first version found.
+                // Use .put() if you prefer the latest version (overwriting previous ones).
+                if (bond.getIsin() != null) {
+                    all.putIfAbsent(bond.getIsin(), bond);
+                }
+            }
+
+        }
+
+        return new ArrayList<>(all.values());
+    }
+
+    /**
+     * Scrapes a single monitoring page and converts its table rows into Bond objects.
+     * <p>
+     * Processing includes:
+     * - HTTP fetch with browser-like headers
+     * - Dynamic column mapping using table headers
+     * - Business filtering rules:
+     * • minimum lot size <= 5000
+     * • non-zero coupon only
+     * • exclude NOK and SEK bonds
+     * - Price conversion to EUR using provided FX rates
+     * - Normalisation of issuer names
+     * <p>
+     * Invalid or unparsable rows are skipped silently.
+     *
+     * @param source Monitoring page URL
+     * @param fx     FX rates used for EUR price conversion
+     * @return List of valid bonds found on this page
+     * @throws Exception if the page cannot be fetched or parsed
+     */
+    public List<Bond> scrapeSingleSource(String source, Map<String, Double> fx) throws Exception {
         List<Bond> list = new ArrayList<>();
 
-        // Fetch HTML document with browser-like headers to avoid blocking
-        Document doc = Jsoup.connect(SOURCE)
+        Document doc = Jsoup.connect(source)
             .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
             .referrer("https://google.com")
             .timeout(30_000)
@@ -73,7 +131,7 @@ public class BondScraper {
                 // Clean Issuer: Extract text before the first digit (usually the date/coupon start)
                 // Example: "ITALY 4.5% 2026" -> "ITALY"
                 String issuer = d.split("\\d", 2)[0].trim();
-                issuer = issuer.replace("BTP", "ITALY"); // Normalize Italian Bonds
+                issuer = CountryNormalizer.normalize(issuer);
 
                 // Parse Coupon: Find the '%' and look back to find the numeric value
                 int pct = d.indexOf('%');
@@ -96,9 +154,8 @@ public class BondScraper {
                 double priceEur = price / fx.getOrDefault(ccy, 1.0);
 
                 // Build and add the bond using the calculator helper
-                list.add(calculator.buildBond(
-                    isin, issuer, price, ccy, priceEur, coupon, maturity
-                ));
+                Bond bond = calculator.buildBond(isin, issuer, price, ccy, priceEur, coupon, maturity);
+                if (bond != null) list.add(bond);
             } catch (Exception ignored) {
                 // Ignore individual row failures to continue processing the rest of the table
             }
@@ -107,10 +164,15 @@ public class BondScraper {
     }
 
     /**
-     * Sanitizes numeric strings by replacing commas and removing currency symbols.
-     * * @param s Raw string from the table (e.g., "102,45 €")
+     * Converts a numeric string extracted from the HTML table into a double.
+     * <p>
+     * Normalisation rules:
+     * - comma → decimal point
+     * - remove currency symbols
+     * - trim whitespace
      *
-     * @return Parsed double
+     * @param s Raw numeric value (example: "102,45 €")
+     * @return Parsed numeric value
      */
     private static double parse(String s) {
         return Double.parseDouble(s.replace(",", ".").replace("€", "").trim());
