@@ -446,11 +446,17 @@ tr:hover {
     }
 
     th:nth-child(2), td:nth-child(2),
-    th:nth-child(5), td:nth-child(5),
     th:nth-child(6), td:nth-child(6),
     th:nth-child(7), td:nth-child(7),
     th:nth-child(10), td:nth-child(10) {
         display: none !important;
+    }
+
+    th:nth-child(1), td:nth-child(1){
+        max-width: 150px;
+    }
+    #bondTable th input[type="text"] {
+        max-width: 140px;
     }
 }
 
@@ -501,7 +507,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-15 23:24
+        — 📅 2026-02-16 10:55
     </span>
 </h2>
 
@@ -4555,10 +4561,10 @@ tr:hover {
             3,87
         </td>
         <td>
-            1680
+            1641
         </td>
         <td>
-            3,36
+            3,34
         </td>
     </tr>
     <tr>
@@ -9905,10 +9911,10 @@ tr:hover {
             2,27
         </td>
         <td>
-            1211
+            1188
         </td>
         <td>
-            2,71
+            2,76
         </td>
     </tr>
     <tr>
@@ -10305,10 +10311,10 @@ tr:hover {
             2,33
         </td>
         <td>
-            1177
+            1154
         </td>
         <td>
-            2,57
+            2,60
         </td>
     </tr>
     <tr>
@@ -10380,10 +10386,10 @@ tr:hover {
             2,33
         </td>
         <td>
-            1176
+            1153
         </td>
         <td>
-            2,55
+            2,58
         </td>
     </tr>
     <tr>
@@ -11555,10 +11561,10 @@ tr:hover {
             3,65
         </td>
         <td>
-            1089
+            1053
         </td>
         <td>
-            2,03
+            1,55
         </td>
     </tr>
     <tr>
@@ -11805,10 +11811,10 @@ tr:hover {
             0,47
         </td>
         <td>
-            1068
+            1063
         </td>
         <td>
-            2,28
+            3,18
         </td>
     </tr>
     <tr>
@@ -12455,10 +12461,10 @@ tr:hover {
             0,26
         </td>
         <td>
-            1064
+            1061
         </td>
         <td>
-            2,14
+            3,08
         </td>
     </tr>
     <tr>
@@ -14517,19 +14523,25 @@ class MobileAdaptation {
 
     init() {
         this.setupViewportMeta();
-        this.shortenColumnTitles();
-        window.addEventListener('resize', () => this.shortenColumnTitles());
+        this.adaptColumnTitles();
+        window.addEventListener('resize', () => this.adaptColumnTitles());
         this.logDeviceInfo();
     }
 
-    shortenColumnTitles() {
-        if (!this.isMobile) return;
+    adaptColumnTitles() {
+        const isMobile = window.innerWidth <= 480;
 
         document.querySelectorAll('th[data-short]').forEach(th => {
             const title = th.querySelector('.column-title');
-            if (title) {
-                title.textContent = th.dataset.short;
+            if (!title) return;
+
+            if (!th.dataset.full) {
+                th.dataset.full = title.textContent.trim();
             }
+
+            title.textContent = isMobile
+                ? th.dataset.short
+                : th.dataset.full;
         });
     }
 
