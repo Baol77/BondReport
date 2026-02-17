@@ -693,11 +693,11 @@ class PortfolioAnalyzer {
 
         breakdown.innerHTML = currencies.map(currency => {
             const amount = Math.round(currencyTotals[currency]);
-            const percentage = (amount / totalInvestment * 100);
+            const percentage = Math.round((amount / totalInvestment * 100));
             return `
                 <div style="background:white;padding:10px;border-radius:4px;border-left:4px solid #4CAF50;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                     <div style="font-size:11px;color:#666;font-weight:600;margin-bottom:6px;">${currency}</div>
-                    <p style="margin:0;font-size:14px;font-weight:bold;color:#4CAF50;">${percentage.toFixed(1)}%</p>
+                    <p style="margin:0;font-size:14px;font-weight:bold;color:#4CAF50;">${percentage}%</p>
                     <p style="margin:5px 0 0 0;font-size:11px;color:#999;">€${amount}</p>
                 </div>
             `;
