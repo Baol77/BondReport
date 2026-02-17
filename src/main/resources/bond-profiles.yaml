@@ -10,7 +10,7 @@ profiles:
     filters:
       maxMatYears: 2.5
       minRating: BBB+
-      minYield: 3.5
+      minYield: 2
 
   # 2. SHORT-TERM YIELD (The "Aggressive Short")
   # Taking risk for high returns in the near term (1-3y).
@@ -30,13 +30,14 @@ profiles:
   - id: balancedCore
     label: Balanced Core
     emoji: "⚖️🌲"
-    description: Mid-term (5-15y), Investment Grade, >4.5% SAY
+    description: Mid-term (5-15y), Investment Grade,>3.5% yield with >3.5% SAY
     profileType: SAY
     sortedBy: SAY
     filters:
       minMatYears: 5
       maxMatYears: 15
-      minSAY: 4.5
+      minYield: 3.5
+      minSAY: 3.5
       minRating: BBB+
 
   # 4. MAX INCOME (The "Cashflow Machine")
@@ -58,7 +59,7 @@ profiles:
   - id: deepDiscount
     label: Deep Discount
     emoji: "📉🚀"
-    description: Bonds trading <90% par. Profit comes from pull-to-par.
+    description: Bonds trading <90% par. Profit comes from pull-to-par (<20y).
     profileType: SAY
     sortedBy: SAY
     filters:
