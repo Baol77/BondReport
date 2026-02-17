@@ -33,9 +33,9 @@ public class Bond {
         this.currentYield = couponPct * 100 / price;
     }
 
-    public int getYearsToMaturity() {
+    public double getYearsToMaturity() {
         if (maturity == null) return -1;
         long days = ChronoUnit.DAYS.between(LocalDate.now(), maturity);
-        return (int)Math.max(0.1, days / 365.25);
+        return Math.max(0.1, days / 365.25);
     }
 }

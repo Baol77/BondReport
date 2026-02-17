@@ -4,11 +4,11 @@ profiles:
   - id: cashParking
     label: Cash Parking
     emoji: "🅿️🛡️"
-    description: Short (<3y) investment grade for liquidity
+    description: Short (<2.5y) investment grade for liquidity
     profileType: SAY
     sortedBy: SAY
     filters:
-      maxMatYears: 3
+      maxMatYears: 2.5
       minRating: BBB+
       minYield: 3.5
 

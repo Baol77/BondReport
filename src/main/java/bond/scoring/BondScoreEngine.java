@@ -26,19 +26,19 @@ public class BondScoreEngine {
      */
     public void calculateBondScores(List<Bond> bonds, String reportCurrency) {
         for (Bond bond : bonds) {
-            int yearsToMaturity = bond.getYearsToMaturity();
+            double yearsToMaturity = bond.getYearsToMaturity();
 
             // --- 1. Determine FX rates with safety margins ---
-            double fxInitial = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.BUY, yearsToMaturity);
-            double fxCurrent = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.COUPON, yearsToMaturity);
-            double fxFuture = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.MATURITY, yearsToMaturity);
+            double fxInitial = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.BUY, (int) yearsToMaturity);
+            double fxCoupon = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.COUPON, (int) yearsToMaturity);
+            double fxFuture = FxService.fxExpectedMultiplier(bond.getCurrency(), reportCurrency, FxPhase.MATURITY, (int) yearsToMaturity);
 
             // --- 2. Calculate projected final capital ---
             // Calculate how many securities are bought with 1000€ (Price * Initial Exchange Rate)
             double bondNbr = INIT_INVESTMENT_EUR / (fxInitial * bond.getPrice());
 
             // Cumulative coupon income converted to EUR with a moderate FX penalty
-            double capitalFromBondNbrEUR = bondNbr * bond.getCouponPct() * bond.getYearsToMaturity() * fxCurrent;
+            double capitalFromBondNbrEUR = bondNbr * bond.getCouponPct() * (int) bond.getYearsToMaturity() * fxCoupon;
 
             // Redemption value (assuming 100 par) converted to EUR with a strong FX penalty
             double capitalGainEUR = 100 * bondNbr * fxFuture;
@@ -46,15 +46,7 @@ public class BondScoreEngine {
             bond.setFinalCapitalToMat(capitalFromBondNbrEUR + capitalGainEUR);
 
             // --- 3. Calculate Simple Annual Yield (SAY %) ---
-            // Coupon relative to purchase price
-            double annualCouponEUR = bond.getCouponPct() * fxCurrent;
-
-            // Capital performance (gain or loss) linearized per year, adjusted for FX risk
-            double annualRentFromCapGainEUR = (100 * fxFuture - bond.getPrice() * fxInitial) / bond.getYearsToMaturity();
-
-            // Total annual yield calculation relative to initial entry cost
-            double simpleAnnualYield = 100 * (annualCouponEUR + annualRentFromCapGainEUR) / (bond.getPrice() * fxInitial);
-
+            double simpleAnnualYield = (bond.getFinalCapitalToMat() - 1000) / (10 * yearsToMaturity);
             bond.setSimpleAnnualYield(simpleAnnualYield);
         }
     }

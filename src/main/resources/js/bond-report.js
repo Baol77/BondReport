@@ -549,6 +549,18 @@ function hideLoading() {
     }
 }
 
+function addYearsDecimal(date, yearsDecimal) {
+    const result = new Date(date);
+
+    const wholeYears = Math.floor(yearsDecimal);
+    const remainingMonths = Math.round((yearsDecimal - wholeYears) * 12);
+
+    result.setFullYear(result.getFullYear() + wholeYears);
+    result.setMonth(result.getMonth() + remainingMonths);
+
+    return result;
+}
+
 function applyPreset(presetName) {
     showLoading();
 
@@ -580,10 +592,8 @@ function applyPreset(presetName) {
 
         // Maturity
         const today = new Date();
-        const minMat = new Date(today);
-        minMat.setFullYear(today.getFullYear() + preset.filters.minMatYears);
-        const maxMat = new Date(today);
-        maxMat.setFullYear(today.getFullYear() + preset.filters.maxMatYears);
+        const minMat = addYearsDecimal(today, preset.filters.minMatYears);
+        const maxMat = addYearsDecimal(today, preset.filters.maxMatYears);
 
         function formatDate(d) {
             const y = d.getFullYear();
