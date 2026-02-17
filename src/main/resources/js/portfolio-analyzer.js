@@ -512,7 +512,7 @@ class PortfolioAnalyzer {
             const hasDuplicates = isinCounts[bond.isin] > 1;
 
             const currentValueEur = bond.quantity * bond.priceEur;
-            const gainLoss = currentValueEur - bond.totalEur;
+            const gainLoss = Math.round(currentValueEur - bond.totalEur);
 
             return `<tr style="border-bottom:1px solid #eee;">
                 <td>${bond.isin}</td>
@@ -534,7 +534,7 @@ class PortfolioAnalyzer {
                 <td>${bond.currentYield.toFixed(2)}%</td>
                 <td>${bond.say.toFixed(2)}%</td>
                 <td class="${gainLoss >= 0 ? 'good' : 'bad'}">
-                    ${gainLoss.toFixed(2)}
+                    ${gainLoss}
                 </td>
                 <td>
                     <input type="checkbox" title="Toggle to include/exclude this bond from statistics calculations"
@@ -580,7 +580,7 @@ class PortfolioAnalyzer {
             document.getElementById('statWeightedRisk').textContent = '0.00 yrs';
             document.getElementById('statWeightedRating').textContent = '-';
             document.getElementById('currencyBreakdown').innerHTML = '';
-            document.getElementById('statTotalProfit').textContent = '€0.00';
+            document.getElementById('statTotalProfit').textContent = '€0';
             document.getElementById('statTotalCouponIncome').textContent = '€0.00';
             return;
         }
@@ -657,7 +657,8 @@ class PortfolioAnalyzer {
         const avgRatingScore = weightedRatingScore / totalInvestment1;
         const weightedRating = ratingOrder[Math.round(avgRatingScore)] || '-';
 
-        document.getElementById('statTotalInvestment').textContent = `€${totalInvestment.toFixed(2)}`;
+        totalInvestment = Math.round(totalInvestment);
+        document.getElementById('statTotalInvestment').textContent = `€${totalInvestment}`;
         document.getElementById('statAvgPrice').textContent = `€${avgPrice.toFixed(2)}`;
         document.getElementById('statWeightedSAY').textContent = `${weightedSAYPercent.toFixed(2)}%`;
         document.getElementById('statWeightedYield').textContent = `${weightedYieldPercent.toFixed(2)}%`;
@@ -668,16 +669,18 @@ class PortfolioAnalyzer {
         document.getElementById('statWeightedRating').textContent = weightedRating;
 
         // Total Profit
+        totalProfit = Math.round(totalProfit);
         const profitElement = document.getElementById('statTotalProfit');
         if (profitElement) {
-            profitElement.textContent = `€${totalProfit.toFixed(2)}`;
+            profitElement.textContent = `€${totalProfit}`;
             profitElement.style.color = totalProfit >= 0 ? '#4CAF50' : '#f44336';
         }
 
         // Total Coupon Income (Current Year)
+        totalCouponIncome = Math.round(totalCouponIncome);
         const couponElement = document.getElementById('statTotalCouponIncome');
         if (couponElement) {
-            couponElement.textContent = `€${totalCouponIncome.toFixed(2)}`;
+            couponElement.textContent = `€${totalCouponIncome}`;
         }
 
         // Display currency breakdown
@@ -689,13 +692,13 @@ class PortfolioAnalyzer {
         const currencies = Object.keys(currencyTotals).sort();
 
         breakdown.innerHTML = currencies.map(currency => {
-            const amount = currencyTotals[currency];
+            const amount = Math.round(currencyTotals[currency]);
             const percentage = (amount / totalInvestment * 100);
             return `
                 <div style="background:white;padding:10px;border-radius:4px;border-left:4px solid #4CAF50;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                     <div style="font-size:11px;color:#666;font-weight:600;margin-bottom:6px;">${currency}</div>
                     <p style="margin:0;font-size:14px;font-weight:bold;color:#4CAF50;">${percentage.toFixed(1)}%</p>
-                    <p style="margin:5px 0 0 0;font-size:11px;color:#999;">€${amount.toFixed(2)}</p>
+                    <p style="margin:5px 0 0 0;font-size:11px;color:#999;">€${amount}</p>
                 </div>
             `;
         }).join('');
