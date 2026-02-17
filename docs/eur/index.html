@@ -655,11 +655,11 @@ pointer-events: auto;
    }
 
     /* Hide less important columns */
-    th:nth-child(2), td:nth-child(2),
-    th:nth-child(5), td:nth-child(5),
-    th:nth-child(6), td:nth-child(6),
-    th:nth-child(7), td:nth-child(7),
-    th:nth-child(10), td:nth-child(10) {
+    #bondTable th:nth-child(2), #bondTable td:nth-child(2),
+    #bondTable th:nth-child(5), #bondTable td:nth-child(5),
+    #bondTable th:nth-child(6), #bondTable td:nth-child(6),
+    #bondTable th:nth-child(7), #bondTable td:nth-child(7),
+    #bondTable th:nth-child(10), #bondTable td:nth-child(10) {
         display: none !important;
     }
 
@@ -667,21 +667,26 @@ pointer-events: auto;
         font-size: 10px;
     }
 
-    th, td {
+    #bondTable th, #bondTable td {
         padding: 6px 4px;
     }
 
-    th:nth-child(1), td:nth-child(1) {
+    #bondTable th:nth-child(1),
+    #bondTable td:nth-child(1) {
         max-width: 100px;
     }
-    th:nth-child(3), td:nth-child(3){
+    #bondTable th:nth-child(3),
+    #bondTable td:nth-child(3){
         max-width: 50px;
     }
-    th:nth-child(4), td:nth-child(4){
+    #bondTable th:nth-child(4),
+    #bondTable td:nth-child(4){
         max-width: 35px;
     }
-    th:nth-child(8), td:nth-child(8),
-    th:nth-child(9), td:nth-child(9),{
+    #bondTable th:nth-child(8),
+    #bondTable td:nth-child(8),
+    #bondTable th:nth-child(9),
+    #bondTable td:nth-child(9),{
         max-width; 30px;
     }
 
@@ -698,7 +703,7 @@ pointer-events: auto;
     }
 
     /* Target only the select in the currency column */
-    table select {
+    #bondTable select {
       /* 1. Remove default browser styling (removes the default arrow) */
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -738,14 +743,14 @@ pointer-events: auto;
         min-height: 40px;
     }
 
-    th:nth-child(2), td:nth-child(2),
-    th:nth-child(6), td:nth-child(6),
-    th:nth-child(7), td:nth-child(7),
-    th:nth-child(10), td:nth-child(10) {
+    #bondTable th:nth-child(2), td:nth-child(2),
+    #bondTable th:nth-child(6), td:nth-child(6),
+    #bondTable th:nth-child(7), td:nth-child(7),
+    #bondTable th:nth-child(10), td:nth-child(10) {
         display: none !important;
     }
 
-    th:nth-child(1), td:nth-child(1){
+    #bondTable th:nth-child(1), td:nth-child(1){
         max-width: 150px;
     }
     #bondTable th input[type="text"] {
@@ -780,7 +785,7 @@ pointer-events: auto;
         padding: 8px 16px;
     }
 
-    th, td {
+    #bondTable th, td {
         display: table-cell !important;
     }
 }
@@ -800,7 +805,7 @@ pointer-events: auto;
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-17 19:09
+        — 📅 2026-02-17 20:00
     </span>
 </h2>
 
@@ -824,7 +829,7 @@ pointer-events: auto;
     <button class="preset-button"
             id="balancedCore"
             onclick="applyPreset('balancedCore')"
-            title="Mid-term (5-15y), Investment Grade, >4.5% SAY">
+            title="Mid-term (5-15y), Investment Grade,>3.5% yield with >3.5% SAY">
         ⚖️🌲 Balanced Core
     </button>
     <button class="preset-button"
@@ -836,7 +841,7 @@ pointer-events: auto;
     <button class="preset-button"
             id="deepDiscount"
             onclick="applyPreset('deepDiscount')"
-            title="Bonds trading <90% par. Profit comes from pull-to-par.">
+            title="Bonds trading <90% par. Profit comes from pull-to-par (<20y).">
         📉🚀 Deep Discount
     </button>
     <button class="preset-button"
@@ -15671,7 +15676,7 @@ function setDefaultMaturityFilters() {
             filters: {
               maxMatYears: 2.5,
               minRating: "BBB+",
-              minYield: 3.5
+              minYield: 2
             }
           },
           ultraShortHigh: {
@@ -15687,13 +15692,14 @@ function setDefaultMaturityFilters() {
           },
           balancedCore: {
             name: "Balanced Core",
-            description: "Mid-term (5-15y), Investment Grade, >4.5% SAY",
+            description: "Mid-term (5-15y), Investment Grade,>3.5% yield with >3.5% SAY",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
               minMatYears: 5,
               maxMatYears: 15,
-              minSAY: 4.5,
+              minYield: 3.5,
+              minSAY: 3.5,
               minRating: "BBB+"
             }
           },
@@ -15711,7 +15717,7 @@ function setDefaultMaturityFilters() {
           },
           deepDiscount: {
             name: "Deep Discount",
-            description: "Bonds trading <90% par. Profit comes from pull-to-par.",
+            description: "Bonds trading <90% par. Profit comes from pull-to-par (<20y).",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
