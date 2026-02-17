@@ -61,7 +61,7 @@ pointer-events: auto;
   padding: 20px;
   overflow-y: auto;
   min-height: 0;      /* CRUCIAL en flexbox sinon pas de scroll */
- padding-bottom: calc(40px + env(safe-area-inset-bottom)); /* espace pour voir le dernier bouton */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* espace pour voir le dernier bouton */
 }
 
 /* --- 2. Search Section --- */
