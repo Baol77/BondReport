@@ -1,1007 +1,534 @@
-# 📊 Sovereign Bond Analytics Platform
+# 📊 Sovereign Bond Analytics Platform — User Manual
 
-**Discover, analyze, and build custom bond portfolios in seconds. Find the best yields across 30+ countries with intelligent filtering, preset strategies, and real-time portfolio analytics.**
-
-A powerful yet intuitive platform for sovereign bond investors—whether you're a seasoned trader, financial advisor, or individual investor seeking better returns than a savings account.
+**Discover, analyze, and build custom bond portfolios in minutes. Find the best yields across 30+ countries with intelligent filtering, preset investment strategies, and real-time portfolio analytics.**
 
 ---
 
-## 🎯 Quick Start (2 Minutes)
+## Table of Contents
 
-### 1. Open the Report
-Open `index.html` in your browser. You'll see a table of 1,000+ bonds with filtering options.
-
-### 2. Pick Your Strategy
-Click one of 6 preset buttons to instantly filter bonds:
-
-| Button | Best For | What It Shows |
-|--------|----------|--------------|
-| 📈🔥 **SAY Aggressive** | Risk-takers seeking capital gains | High-return bonds (5%+ SAY), 1-10 year maturity |
-| ⚖️🛡️ **Balanced Core** | Balanced growth investors | Investment-grade bonds with solid returns (4.5%+ SAY) |
-| 💵🔥 **Max Income** | Income seekers, retirees | High-coupon bonds (6%+ yield), 15+ year maturity |
-| 📉🚀 **Deep Discount** | Long-term wealth builders | Bonds below par value (buy low, sell at maturity) |
-| 🅿️🛡️ **Cash Parking** | Short-term liquidity needs | Ultra-safe short-term bonds (<1.5 years) |
-| 🏰🛡️ **AAA/AA Fortress** | Risk-averse, wealth preservation | Only top-rated sovereigns (AA- or better) |
-
-**That's it!** The table instantly shows 20-50 bonds matching your strategy, ranked by the best opportunities first.
-
-### 3. Review & Act
-- ✅ Scroll through the filtered list
-- ✅ Check the color-coded heatmap (green = good, red = avoid)
-- ✅ Click **"🎯 Portfolio Analysis"** to build a custom portfolio
-- ✅ Export your picks to send to your broker
+1. [What Is This Platform?](#what-is-this-platform)
+2. [Quick Start](#quick-start)
+3. [Understanding the Bond Table](#understanding-the-bond-table)
+4. [Key Metrics Explained](#key-metrics-explained)
+5. [Investment Strategy Presets](#investment-strategy-presets)
+6. [Advanced Filtering](#advanced-filtering)
+7. [Portfolio Analyzer](#portfolio-analyzer)
+8. [Analysis Modes](#analysis-modes)
+9. [Custom Investment Profiles (YAML)](#custom-investment-profiles-yaml)
+10. [For Administrators: Generating Reports](#for-administrators-generating-reports)
+11. [Troubleshooting](#troubleshooting)
+12. [Frequently Asked Questions](#frequently-asked-questions)
 
 ---
 
-## 🔍 Understanding the Bond Table
+## What Is This Platform?
 
-### What Each Column Means
+The Sovereign Bond Analytics Platform is a two-part tool:
 
-| Column | What It Is | Why You Care |
-|--------|-----------|--------------|
-| **ISIN** | Bond identification code | Give this to your broker to buy |
-| **Issuer** | Which country issued it | Know who you're lending to (Germany, Italy, Poland, etc.) |
-| **Price** | Cost in original currency | What you pay in USD, GBP, CHF, etc. |
-| **Currency** | What currency it's issued in | EUR, USD, GBP, CHF, SEK, etc. |
-| **Rating** | Credit quality (AAA, BBB+, etc.) | AAA = safest, BB = risky. Higher = safer but lower yield |
-| **Price (EUR)** | Cost in euros | Easiest way to compare across currencies |
-| **Coupon %** | Annual interest payment | A 5% coupon pays €50/year per €1,000 bond |
-| **Maturity** | When you get your money back | 2028 = 2 years, 2035 = 10 years |
-| **Curr. Yield %** | Annual income as % of price | €5 income on €100 bond = 5% yield |
-| **Total Return (1k€)** | What €1,000 becomes at maturity | €1,000 → €1,300 = €300 profit |
-| **SAY (%)** | **Total return per year** | **Most important metric** — includes income + capital gains |
+**1. The Interactive Report** (`docs/eur/index.html`) — A browser-based interface that lets any investor browse, filter, and analyze sovereign bonds without any technical knowledge. Just open the HTML file in a browser.
+
+**2. The Java Backend** (`BondApp.java`) — A data engine that scrapes live bond data, calculates returns, applies FX adjustments, and generates the HTML report. This part is run by an administrator.
+
+Together, they form a self-contained investment research tool that works offline, stores no data on external servers, and requires no subscription or login.
 
 ---
 
-## 💡 The Three Metrics You Need to Know
+## Quick Start
 
-### 1. **SAY (Simple Annual Yield)** — Your Total Return
-**This is the single most important number.**
+### Step 1 — Open the Report
 
-SAY tells you how much money you'll make per year, as a percentage of what you pay today. It includes both coupon income AND capital gains.
+Open `docs/eur/index.html` in any modern web browser (Chrome, Firefox, Safari, Edge). You will see a table of 1,000+ sovereign bonds with interactive filtering options.
 
-**Example**:
-- You buy a bond for €100
-- It pays €5/year in coupons (5% coupon)
-- It's worth €102 when it matures (€2 capital gain over the holding period)
-- Total annual return = (€5 + €2/10 years) / €100 = **7% SAY**
+> **Note:** If you are accessing a hosted version via GitHub Pages, just navigate to the published URL. No local installation is required.
 
-**In the table**: Bonds with SAY ≥ 4.5% are highlighted in **green** (good opportunities). Anything under 3% is in **red** (avoid).
+### Step 2 — Pick a Strategy Preset
 
-### 2. **Current Yield %** — Your Annual Income
-How much cash the bond pays you each year, relative to what you're paying today.
+At the top of the page, six preset buttons instantly filter the table to match a specific investment style:
 
-**Example**: A bond with a 5% coupon costing €100 = **5% Current Yield**
+| Preset Button | Who It Is For | What It Filters |
+|---|---|---|
+| 🅿️🛡️ **Cash Parking** | Short-term, safety-first investors | Investment-grade bonds, maturity under 2.5 years |
+| ⚡💰 **Ultra Short High** | Risk-tolerant investors seeking quick returns | Short-term bonds (1–3 years) with yield above 6% |
+| ⚖️🌲 **Balanced Core** | The majority of long-term investors | Mid-term (5–15 years), investment-grade, SAY above 3.5% |
+| 💵🔥 **Max Income** | Retirees and income-focused investors | Long-duration bonds (15+ years) with current yield above 6% |
+| 📉🚀 **Deep Discount** | Capital-growth investors | Bonds trading below 90% of face value, SAY above 5% |
+| 🏰🛡️ **AAA/AA Fortress** | Wealth-preservation, risk-averse investors | Only top-rated sovereigns (AA− or better) |
 
-**Use this if**: You need steady income (retirees). You'll check this column and buy high-yield bonds.
+Click any button and the table instantly narrows to bonds matching that strategy, sorted by the best opportunities first.
 
-**Don't focus only on this if**: You're investing for growth—SAY is more important because it includes capital appreciation.
+### Step 3 — Review and Act
 
-### 3. **Maturity** — When You Get Your Money Back
-The date the issuer repays your principal.
-
-**Example**:
-- Bond matures 2026 = In 2 years, the issuer pays back €100 (or €100+ if you bought at discount)
-- Bond matures 2035 = In 10 years, the issuer pays back €100
-
-**Why it matters**:
-- **Short (1-3 years)**: Lower risk, lower returns, good for safety
-- **Medium (5-10 years)**: Balanced risk/return
-- **Long (15+ years)**: Higher returns, more interest rate risk
+Once a preset is active:
+- Scroll through the filtered list and review color-coded highlights
+- Click any column header to re-sort by that metric
+- Click **🎯 Portfolio Analysis** to open the portfolio builder and model a real investment
 
 ---
 
-## 🎬 Real Example: Finding Your First Bond
+## Understanding the Bond Table
 
-**Your goal**: €5,000 investment, want 4%+ annual return, willing to wait 5-10 years
+Each row in the table represents a single sovereign bond. The columns are:
 
-**Step 1**: Click **⚖️ Balanced Core**
-- Filters instantly show ~80 bonds matching this strategy
-- All are investment-grade (safe)
-- All have 4.5%+ SAY (good returns)
-- Maturities between 1-20 years (flexible)
-
-**Step 2**: Sort by SAY (click the "SAY" column header)
-- Best opportunities appear at top
-- You see:
-  ```
-  ROMANIA (XS2571924070)     — Price €96, SAY 5.2%, Rating BBB-, 2031
-  POLAND (PL0000123456)       — Price €99, SAY 4.8%, Rating A,    2033
-  HUNGARY (HU1122334455)      — Price €98, SAY 4.9%, Rating BBB+, 2032
-  ```
-
-**Step 3**: Review color coding
-- Green background = SAY 3.5%+ (good)
-- Light green = SAY 2.5-3.5% (ok)
-- Red = SAY < 2.5% (skip)
-
-**Step 4**: Check the rating
-- BBB- = Investment Grade, but risky side. OK for growth.
-- A = Safer. Less return but more stable.
-
-**Step 5**: Export or add to portfolio
-- Send to your broker with €5,000
-- Or add to portfolio analyzer for "what if" scenarios
+| Column | What It Represents | Practical Use |
+|---|---|---|
+| **ISIN** | Unique international identifier code | Provide this code to your broker to place a buy order |
+| **Issuer** | Country that issued the bond | Know who you are lending money to |
+| **Price** | Current price in the bond's native currency | What you pay today per unit |
+| **Currency** | Currency the bond is denominated in | EUR, USD, GBP, CHF, SEK, etc. |
+| **Rating** | Credit quality assigned by rating agencies | AAA is safest; BB+ and below is speculative grade |
+| **Price (EUR)** | Price converted to euros | Enables fair comparison across all currencies |
+| **Coupon %** | Fixed annual interest rate | A 5% coupon on a €1,000 bond pays €50 per year |
+| **Maturity** | Date the issuer repays the principal | Determines how long your money is committed |
+| **Curr. Yield %** | Annual income as a percentage of current price | More accurate than coupon when buying above or below par |
+| **Total Return (1k€)** | What €1,000 invested grows to by maturity | Shows the end-state profit in absolute terms |
+| **SAY (%)** | Simple Annual Yield — total return per year | **The most important column.** See explanation below. |
 
 ---
 
-## 🎯 Portfolio Analyzer — Build Your Own Portfolio
+## Key Metrics Explained
 
-Click **"🎯 Portfolio Analysis"** button to open the portfolio builder. This is where you model your actual investment.
+### SAY — Simple Annual Yield
 
-### How to Use It
+SAY is the single most useful number in the table. It measures total annual return, combining both the coupon income you receive each year and any capital gain (or loss) from buying the bond above or below its face value.
 
-#### Step 1: Search for a Bond
-1. Enter ISIN code (e.g., `XS2571924070`)
-2. Click **🔍 Search**
-3. Bond details appear automatically
-
-#### Step 2: Add to Portfolio
-Choose ONE of these:
-- **Enter Quantity**: "I want 10 units"
-- **Enter € Amount**: "I want to invest €5,000"
-
-The tool auto-calculates the other. Click **➕ Add to Portfolio**.
-
-#### Step 3: Add More Bonds
-Repeat steps 1-2 to add 3-10 different bonds (diversification is key).
-
-#### Step 4: Review Your Portfolio Dashboard
-
-The portal shows 8 key statistics:
-
-| Stat | What It Means | Example |
-|------|---------------|---------|
-| **Total Investment** | How much money you're putting in | €10,500 |
-| **Avg Price** | Average € price you're paying per bond | €98.50 |
-| **Weighted SAY** | Your portfolio's total return | **4.32%** |
-| **Weighted Yield** | Your portfolio's annual income | 2.85% |
-| **Avg Coupon** | Average interest rate you're getting | 3.75% |
-| **Bond Count** | How many different bonds you own | 5 |
-| **Avg Risk (Maturity)** | How long till you get your money | 7.2 years |
-| **Weighted Rating** | Average credit quality | BBB+ |
-
-**Real example**:
+**Formula:**
 ```
-Portfolio: 5 bonds worth €10,500
-├─ Total Investment: €10,500 (your money in)
-├─ Weighted SAY: 4.32% (you make 4.32%/year)
-├─ Weighted Rating: BBB+ (mostly safe, some risk)
-└─ Avg Maturity: 7.2 years (medium-term holding)
+SAY = (Annual Coupon + Capital Gain over holding period / Years to maturity) / Purchase Price
 ```
 
-#### Step 5: Currency Breakdown
-See how much you own in each currency:
+**Example:**
+- You buy a bond for €96 (below its €100 face value)
+- It pays a 5% coupon, so €4.80/year on your €96 purchase (5% coupon on €96)
+- At maturity (10 years away), you receive €100 back — a €4 capital gain
+- SAY = (€4.80 + €4 / 10) / €96 = **5.4% per year**
+
+The bond table uses color coding to communicate SAY quality at a glance:
+- 🟢 **Dark green** — SAY 4%+ (excellent)
+- 🟢 **Light green** — SAY 2.5–4% (good)
+- 🟠 **Yellow/orange** — SAY 1–2.5% (acceptable)
+- 🔴 **Red** — SAY below 1% (poor, consider avoiding)
+
+### Current Yield
+
+Current Yield is the annual cash income you receive expressed as a percentage of the price you pay today. It does not account for capital gains.
+
+Use this metric if you depend on regular income, such as during retirement. A high current yield means more cash in your pocket each year.
+
+### Maturity
+
+Maturity is the date the issuing government repays your principal.
+
+- **Short maturity (under 3 years):** Lower risk, lower returns. Good for cash you may need soon.
+- **Medium maturity (5–10 years):** Balanced risk and return.
+- **Long maturity (15+ years):** Higher potential returns, but more sensitivity to interest rate changes.
+
+---
+
+## Investment Strategy Presets
+
+The six presets are configured from a YAML profile file and represent the most common investor needs. Here is what each one does internally:
+
+### 🅿️🛡️ Cash Parking
+**Purpose:** A safe home for capital you may need within 2–3 years.
+- Maturity: up to 2.5 years
+- Minimum rating: BBB+
+- Minimum yield: 2%
+- Sorted by: SAY (highest first)
+
+### ⚡💰 Ultra Short High
+**Purpose:** Maximum yield in a short time frame. Accepts higher credit risk.
+- Maturity: 1–3 years
+- Minimum yield: 6%
+- Sorted by: SAY
+
+### ⚖️🌲 Balanced Core
+**Purpose:** The all-purpose profile for most investors — solid returns with investment-grade safety.
+- Maturity: 5–15 years
+- Minimum rating: BBB+
+- Minimum yield: 3.5%
+- Minimum SAY: 3.5%
+- Sorted by: SAY
+
+### 💵🔥 Max Income
+**Purpose:** Maximize the cash you receive each year, regardless of capital gain.
+- Maturity: 15+ years
+- Maximum price: €110 (avoids overpaying for income)
+- Minimum yield: 6%
+- Minimum rating: BB+
+- Sorted by: Current Yield (highest first)
+
+### 📉🚀 Deep Discount
+**Purpose:** Buy bonds cheaply, hold until maturity, and collect the capital gain as the price rises toward face value.
+- Price: below €90 (buying at a discount)
+- Maturity: 3–20 years
+- Minimum SAY: 5%
+- Sorted by: SAY
+
+### 🏰🛡️ AAA/AA Fortress
+**Purpose:** Maximum capital safety, accepting lower returns in exchange for near-zero default risk.
+- Minimum rating: AA−
+- Maturity: 5–30 years
+- Minimum SAL (Simple Annual Loss adjusted): 3%
+- Sorted by: SAY
+
+---
+
+## Advanced Filtering
+
+In addition to presets, you can apply manual filters directly on the table:
+
+- **Click any column header** to sort ascending or descending
+- **Type in the filter row** below the header to filter by text (e.g., type "DE" to see only German bonds)
+- **Combine a preset with manual column sorting** for refined results
+
+**Practical example:** Click **⚖️ Balanced Core**, then click the **Rating** column header to view the safest bonds within that strategy first.
+
+---
+
+## Portfolio Analyzer
+
+The Portfolio Analyzer lets you build a hypothetical portfolio, review its aggregate statistics, and export a shopping list for your broker.
+
+### Opening the Analyzer
+
+Click the **🎯 Portfolio Analysis** button at the top of the page. A panel opens at the bottom (or in a modal depending on your screen).
+
+### Adding a Bond
+
+1. Enter the **ISIN code** of the bond (copy it from the table by clicking the ISIN cell)
+2. Click **🔍 Search** — bond details load automatically
+3. Enter either:
+    - **Quantity** (number of units), or
+    - **€ Amount** (how much money to invest)
+      The other field calculates automatically.
+4. Click **➕ Add to Portfolio**
+
+Repeat for each bond you want to include. A diversified portfolio typically contains 5–10 bonds across different countries, ratings, and maturities.
+
+### Reading the Portfolio Dashboard
+
+After adding bonds, the dashboard shows 8 statistics:
+
+| Statistic | What It Means |
+|---|---|
+| **Total Investment** | The total euros committed across all bonds |
+| **Avg Price** | The weighted average price paid per bond unit in euros |
+| **Weighted SAY** | Your portfolio's average annual total return |
+| **Weighted Yield** | Your portfolio's average annual income yield |
+| **Avg Coupon** | Weighted average interest rate across all holdings |
+| **Bond Count** | Number of distinct bonds in the portfolio |
+| **Avg Risk (Maturity)** | Weighted average years until all bonds mature |
+| **Weighted Rating** | Average credit quality across the portfolio |
+
+**Example reading:**
 ```
-EUR    65%  €6,820
-USD    25%  €2,625
-GBP    10%  €1,050
+Total Investment:  €15,000
+Weighted SAY:       4.62%   ← You earn 4.62% per year on average
+Weighted Rating:    A−      ← Mostly safe, some moderate-risk bonds
+Avg Maturity:       8.2 yrs ← Your money is committed for ~8 years
 ```
 
-**Why this matters**: If 90% is USD and the euro strengthens, your returns drop. Use this to balance currency exposure.
+### Currency Breakdown
 
-#### Step 6: Manage Your Portfolio
-- **Edit quantities**: Click the Qty field, change the number, watch stats update instantly
-- **Delete bonds**: Click ❌ to remove a bond
-- **Test scenarios**: Add/remove bonds to see "what if" results
+Below the statistics, the analyzer shows how your investment is distributed by currency:
 
-#### Step 7: Save Your Portfolio
-**Export (📥)**: Save as CSV file
-- Backup for later
-- Share with your financial advisor
+```
+EUR    80%   €12,000
+USD    15%    €2,250
+GBP     5%      €750
+```
+
+If a large portion is in a single non-euro currency, you carry foreign exchange risk — the value of your returns in euros may fall if that currency weakens. Aim for a currency distribution that matches your comfort level.
+
+### Managing Your Portfolio
+
+- **Edit a quantity:** Click directly on the quantity value in the portfolio table, change the number, and statistics update instantly.
+- **Remove a bond:** Click the ❌ icon next to a bond row.
+- **Clear everything:** Click **🗑️ Clear** to reset and start fresh.
+
+### Saving and Loading Portfolios
+
+**Export (📥):** Downloads the current portfolio as a CSV file. Use this to:
+- Back up your research
+- Share with a financial advisor
 - Open in Excel for further analysis
 
-**Import (📤)**: Load a previously saved portfolio
-- Automatically updates prices to today's market values
-- Shows which bonds moved up/down
-- Recalculates all statistics
+**Import (📤):** Loads a previously saved CSV file. The system automatically refreshes bond prices to current market values and shows you what changed:
 
-**Example alert when importing**:
 ```
-✅ Imported 3 bonds!
+✅ Imported 4 bonds
 
 📊 Price Changes Since You Saved:
-XS2571924070: €96.50 → €98.75 (↑ +€2.25)
-US0378331005: €105.00 → €103.50 (↓ -€1.50)
+XS2571924070 (Romania):  €96.50 → €98.75  ↑ +€2.25
+US0000000001 (USA):     €105.00 → €103.50  ↓ −€1.50
 ```
 
-**Clear (🗑️)**: Delete entire portfolio and start fresh
+This makes quarterly portfolio reviews easy — save today, reimport in 3 months, and immediately see which bonds gained or lost value.
 
 ---
 
-## 🎨 Two Analysis Modes
+## Analysis Modes
+
+The platform offers two analysis perspectives, toggled using the legend at the bottom of the main page.
 
 ### Capital Gain Mode (Default)
-**Focus**: Total return (SAY)  
-**Color coding**:
-- 🔴 Red = SAY < 1% (avoid)
-- 🟠 Yellow = SAY 1-2.5% (poor)
-- 🟢 Light Green = SAY 2.5%+ (good)
-- 🟢 Dark Green = SAY 4%+ (excellent)
+Focuses on **SAY — total annual return.** Best for growth investors who reinvest income and want to maximize the final value of their investment.
 
-**Best for**: Growth investors, reinvesting coupons, long-term wealth building
+Color coding:
+- 🔴 Red — SAY below 1%
+- 🟠 Yellow — SAY 1–2.5%
+- 🟢 Light green — SAY 2.5%+
+- 🟢 Dark green — SAY 4%+
 
 ### Income Mode
-**Focus**: Annual cash flow (Current Yield)  
-**Color coding**:
-- 🔴 Red = Yield < 3% (too low)
-- 🟠 Yellow = Yield 3-4.5% (acceptable)
-- 🟢 Light Green = Yield 4.5%+ (good)
-- 🟢 Dark Green = Yield 6%+ (excellent)
+Focuses on **Current Yield — annual cash income.** Best for investors who need regular income, such as retirees living off bond coupons.
 
-**Best for**: Income investors, retirees needing cash, living off bond yields
+Color coding:
+- 🔴 Red — Current Yield below 3%
+- 🟠 Yellow — Current Yield 3–4.5%
+- 🟢 Light green — Current Yield 4.5%+
+- 🟢 Dark green — Current Yield 6%+
 
-**Toggle between modes** using the legend at the bottom of the page.
+Switch between modes by clicking the toggle in the legend section of the page. The entire table re-colors instantly.
 
 ---
 
-## 🎨 Advanced: Custom Investment Profiles (YAML)
+## Custom Investment Profiles (YAML)
 
-### What Are Custom Profiles?
+Beyond the six built-in presets, you can create your own investment strategies by uploading a custom YAML configuration file.
 
-Beyond the 6 built-in presets, you can create **unlimited custom investment strategies** by uploading a YAML file. Perfect for:
+### When to Use Custom Profiles
 
-- Your personal investment thesis
-- Team-specific strategies
-- Client segments
-- Risk profiles
-- Currency preferences
-- Rating-specific portfolios
+Custom profiles are useful when you have specific investment constraints such as:
+- A minimum rating you will not go below (e.g., only A− and above)
+- A currency preference or restriction
+- A specific maturity window
+- A yield threshold different from the built-in presets
 
-### How to Create a Custom Profile
+### YAML File Format
 
-#### Option 1: Click "📁 Import YAML" Button
-1. Click the **"📁 Import YAML"** button in the presets row
-2. Select your custom `.yaml` or `.yml` file
-3. New profile buttons appear instantly
-4. Click them like any preset
-
-#### Option 2: Manual YAML Format
-
-Create a file called `my-profiles.yaml` with this structure:
+Create a file (e.g., `my-profiles.yaml`) using this structure:
 
 ```yaml
 profiles:
-  - id: my-income-strategy
-    label: "My Income Strategy"
-    emoji: "💰"
-    description: "High-yield bonds for retirement income"
-    profileType: "income"        # or "SAY" for capital gains
-    sortedBy: "CURR_YIELD"       # or "SAY", "PRICE", etc.
+  - id: myConservative
+    label: My Conservative Strategy
+    emoji: "🛡️"
+    description: Investment-grade bonds, 3–7 years, minimum 3% yield
+    profileType: SAY
+    sortedBy: SAY
     filters:
-      minMatYears: 10
-      maxMatYears: 25
-      minYield: 5.5
-      minRating: "A-"
-      maxPrice: 105
-```
-
-### Understanding Each Field
-
-| Field | Purpose | Example |
-|-------|---------|---------|
-| **id** | Unique identifier (no spaces) | `my-income-strategy` |
-| **label** | Display name on button | `"My Income Strategy"` |
-| **emoji** | Icon for the button | `"💰"` or `"🎯"` |
-| **description** | Tooltip when hovering | `"High-yield bonds for..."` |
-| **profileType** | "SAY" (growth) or "income" (yields) | `"income"` |
-| **sortedBy** | Default sort column | `"CURR_YIELD"` |
-| **filters** | Investment criteria | See below ↓ |
-
-### Available Filters in YAML
-
-```yaml
-filters:
-  minMatYears: 5              # Minimum years to maturity
-  maxMatYears: 15             # Maximum years to maturity
-  minPrice: 90                # Minimum bond price in EUR
-  maxPrice: 110               # Maximum bond price in EUR
-  minSAY: 3.5                 # Minimum Simple Annual Yield %
-  minYield: 4.0               # Minimum Current Yield %
-  minRating: "BBB"            # Minimum credit rating (AAA, AA, A, BBB, etc.)
-  currency: "EUR"             # Single currency (EUR, USD, GBP, etc.)
-```
-
-### Real-World YAML Examples
-
-#### Example 1: Retiree Income Portfolio
-```yaml
-profiles:
-  - id: retirement-income
-    label: "🏖️ Retirement Income"
-    emoji: "🏖️"
-    description: "Safe, high-yield bonds for retirement"
-    profileType: "income"
-    sortedBy: "CURR_YIELD"
-    filters:
-      minMatYears: 8
-      maxMatYears: 20
-      minYield: 5.0
-      minRating: "A"
-      maxPrice: 110
-```
-
-**What this does**:
-- Filters bonds paying 5%+ annual income
-- Only A-rated or better (safe)
-- 8-20 year maturity (predictable income)
-- Caps price at €110 (not overpaying for premium)
-- Sorts by Current Yield (shows highest income first)
-
-#### Example 2: Aggressive Growth Portfolio
-```yaml
-profiles:
-  - id: aggressive-growth
-    label: "📈 Aggressive Growth"
-    emoji: "📈"
-    description: "High SAY, ignore ratings, target capital gains"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      minMatYears: 1
-      maxMatYears: 10
-      minSAY: 5.0
-      minPrice: 75
-      maxPrice: 95
-```
-
-**What this does**:
-- Focuses on bonds trading below par (€75-€95)
-- Target: 5%+ total annual return (capital gains)
-- Short to medium-term (1-10 years)
-- Any rating acceptable (BB+ and below considered)
-- Sorts by SAY (shows best total returns first)
-
-#### Example 3: Safe Haven Portfolio
-```yaml
-profiles:
-  - id: safe-haven
-    label: "🏰 Safe Haven"
-    emoji: "🏰"
-    description: "Ultra-safe sovereigns only"
-    profileType: "income"
-    sortedBy: "CURR_YIELD"
-    filters:
-      minMatYears: 5
-      maxMatYears: 30
-      minRating: "AA"
-      minYield: 2.5
-      maxPrice: 120
-```
-
-**What this does**:
-- Only AA-rated or better (Germany, Switzerland, Netherlands)
-- Any maturity 5-30 years (very stable)
-- Lowest risk possible (flight-to-quality hedge)
-- Higher prices acceptable (willing to pay for safety)
-
-#### Example 4: Currency-Specific Portfolio
-```yaml
-profiles:
-  - id: eur-only
-    label: "€ EUR Only"
-    emoji: "€"
-    description: "No FX risk - EUR bonds only"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      currency: "EUR"
       minMatYears: 3
-      maxMatYears: 15
-      minSAY: 3.5
-      minRating: "BBB-"
-```
-
-**What this does**:
-- Only EUR-denominated bonds (no currency risk)
-- 3-15 year maturity
-- 3.5%+ SAY
-- BBB- or better ratings
-
-### How Sorting Works
-
-The `sortedBy` field determines which column is auto-sorted when you click the profile:
-
-| Value | Result |
-|-------|--------|
-| `"SAY"` | Sorted by total return (best to worst) |
-| `"CURR_YIELD"` | Sorted by annual income (highest to lowest) |
-| `"PRICE"` | Sorted by price (cheapest first) |
-| `"RATING"` | Sorted by credit rating (safest first) |
-| `"MATURITY"` | Sorted by maturity date (soonest first) |
-| `"COUPON"` | Sorted by coupon rate (highest first) |
-
-### Profile Type: SAY vs Income
-
-**profileType: "SAY"**
-- Highlights bonds with high total returns
-- Used for growth investing
-- Heatmap shows SAY percentages
-- Sorts by capital appreciation potential
-
-**profileType: "income"**
-- Highlights bonds with high coupons
-- Used for income investing
-- Heatmap shows Current Yield percentages
-- Sorts by annual cash flow
-
-### Step-by-Step: Create Your First Custom Profile
-
-**Goal**: Create a profile for "Polish bonds, high yield, medium-term"
-
-**Step 1**: Create a text file and name it `my-profiles.yaml`
-
-**Step 2**: Add this content:
-```yaml
-profiles:
-  - id: poland-bonds
-    label: "🇵🇱 Poland Portfolio"
-    emoji: "🇵🇱"
-    description: "Polish bonds with 4%+ SAY, A rating, 5-15 years"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      minMatYears: 5
-      maxMatYears: 15
-      minSAY: 4.0
-      minRating: "A"
-```
-
-**Step 3**: Save the file to your computer
-
-**Step 4**: Open the bond platform
-
-**Step 5**: Click **"📁 Import YAML"**
-
-**Step 6**: Select your `my-profiles.yaml` file
-
-**Step 7**: A new button appears: **"🇵🇱 Poland Portfolio"**
-
-**Step 8**: Click it to instantly filter Polish bonds!
-
-### Combining Multiple Profiles
-
-You can combine multiple profiles in one YAML file:
-
-```yaml
-profiles:
-  - id: income-safe
-    label: "💵 Income Safe"
-    emoji: "💵"
-    description: "High yield, low risk"
-    profileType: "income"
-    sortedBy: "CURR_YIELD"
-    filters:
-      minYield: 5.0
-      minRating: "A"
-      maxPrice: 110
-
-  - id: growth-aggressive
-    label: "📈 Growth Aggressive"
-    emoji: "📈"
-    description: "Capital gains, all ratings"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      minSAY: 5.0
-      minPrice: 75
-      maxPrice: 95
-
-  - id: short-term
-    label: "⏱️ Short Term"
-    emoji: "⏱️"
-    description: "Quick returns, under 3 years"
-    profileType: "SAY"
-    sortedBy: "MATURITY"
-    filters:
-      minMatYears: 0
-      maxMatYears: 3
+      maxMatYears: 7
+      minRating: A-
+      minYield: 3.0
       minSAY: 3.0
-```
 
-Now you'll have 3 new buttons: **💵 Income Safe**, **📈 Growth Aggressive**, **⏱️ Short Term**
-
-### Tips for Creating Profiles
-
-#### Tip 1: Profile Name Should Be Clear
-```yaml
-# GOOD
-label: "🏖️ Retirement Income"
-
-# CONFUSING
-label: "Profile 1"
-```
-
-#### Tip 2: Description Explains Your Strategy
-```yaml
-description: "High-yield bonds for retirees, A-rated minimum, 5% yield floor"
-```
-
-#### Tip 3: Set Realistic Filters
-```yaml
-# GOOD - Filters will match 20-50 bonds
-filters:
-  minSAY: 4.0
-  minRating: "BBB+"
-
-# TOO STRICT - Filters match 0-2 bonds
-filters:
-  minSAY: 6.0
-  minRating: "AAA"
-  maxPrice: 99
-```
-
-#### Tip 4: Use Emoji for Visual Recognition
-- 💰 = Income/yield
-- 📈 = Growth/capital gains
-- 🛡️ = Safe/defensive
-- 🚀 = Aggressive
-- 🏖️ = Retirement
-- 🌍 = Geographic (Poland, Germany, etc.)
-- ⏱️ = Time-based (short, medium, long)
-
-#### Tip 5: Test Before Sharing
-1. Create the YAML file
-2. Import it
-3. Click the profile and verify it shows expected bonds
-4. Adjust filters if needed
-5. Re-import the updated file
-
-### Sharing Profiles with Your Team
-
-**Create team profiles**:
-1. Build a master `team-profiles.yaml` with 5-10 standard strategies
-2. Share with your team members
-3. Everyone imports the same file
-4. Everyone uses consistent criteria
-
-**Example team file**:
-```yaml
-profiles:
-  # Conservative strategy for clients over 65
-  - id: conservative-65plus
-    label: "👵 Conservative 65+"
-    emoji: "👵"
-    description: "Team standard for retirees"
-    profileType: "income"
-    sortedBy: "CURR_YIELD"
+  - id: myHighYield
+    label: High Yield Hunt
+    emoji: "🎯"
+    description: Sub-investment grade, 5–15 years, SAY above 6%
+    profileType: SAY
+    sortedBy: SAY
     filters:
-      minYield: 4.0
-      minRating: "AA-"
       minMatYears: 5
-      maxMatYears: 20
-
-  # Balanced strategy for most clients
-  - id: balanced-standard
-    label: "⚖️ Balanced Standard"
-    emoji: "⚖️"
-    description: "Team standard for balanced growth"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      minSAY: 4.0
-      minRating: "A"
-      minMatYears: 3
       maxMatYears: 15
-
-  # Aggressive strategy for young investors
-  - id: aggressive-young
-    label: "🚀 Aggressive Young"
-    emoji: "🚀"
-    description: "Team standard for young growth investors"
-    profileType: "SAY"
-    sortedBy: "SAY"
-    filters:
-      minSAY: 5.0
-      minMatYears: 1
-      maxMatYears: 20
+      minSAY: 6.0
+      minYield: 5.0
 ```
 
-## 🔧 Advanced: Custom Filters
+### Available Filter Fields
 
-Don't like the presets? Build your own filter in 3 clicks.
+| Field | Type | Description |
+|---|---|---|
+| `minMatYears` | number | Minimum years to maturity |
+| `maxMatYears` | number | Maximum years to maturity |
+| `minRating` | string | Minimum credit rating (e.g., `BBB-`, `A`, `AA-`) |
+| `minYield` | number | Minimum current yield percentage |
+| `minSAY` | number | Minimum SAY percentage |
+| `maxPrice` | number | Maximum bond price in EUR |
+| `minSAL` | number | Minimum SAL (Simple Annual Loss) metric |
 
-### Filter Options (Click column headers)
+### Loading Custom Profiles
 
-#### **ISIN Search**
-Type a bond code to find a specific bond:
-```
-XS2571924070  →  Shows only that bond
-```
+In the browser interface, look for the **Upload Profile** or **Custom Strategy** button. Select your YAML file and the new presets appear alongside the built-in ones. Your custom strategies are only active during that browser session — upload the file again each time you open the report.
 
-#### **Issuer Search**
-Filter by country:
-```
-ROMANIA  →  Shows only Romanian bonds
-GERMANY  →  Shows only German bonds
-```
-
-#### **Price Range**
-Set min/max price to find bonds at specific price points:
-```
-Min: 80    Max: 110   →  Shows bonds trading €80-€110
-Min: 90    Max: 95    →  Shows deep discounts
-```
-
-#### **Currency**
-Choose specific currencies:
-```
-EUR  →  Only euro bonds (no FX risk)
-USD  →  Only dollar bonds (FX-adjusted returns)
-```
-
-#### **Minimum Rating**
-Filter by credit safety:
-```
-≥ BBB   →  Investment grade only (safer)
-≥ A     →  High quality (very safe, lower yield)
-```
-
-#### **Maturity Range**
-Choose bond duration:
-```
-2025-2027   →  Short-term (1-3 years)
-2030-2035   →  Medium-term (5-10 years)
-2045-2050   →  Long-term (20+ years)
-```
-
-#### **Minimum Yield**
-Set income floor:
-```
-Min 5%  →  Only high-income bonds
-Min 4%  →  Moderate income bonds
-```
-
-#### **Minimum SAY**
-Filter by total return:
-```
-Min 4.5%  →  Only bonds with 4.5%+ annual return
-Min 3.5%  →  Broader selection
-```
-
-### Build a Custom Filter Example
-
-**Goal**: "I want Italian bonds, investment-grade, 6-10 year maturity, at least 4% SAY"
-
-1. Issuer → Type `ITALY`
-2. Rating → Select `≥ BBB+`
-3. Maturity → Set dates for 2030-2034
-4. SAY → Set minimum `4.0%`
-
-**Result**: 5-8 bonds matching your exact criteria, ranked by SAY
+A reference example is available at `docs/bond-profiles-custom.yaml` in the project folder.
 
 ---
 
-## 💾 Portfolio Features Explained
+## For Administrators: Generating Reports
 
-### Editable Quantities
-Click on any Qty in your portfolio to change it instantly. The dashboard recalculates everything automatically.
+This section is for the person who maintains the platform and refreshes the bond data.
 
-**Use this for**: "What if I bought 20 units instead of 10?" testing
+### Prerequisites
 
-### Duplicate Detection
-If you accidentally add the same bond twice, the system shows a 🔄 merge button. Click it to combine entries with a weighted-average cost basis.
+- **Java 17** or later installed
+- **Apache Maven** installed
+- Internet access (the scraper fetches live bond data)
 
-### Smart Import
-When you reimport a saved portfolio:
-1. Quantities stay the same
-2. Prices update to current market
-3. All statistics recalculate
-4. You see which bonds moved up/down
+### Building the Project
 
-**Example**:
-```
-Saved 3 months ago at: €96.50
-Today's price:         €98.75
-Your bonds made:       +€2.25 per unit!
+```bash
+# Clone or unzip the project
+cd BondReport
+
+# Compile and run
+mvn exec:java
 ```
 
-### LocalStorage Persistence
-Your portfolio auto-saves to your browser. Even if you close and reopen tomorrow, your portfolio is still there.
+This will:
+1. Load current FX exchange rates
+2. Scrape live sovereign bond data for 30+ countries
+3. Calculate SAY, Current Yield, and scoring metrics for each bond
+4. Apply EUR conversions using live FX rates
+5. Generate `docs/eur/index.html`
 
-**Note**: Portfolio data never leaves your computer. It's stored only locally in your browser.
+On completion you will see:
+```
+🚀 Starting Sovereign Bond Analytics...
+📊 Loaded 1,247 bonds
+✅ Reports generated:
+ - docs/eur/index.html
+```
+
+### Running Tests
+
+```bash
+mvn test
+```
+
+The test suite validates bond calculation logic (`BondCalculatorTest.java`) and ensures yield and SAY computations are correct.
+
+### Project Structure
+
+```
+BondReport/
+├── src/main/java/bond/
+│   ├── BondApp.java              # Entry point
+│   ├── calc/BondCalculator.java  # SAY, yield, return calculations
+│   ├── config/BondProfile.java   # YAML profile model
+│   ├── fx/FxService.java         # FX rate loader and converter
+│   ├── model/Bond.java           # Bond data model
+│   ├── rating/RatingService.java # Credit rating normalizer
+│   ├── report/HtmlReportWriter.java # HTML generation via FreeMarker
+│   ├── scoring/BondScoreEngine.java # Score computation logic
+│   └── scrape/BondScraper.java   # Live data scraper
+├── src/main/resources/
+│   ├── bond-profiles.yaml        # Default strategy presets
+│   ├── ftl/bond-report.ftl       # HTML report template
+│   ├── css/                      # Stylesheets
+│   └── js/                       # Report interactivity
+├── docs/
+│   ├── eur/index.html            # Generated EUR report (open this)
+│   └── bond-profiles-custom.yaml # Custom profile example
+└── pom.xml                       # Maven build configuration
+```
+
+### Automating Refresh
+
+To keep the report current, schedule `mvn exec:java` as a cron job or CI/CD pipeline step. The GitHub Actions workflow at `.github/workflows/static.yml` is already configured to publish `docs/` to GitHub Pages automatically on each push.
 
 ---
 
-## 🌍 FX Risk Explained
+## Troubleshooting
 
-When you buy a **USD bond**, you're taking **currency risk**. The platform automatically adjusts returns to account for this.
+### Portfolio does not save between sessions
 
-### How It Works
+The Portfolio Analyzer stores data in your browser's **localStorage**. Check the following:
 
-A 7-year USD bond might show:
-- Nominal SAY: 5.5% (before FX adjustment)
-- Adjusted SAY: 4.8% (after FX risk haircut)
+1. localStorage must be enabled (Browser Settings → Privacy → Site Data)
+2. Incognito / private browsing mode disables localStorage — use a regular window
+3. Some browser extensions that block tracking can also block localStorage
+4. Try a different browser if the issue persists
 
-The adjustment is **maturity-based**:
+### Search does not find a bond
 
-| Maturity | Coupon Haircut | Capital Haircut |
-|----------|---|---|
-| 0-5 years | 5% | 10% |
-| 5-10 years | 7.5% | 15% |
-| 10-15 years | 10% | 20% |
-| 15-20 years | 12.5% | 25% |
-| 20+ years | 15% | 30% |
+- The ISIN code must be exact — copy and paste it directly from the table rather than typing it manually
+- Ensure you are searching within the currently loaded report (data is not fetched from the internet in real time)
 
-**Translation**: Longer-duration bonds get bigger FX haircuts because currency risk compounds over time.
+### Filters do not seem to work
 
-**Bottom line**: The numbers you see are **realistic FX-adjusted returns**, not optimistic nominal returns.
+- Click on the column header to confirm the filter row is active
+- Check that the filter value format is correct (numbers for numeric columns, text for text columns)
+- Click **Reset** or reload the page to clear all active filters and start fresh
 
----
+### Numbers look wrong or unexpected
 
-## 🎓 Pro Tips for Better Investing
+- Confirm the price column is showing EUR values, not the original currency
+- Check whether you are in **Capital Gain Mode** or **Income Mode** — this changes the color coding and highlighted metric
+- FX-adjusted values are based on exchange rates at the time the report was generated, not real-time rates
 
-### Tip 1: Diversify Across Ratings
-Don't buy only AAA bonds (boring yields). Mix:
-- 60% A-rated bonds (good returns, low risk)
-- 40% BBB-rated bonds (better returns, acceptable risk)
-- **Result**: 4-5% portfolio SAY with reasonable safety
+### Report is outdated
 
-### Tip 2: Diversify Across Maturities
-Avoid buying only 10-year bonds. Mix:
-- 30% Short (1-3 years) - Quick cash back, reinvestment options
-- 40% Medium (5-10 years) - Balanced duration
-- 30% Long (15+ years) - High returns, long-term wealth
-- **Result**: Smooth cash flow + flexibility
-
-### Tip 3: Mix Currencies
-If you're all-in EUR and the euro weakens, your returns suffer. Mix:
-- 70% EUR (home currency)
-- 20% USD (major currency, diversification)
-- 10% GBP/CHF (minor diversification)
-
-### Tip 4: Use Presets as Starting Points
-The 6 presets aren't rigid rules. Use them to get 20-30 candidate bonds, then:
-1. Read about the top 5 issuers
-2. Check recent news
-3. Customize your own portfolio
-4. Export and send to your broker
-
-### Tip 5: Export, Review, Act
-1. Build portfolio in the analyzer
-2. Export to CSV
-3. Review for 24 hours
-4. Send to broker to execute
-5. Never buy on impulse
-
-### Tip 6: Track Price Changes
-Every quarter, reimport your saved portfolio. The system shows you which bonds:
-- Went up (winners)
-- Went down (potential rebalancing opportunities)
-- Stayed flat (boring but stable)
-
-### Tip 7: Check Currency Breakdown Quarterly
-If 80% of your portfolio is suddenly USD (because you kept adding USD bonds), rebalance back to your target allocation.
+Contact your administrator to re-run the data generation script (`mvn exec:java`). The generation timestamp is displayed at the top of the report page.
 
 ---
 
-## ❓ Common Questions
+## Frequently Asked Questions
 
-### "Which preset should I use?"
+**Which preset should I use?**
 
-**Use this flowchart**:
-```
-Do you need money in 1-2 years?
-├─ YES → Cash Parking 🅿️
-└─ NO ↓
+Answer these questions in order:
+1. Do you need the money back within 2 years? → **Cash Parking**
+2. Are you retired and need regular income? → **Max Income**
+3. Do you want the absolute maximum safety? → **AAA/AA Fortress**
+4. Do you want long-term growth with balanced risk? → **Balanced Core**
+5. Are you comfortable with higher risk for higher returns? → **Deep Discount** or **SAY Aggressive**
 
-Are you retired/need income?
-├─ YES → Max Income 💵
-└─ NO ↓
+**Should I always buy the bond with the highest SAY?**
 
-Do you want maximum safety?
-├─ YES → AAA/AA Fortress 🏰
-└─ NO ↓
+Not necessarily. A very high SAY often signals:
+- A lower credit rating (greater default risk)
+- A non-EUR currency (FX risk — returns may shrink if that currency weakens)
+- A very long maturity (more sensitive to interest rate changes)
 
-Do you want balanced returns?
-├─ YES → Balanced Core ⚖️
-└─ NO ↓
+A portfolio of 5–10 diversified bonds across different countries, ratings, and maturities will typically deliver better risk-adjusted returns than a single high-SAY pick.
 
-Do you want maximum returns?
-├─ YES → SAY Aggressive 📈 OR Deep Discount 📉
-```
+**How often is the data updated?**
 
-### "I'm new to bonds. Where do I start?"
+Data is updated each time the administrator runs the data generation script. The timestamp in the top bar of the report tells you exactly when the data was last refreshed. Ask your administrator for the update schedule.
 
-1. Click **⚖️ Balanced Core** (good for everyone)
-2. Pick top 5 bonds by SAY
-3. Add to portfolio analyzer
-4. Review statistics
-5. Export and show to your advisor
+**Can I use this on a mobile phone?**
 
-### "Should I buy the highest SAY bond?"
+Yes. The report is fully responsive:
+- **Portrait mode:** Single-column layout optimized for scrolling
+- **Landscape mode:** Compact table view
+- **Desktop:** Full table with all columns visible
 
-**Not always.** High SAY often comes with:
-- Lower credit rating (riskier)
-- Non-EUR currency (FX risk)
-- Longer maturity (interest rate risk)
+**Can I share my portfolio with a financial advisor?**
 
-**Better approach**: Build a portfolio with 5-10 bonds diversified across rating/maturity/currency.
+Yes. Use **📥 Export CSV** to download your portfolio as a spreadsheet-compatible file. Email this to your advisor. They can open it in Excel, add notes, and return it for your confirmation. When you receive it back, use **📤 Import CSV** to reload it with updated prices.
 
-### "How often does data update?"
+**What does it mean when a bond is priced above 100?**
 
-Check the timestamp at the top of the page. Your administrator controls update frequency (could be daily, weekly, or real-time).
+A price above 100 means you are paying more than the face value. You will receive exactly 100 back at maturity, so there is a built-in capital loss. However, if the coupon is high enough to more than compensate for that loss over the holding period, the bond can still have a positive SAY. Always check the SAY column rather than just the price.
 
-### "Can I use this on my phone?"
+**Is my data sent to any server?**
 
-Yes! The app is fully mobile-responsive:
-- **Portrait**: Single-column layout, easy scrolling
-- **Landscape**: Compact view, still usable
-- **Desktop**: Full view with all columns
-
-### "My portfolio doesn't save. Why?"
-
-Check:
-1. Is localStorage enabled? (Browser settings → Privacy)
-2. Are you in incognito mode? (Doesn't support storage)
-3. Is your browser cache cleared? (Try closing/reopening)
-4. Try a different browser?
-
-### "Can I share my portfolio with my advisor?"
-
-Yes! Click **📥 Export CSV**, email the file to your advisor. They can:
-- Review in Excel
-- Make notes
-- Send back for confirmation
-- Track changes over time
-
-### "What if prices change after I export?"
-
-When you **reimport**, the system automatically updates prices to today's market. You'll see which bonds moved and recalculate your returns.
+No. The report is a static HTML file that runs entirely in your browser. The Portfolio Analyzer stores data in your browser's localStorage. Nothing is transmitted to external servers.
 
 ---
 
-## 📈 Real-World Walkthrough: Building Your First Portfolio
+## Summary: Step-by-Step First Portfolio
 
-**Scenario**: You have €15,000 to invest for 8 years. You want 4%+ annual return with moderate risk.
+Here is a complete walkthrough for building your first bond portfolio:
 
-### Step 1: Pick a Preset
-Click **⚖️ Balanced Core**
-- Shows ~100 bonds fitting your strategy
-- All investment-grade (safe)
-- 4.5%+ SAY (good returns)
+1. Open `docs/eur/index.html` in your browser
+2. Click **⚖️ Balanced Core** to see investment-grade, mid-term bonds
+3. Click the **SAY** column header to sort by best return first
+4. Select 5 bonds from different countries (diversification reduces risk)
+5. Click **🎯 Portfolio Analysis**
+6. Add each bond using its ISIN and your intended investment amount
+7. Review the **Weighted SAY** and **Weighted Rating** in the dashboard
+8. Confirm the **Currency Breakdown** is acceptable
+9. Click **📥 Export CSV**
+10. Share the file with your broker or financial advisor
 
-### Step 2: Sort by SAY
-Click the SAY column header to sort best-to-worst
-
-Top candidates:
-```
-1. ROMANIA (XS2571924070)    €96.00    BBB-    5.2%    2031
-2. POLAND (PL0000000001)     €99.00    A       4.8%    2033
-3. HUNGARY (HU1122334455)    €98.00    A-      4.9%    2032
-4. CZECHIA (CZ0000000001)    €102.00   A       4.5%    2030
-5. CROATIA (HR1111111111)    €94.00    BBB+    5.1%    2031
-```
-
-### Step 3: Build Diversified Portfolio
-Add 5 different bonds (not all from same country):
-```
-Bond 1: ROMANIA      €3,000  (Higher yield, bit riskier)
-Bond 2: POLAND       €3,000  (Good balance)
-Bond 3: CZECHIA      €3,000  (Safe, good yield)
-Bond 4: HUNGARY      €3,000  (Good balance)
-Bond 5: GERMANY      €3,000  (Ultra-safe, lower yield)
-Total:               €15,000
-```
-
-### Step 4: Check Dashboard
-```
-Total Investment:    €15,000
-Weighted SAY:        4.62%  ← Your average return
-Weighted Rating:     A-     ← Average credit quality
-Avg Maturity:        8.2 yrs ← Good match for your timeline
-```
-
-Currency breakdown:
-```
-EUR    80%  €12,000
-CHF    20%  €3,000
-```
-
-### Step 5: Export
-Click **📥 Export CSV**, get a file like:
-```
-ISIN,Issuer,Price EUR,Quantity,Investment EUR,SAY %,...
-XS2571924070,ROMANIA,96.00,31.25,3000.00,5.2%,...
-PL0000000001,POLAND,99.00,30.30,3000.00,4.8%,...
-...
-```
-
-### Step 6: Send to Broker
-Email to your broker with message:
-```
-Hi,
-
-Please execute the following bond purchases (attached CSV):
-- 31 units of XS2571924070 (Romania)
-- 30 units of PL0000000001 (Poland)
-- etc.
-
-Total investment: €15,000
-
-Thanks!
-```
-
-### Step 7: Quarterly Check-In
-Set reminder for 3 months later:
-1. Open portfolio CSV
-2. Click **📤 Import CSV**
-3. System updates prices
-4. See which bonds moved:
-   ```
-   ✅ ROMANIA: €96.00 → €98.50 (+€2.50 gain!)
-   ❌ GERMANY: €102.00 → €100.50 (-€1.50)
-   ```
-5. Rebalance if needed
-
-**Done!** You've built a professional bond portfolio in 20 minutes.
+Set a quarterly reminder to reimport the CSV, compare updated prices, and rebalance if needed.
 
 ---
 
-## 🎯 Key Features Summary
-
-✅ **1,000+ bonds** across 30+ countries  
-✅ **6 instant presets** for quick starts  
-✅ **Advanced filtering** for custom strategies  
-✅ **SAY analysis** focused on total returns  
-✅ **FX-adjusted** returns for realistic expectations  
-✅ **Portfolio builder** with real-time stats  
-✅ **CSV export/import** for tracking  
-✅ **Mobile responsive** (phone, tablet, desktop)  
-✅ **Currency breakdown** for FX risk analysis  
-✅ **Dual analysis modes** (capital gain / income)  
-✅ **Price editing** in portfolio for "what if" scenarios  
-✅ **Zero cost** — completely free to use  
-✅ **No login needed** — just open and use  
-✅ **Data stays local** — nothing sent to servers
-
----
-
-## 📞 Getting Help
-
-### If Portfolio Doesn't Save
-→ Check browser localStorage is enabled (Settings → Privacy)
-
-### If Search Doesn't Find Bonds
-→ Verify ISIN is spelled correctly (copy/paste from table)
-
-### If Filters Don't Work
-→ Click column header and verify filter is entered
-
-### If Numbers Look Wrong
-→ Check if currency is EUR or needs FX adjustment
-
-### If You Need More Help
-→ Ask your administrator or financial advisor
-
----
-
-## 🚀 Next Steps
-
-1. **Right now**: Open the platform and click a preset
-2. **In 5 minutes**: Add 5 bonds to your portfolio
-3. **In 15 minutes**: Export your portfolio and review
-4. **Next week**: Send to your broker or advisor
-5. **Every 3 months**: Reimport to track performance
-
----
-
-## 💡 Remember
-
-- **SAY is your friend** — It shows total return, not just coupons
-- **Diversify** — Mix ratings, maturities, and currencies
-- **Use presets first** — They save you from analysis paralysis
-- **Export everything** — Keep records of your research
-- **Review quarterly** — Markets change, so do opportunities
-
----
-
-**Ready to build your bond portfolio?**
-
-**Open the platform. Click a preset. Find your next investment. 🎯**
-
----
-
-*Last Updated: February 2026*  
-*Version: 5.0 — With Portfolio Analyzer*  
-*For Investors, By Investors* 📊
+*Last updated: February 2026*
+*Version: 6.2 — Sovereign Bond Analytics Platform*
+*For Investors, By Investors 📊*
