@@ -115,6 +115,8 @@ class PortfolioAnalyzer {
             this.modal.style.display = 'flex';
             this.updatePortfolioTable();
             this.updateStatistics();
+
+            document.getElementById('searchResults').style.display = "none";
         }
     }
 
@@ -126,25 +128,146 @@ class PortfolioAnalyzer {
     }
 
     searchBond() {
-        const isin = document.getElementById('isinSearch').value.trim().toUpperCase();
-        const resultsDiv = document.getElementById('searchResults');
 
-        if (isin.length < 3) {
-            resultsDiv.innerHTML = '';
-            document.getElementById('addBondForm').style.display = 'none';
+        const input = document.getElementById('isinSearch');
+        const query = input.value.toLowerCase().trim();
+
+        const resultsContainer = document.getElementById('searchResults');
+
+        if (!query) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = "none";
             return;
         }
 
-        const bond = this.allBonds.find(b => b.isin.toUpperCase() === isin);
+        // --- normalize helper ---
+        const normalize = s =>
+            String(s)
+                .toLowerCase()
+                .replace(',', '.')
+                .replace('%', '')
+                .trim();
 
-        if (bond) {
-            resultsDiv.innerHTML = `✅ Bond found: <strong>${bond.issuer}</strong>`;
-            this.showAddBondForm(bond);
-        } else {
-            resultsDiv.innerHTML = `❌ No bond found with ISIN: ${isin}`;
-            document.getElementById('addBondForm').style.display = 'none';
-        }
+        // --- split words ---
+        // --- split tokens ---
+        const tokens = query
+            .split(/\s+/)
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
+
+        // --- classify tokens ---
+        const percentTokens = [];
+        const textTokens = [];
+
+        tokens.forEach(t => {
+            const normalized = t.replace(',', '.');
+            // nombre avec ou sans %
+            if (/^\d+(\.\d*)?%?$/.test(normalized)) {
+                percentTokens.push(parseFloat(normalized));
+            } else {
+                textTokens.push(normalize(t));
+            }
+        });
+
+
+        const matches = this.allBonds.filter(bond => {
+            const coupon = Number(bond.coupon);
+
+            // --- coupon match (optional) ---
+            let couponMatch = true;
+            if (percentTokens.length > 0) {
+                couponMatch = percentTokens.every(p => {
+                    if (Number.isInteger(p)) {
+                        return Math.floor(coupon) === p;
+                    }
+
+                    const decimals = (String(p).split('.')[1] || '').length;
+                    const factor = 10 ** decimals;
+
+                    return Math.floor(coupon * factor) === Math.floor(p * factor);
+                });
+            }
+
+            // --- text match (optional) ---
+            let textMatch = true;
+            if (textTokens.length > 0) {
+                const searchable = normalize([
+                    bond.isin,
+                    bond.issuer
+                ].join(' '));
+
+                textMatch = textTokens.every(t => searchable.includes(t));
+            }
+
+            return couponMatch && textMatch;
+        });
+
+        this.showSearchResults(matches);
     }
+
+    showSearchResults = function (matches) {
+
+        const container = document.getElementById("searchResults");
+        container.innerHTML = "";
+
+        if (!matches || matches.length === 0) {
+            container.innerHTML = `
+                <div class="search-no-results">
+                    No bond found
+                </div>
+            `;
+            container.style.display = "block";
+            return;
+        }
+
+        // limit results (important UX)
+        const MAX_RESULTS = 8;
+        const resultsToShow = matches.slice(0, MAX_RESULTS);
+
+        resultsToShow.forEach(bond => {
+
+            const row = document.createElement("div");
+            row.className = "search-result";
+
+            row.innerHTML = `
+                <div class="sr-main">
+                    <strong>${bond.issuer}</strong>
+                    ${bond.coupon}%
+                    ${this.formatDate(bond.maturity)}
+                </div>
+                <div class="sr-meta">
+                    ${bond.isin} - ${bond.price}${bond.currency}
+                </div>
+            `;
+
+            row.onclick = () => {
+                this.showAddBondForm(bond);
+                container.innerHTML = "";
+                container.style.display = "none";
+            };
+
+            container.appendChild(row);
+        });
+
+        // Show message in case the results are too many
+        if (matches.length > MAX_RESULTS) {
+            const remaining = matches.length - MAX_RESULTS;
+
+            const moreMsg = document.createElement("div");
+            moreMsg.className = "search-results-more";
+            moreMsg.textContent = `${remaining} more result${remaining > 1 ? "s are" : " is"} not shown`;
+
+            container.appendChild(moreMsg);
+        }
+
+        container.style.display = "block";
+    };
+
+    formatDate = function (dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString();
+    };
+
 
     handleSearch() {
         this.searchBond();

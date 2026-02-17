@@ -11,12 +11,11 @@
             <div class="search-section">
                 <h3>1️⃣ Search & Add Bond</h3>
                 <div class="search-bar">
-                    <input type="text" id="isinSearch" placeholder="Enter ISIN (e.g., US0378331005)"
+                    <input type="text"
+                           id="isinSearch"
+                           placeholder="Search ISIN, issuer or coupon (e.g. XS 3%, Romania 2.5)"
                            onkeyup="window.portfolioAnalyzer.searchBond()"
                            class="search-input">
-                    <button onclick="window.portfolioAnalyzer.handleSearch()" class="btn btn-search">
-                        🔍 Search
-                    </button>
                 </div>
                 <div id="searchResults" class="search-results"></div>
             </div>

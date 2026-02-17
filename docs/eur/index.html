@@ -331,7 +331,7 @@ tr:hover {
 .search-bar {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 .search-input {
@@ -506,7 +506,51 @@ tr:hover {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
-}/* ========================================
+}
+
+
+.search-results {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    max-width: 300px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 999;
+}
+
+.search-result {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.search-result:hover {
+    background: #f5f7fb;
+}
+
+.sr-main {
+    font-size: 14px;
+}
+
+.sr-meta {
+    font-size: 12px;
+    color: #777;
+}
+
+.search-no-results {
+    padding: 10px;
+    color: #999;
+    font-style: italic;
+}
+
+.search-results-more {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #777;
+    font-style: italic;
+}
+/* ========================================
    GLOBAL DEFAULT (Desktop First)
 ======================================== */
 
@@ -747,7 +791,7 @@ tr:hover {
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-17 09:32
+        — 📅 2026-02-17 18:08
     </span>
 </h2>
 
@@ -1069,7 +1113,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            84,95
+            85,16
         </td>
         <td>4,38</td>
         <td style="white-space: nowrap;">2039-11-15</td>
@@ -1144,7 +1188,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            65,20
+            65,36
         </td>
         <td>3,00</td>
         <td style="white-space: nowrap;">2047-05-15</td>
@@ -1169,7 +1213,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            71,12
+            71,29
         </td>
         <td>3,12</td>
         <td style="white-space: nowrap;">2042-02-15</td>
@@ -1444,7 +1488,7 @@ tr:hover {
             <strong>AA</strong>
         </td>
         <td>
-            109,16
+            108,62
         </td>
         <td>4,25</td>
         <td style="white-space: nowrap;">2039-09-07</td>
@@ -1469,7 +1513,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            50,33
+            50,20
         </td>
         <td>1,75</td>
         <td style="white-space: nowrap;">2032-11-21</td>
@@ -1769,7 +1813,7 @@ tr:hover {
             <strong>BBB</strong>
         </td>
         <td>
-            99,84
+            100,08
         </td>
         <td>8,30</td>
         <td style="white-space: nowrap;">2031-08-15</td>
@@ -1794,7 +1838,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            58,04
+            57,89
         </td>
         <td>3,25</td>
         <td style="white-space: nowrap;">2029-04-21</td>
@@ -1894,7 +1938,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            95,31
+            95,54
         </td>
         <td>7,50</td>
         <td style="white-space: nowrap;">2037-02-10</td>
@@ -1944,7 +1988,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            91,50
+            91,72
         </td>
         <td>5,00</td>
         <td style="white-space: nowrap;">2037-05-15</td>
@@ -1969,7 +2013,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            88,71
+            88,92
         </td>
         <td>5,50</td>
         <td style="white-space: nowrap;">2028-08-15</td>
@@ -2044,7 +2088,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            89,03
+            89,25
         </td>
         <td>5,25</td>
         <td style="white-space: nowrap;">2029-02-15</td>
@@ -2119,7 +2163,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            74,31
+            74,49
         </td>
         <td>3,62</td>
         <td style="white-space: nowrap;">2044-02-15</td>
@@ -2319,7 +2363,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            72,04
+            72,21
         </td>
         <td>3,25</td>
         <td style="white-space: nowrap;">2042-05-15</td>
@@ -2369,7 +2413,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            71,51
+            71,68
         </td>
         <td>3,38</td>
         <td style="white-space: nowrap;">2044-05-15</td>
@@ -2394,7 +2438,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            54,59
+            54,73
         </td>
         <td>2,25</td>
         <td style="white-space: nowrap;">2049-08-15</td>
@@ -2594,7 +2638,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            63,60
+            63,76
         </td>
         <td>2,25</td>
         <td style="white-space: nowrap;">2041-05-15</td>
@@ -3019,7 +3063,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            83,58
+            83,78
         </td>
         <td>4,62</td>
         <td style="white-space: nowrap;">2055-02-15</td>
@@ -3194,7 +3238,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            82,50
+            82,70
         </td>
         <td>2,75</td>
         <td style="white-space: nowrap;">2029-05-31</td>
@@ -3569,7 +3613,7 @@ tr:hover {
             <strong>BB-</strong>
         </td>
         <td>
-            90,16
+            90,38
         </td>
         <td>7,25</td>
         <td style="white-space: nowrap;">2038-03-05</td>
@@ -3644,7 +3688,7 @@ tr:hover {
             <strong>BB</strong>
         </td>
         <td>
-            109,51
+            109,78
         </td>
         <td>12,25</td>
         <td style="white-space: nowrap;">2030-03-06</td>
@@ -3669,7 +3713,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            64,29
+            64,44
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2046-11-15</td>
@@ -3769,7 +3813,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            54,79
+            54,92
         </td>
         <td>2,38</td>
         <td style="white-space: nowrap;">2051-05-15</td>
@@ -3944,7 +3988,7 @@ tr:hover {
             <strong>BBB+</strong>
         </td>
         <td>
-            90,11
+            90,33
         </td>
         <td>5,38</td>
         <td style="white-space: nowrap;">2033-06-15</td>
@@ -3969,7 +4013,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            85,74
+            85,95
         </td>
         <td>4,75</td>
         <td style="white-space: nowrap;">2045-02-15</td>
@@ -4194,7 +4238,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            89,57
+            89,79
         </td>
         <td>4,75</td>
         <td style="white-space: nowrap;">2037-02-15</td>
@@ -4219,7 +4263,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            80,34
+            80,53
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2032-05-15</td>
@@ -4419,7 +4463,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            85,19
+            85,40
         </td>
         <td>4,75</td>
         <td style="white-space: nowrap;">2053-11-15</td>
@@ -4444,7 +4488,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            59,78
+            59,61
         </td>
         <td>4,50</td>
         <td style="white-space: nowrap;">2033-04-21</td>
@@ -4469,7 +4513,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            60,79
+            60,94
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2052-05-15</td>
@@ -4544,7 +4588,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            85,34
+            85,55
         </td>
         <td>5,75</td>
         <td style="white-space: nowrap;">2035-03-24</td>
@@ -4744,7 +4788,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            84,27
+            84,47
         </td>
         <td>4,25</td>
         <td style="white-space: nowrap;">2039-05-15</td>
@@ -4869,7 +4913,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            78,30
+            78,49
         </td>
         <td>2,62</td>
         <td style="white-space: nowrap;">2032-03-27</td>
@@ -5444,7 +5488,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            87,90
+            88,12
         </td>
         <td>4,50</td>
         <td style="white-space: nowrap;">2031-12-31</td>
@@ -5594,7 +5638,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            82,61
+            82,81
         </td>
         <td>4,38</td>
         <td style="white-space: nowrap;">2043-08-15</td>
@@ -5669,7 +5713,7 @@ tr:hover {
             <strong>BB-</strong>
         </td>
         <td>
-            94,09
+            94,32
         </td>
         <td>8,00</td>
         <td style="white-space: nowrap;">2034-02-14</td>
@@ -5894,7 +5938,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            74,63
+            74,81
         </td>
         <td>3,62</td>
         <td style="white-space: nowrap;">2043-08-15</td>
@@ -5919,7 +5963,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            77,99
+            78,18
         </td>
         <td>1,50</td>
         <td style="white-space: nowrap;">2030-02-15</td>
@@ -5944,7 +5988,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            84,28
+            84,48
         </td>
         <td>6,12</td>
         <td style="white-space: nowrap;">2044-01-22</td>
@@ -5994,7 +6038,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            52,91
+            53,04
         </td>
         <td>2,25</td>
         <td style="white-space: nowrap;">2052-02-15</td>
@@ -6094,7 +6138,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            63,69
+            63,84
         </td>
         <td>2,38</td>
         <td style="white-space: nowrap;">2042-02-15</td>
@@ -6294,7 +6338,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            65,10
+            65,26
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2045-08-15</td>
@@ -6444,7 +6488,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            96,58
+            96,82
         </td>
         <td>7,62</td>
         <td style="white-space: nowrap;">2053-01-17</td>
@@ -6844,7 +6888,7 @@ tr:hover {
             <strong>A-</strong>
         </td>
         <td>
-            90,61
+            90,83
         </td>
         <td>5,75</td>
         <td style="white-space: nowrap;">2032-11-16</td>
@@ -6869,7 +6913,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            77,65
+            77,84
         </td>
         <td>3,88</td>
         <td style="white-space: nowrap;">2043-02-15</td>
@@ -6919,7 +6963,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            91,17
+            91,39
         </td>
         <td>5,38</td>
         <td style="white-space: nowrap;">2031-02-15</td>
@@ -6969,7 +7013,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            45,87
+            45,98
         </td>
         <td>1,62</td>
         <td style="white-space: nowrap;">2050-11-15</td>
@@ -7269,7 +7313,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            51,10
+            50,97
         </td>
         <td>2,75</td>
         <td style="white-space: nowrap;">2035-06-21</td>
@@ -7319,7 +7363,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            54,65
+            54,50
         </td>
         <td>3,75</td>
         <td style="white-space: nowrap;">2037-04-21</td>
@@ -7444,7 +7488,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            68,65
+            68,81
         </td>
         <td>3,38</td>
         <td style="white-space: nowrap;">2048-11-15</td>
@@ -7519,7 +7563,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            67,23
+            67,39
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2043-05-15</td>
@@ -7644,7 +7688,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            60,44
+            60,59
         </td>
         <td>2,00</td>
         <td style="white-space: nowrap;">2041-11-15</td>
@@ -7769,7 +7813,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            76,89
+            77,08
         </td>
         <td>4,12</td>
         <td style="white-space: nowrap;">2053-08-15</td>
@@ -7869,7 +7913,7 @@ tr:hover {
             <strong>BBB+</strong>
         </td>
         <td>
-            84,27
+            84,47
         </td>
         <td>5,00</td>
         <td style="white-space: nowrap;">2037-03-05</td>
@@ -7919,7 +7963,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            60,11
+            60,26
         </td>
         <td>2,50</td>
         <td style="white-space: nowrap;">2046-05-15</td>
@@ -7994,7 +8038,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            77,52
+            77,71
         </td>
         <td>3,00</td>
         <td style="white-space: nowrap;">2031-02-14</td>
@@ -8044,7 +8088,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            87,55
+            87,76
         </td>
         <td>4,75</td>
         <td style="white-space: nowrap;">2041-02-15</td>
@@ -8219,7 +8263,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            49,46
+            49,33
         </td>
         <td>1,25</td>
         <td style="white-space: nowrap;">2032-05-21</td>
@@ -8294,7 +8338,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            66,87
+            67,04
         </td>
         <td>3,00</td>
         <td style="white-space: nowrap;">2045-05-15</td>
@@ -8319,7 +8363,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            93,45
+            93,68
         </td>
         <td>6,25</td>
         <td style="white-space: nowrap;">2030-05-15</td>
@@ -8694,7 +8738,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            74,35
+            74,53
         </td>
         <td>0,88</td>
         <td style="white-space: nowrap;">2030-11-15</td>
@@ -9044,7 +9088,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            79,27
+            79,47
         </td>
         <td>1,75</td>
         <td style="white-space: nowrap;">2029-11-15</td>
@@ -9144,7 +9188,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            48,27
+            48,38
         </td>
         <td>1,88</td>
         <td style="white-space: nowrap;">2051-11-15</td>
@@ -9169,7 +9213,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            43,03
+            43,13
         </td>
         <td>1,38</td>
         <td style="white-space: nowrap;">2050-08-15</td>
@@ -9244,7 +9288,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            79,33
+            79,52
         </td>
         <td>1,62</td>
         <td style="white-space: nowrap;">2029-08-15</td>
@@ -9294,7 +9338,7 @@ tr:hover {
             <strong>AA</strong>
         </td>
         <td>
-            90,63
+            90,19
         </td>
         <td>3,25</td>
         <td style="white-space: nowrap;">2044-01-22</td>
@@ -9494,7 +9538,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            84,93
+            85,13
         </td>
         <td>4,62</td>
         <td style="white-space: nowrap;">2044-05-15</td>
@@ -9794,7 +9838,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            78,82
+            79,01
         </td>
         <td>4,00</td>
         <td style="white-space: nowrap;">2042-11-15</td>
@@ -9869,7 +9913,7 @@ tr:hover {
             <strong>AA</strong>
         </td>
         <td>
-            93,07
+            92,61
         </td>
         <td>3,50</td>
         <td style="white-space: nowrap;">2045-01-22</td>
@@ -9919,7 +9963,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            82,87
+            83,07
         </td>
         <td>2,88</td>
         <td style="white-space: nowrap;">2029-04-30</td>
@@ -10069,7 +10113,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            74,31
+            74,49
         </td>
         <td>1,38</td>
         <td style="white-space: nowrap;">2031-11-15</td>
@@ -10094,7 +10138,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            79,64
+            79,83
         </td>
         <td>1,12</td>
         <td style="white-space: nowrap;">2028-08-31</td>
@@ -10119,7 +10163,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            75,98
+            76,16
         </td>
         <td>1,88</td>
         <td style="white-space: nowrap;">2032-02-15</td>
@@ -10494,7 +10538,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            83,03
+            83,23
         </td>
         <td>4,25</td>
         <td style="white-space: nowrap;">2040-11-15</td>
@@ -10569,7 +10613,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            83,88
+            84,09
         </td>
         <td>5,62</td>
         <td style="white-space: nowrap;">2050-11-18</td>
@@ -10869,7 +10913,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            58,45
+            58,59
         </td>
         <td>1,75</td>
         <td style="white-space: nowrap;">2041-08-15</td>
@@ -10894,7 +10938,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            87,67
+            87,88
         </td>
         <td>5,75</td>
         <td style="white-space: nowrap;">2030-09-16</td>
@@ -10994,7 +11038,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            60,84
+            60,99
         </td>
         <td>4,00</td>
         <td style="white-space: nowrap;">2051-02-14</td>
@@ -11069,7 +11113,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            93,13
+            93,36
         </td>
         <td>7,12</td>
         <td style="white-space: nowrap;">2033-01-17</td>
@@ -11294,7 +11338,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            91,79
+            92,02
         </td>
         <td>6,12</td>
         <td style="white-space: nowrap;">2029-08-15</td>
@@ -11394,7 +11438,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            87,04
+            87,26
         </td>
         <td>6,00</td>
         <td style="white-space: nowrap;">2034-05-25</td>
@@ -11469,7 +11513,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            83,37
+            83,58
         </td>
         <td>4,62</td>
         <td style="white-space: nowrap;">2054-05-15</td>
@@ -11719,7 +11763,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            88,19
+            88,41
         </td>
         <td>5,25</td>
         <td style="white-space: nowrap;">2028-11-15</td>
@@ -11844,7 +11888,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            41,83
+            41,93
         </td>
         <td>1,25</td>
         <td style="white-space: nowrap;">2050-05-15</td>
@@ -11894,7 +11938,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            61,37
+            61,53
         </td>
         <td>2,50</td>
         <td style="white-space: nowrap;">2045-02-15</td>
@@ -12244,7 +12288,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            87,60
+            87,81
         </td>
         <td>5,88</td>
         <td style="white-space: nowrap;">2029-01-30</td>
@@ -12269,7 +12313,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            84,35
+            84,56
         </td>
         <td>4,38</td>
         <td style="white-space: nowrap;">2040-05-15</td>
@@ -12344,7 +12388,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            51,17
+            51,29
         </td>
         <td>2,00</td>
         <td style="white-space: nowrap;">2050-02-15</td>
@@ -12369,7 +12413,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            79,79
+            79,98
         </td>
         <td>3,88</td>
         <td style="white-space: nowrap;">2040-08-15</td>
@@ -12619,7 +12663,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            69,96
+            70,13
         </td>
         <td>3,12</td>
         <td style="white-space: nowrap;">2043-02-15</td>
@@ -13069,7 +13113,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            100,21
+            100,46
         </td>
         <td>7,62</td>
         <td style="white-space: nowrap;">2041-03-29</td>
@@ -13169,7 +13213,7 @@ tr:hover {
             <strong>BB</strong>
         </td>
         <td>
-            93,18
+            93,41
         </td>
         <td>7,12</td>
         <td style="white-space: nowrap;">2037-01-20</td>
@@ -13444,7 +13488,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            88,87
+            89,09
         </td>
         <td>6,38</td>
         <td style="white-space: nowrap;">2034-01-30</td>
@@ -13494,7 +13538,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            86,95
+            87,16
         </td>
         <td>4,62</td>
         <td style="white-space: nowrap;">2040-02-15</td>
@@ -13644,7 +13688,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            67,09
+            67,25
         </td>
         <td>3,00</td>
         <td style="white-space: nowrap;">2044-11-15</td>
@@ -14194,7 +14238,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            88,20
+            88,42
         </td>
         <td>4,50</td>
         <td style="white-space: nowrap;">2036-02-15</td>
@@ -14244,7 +14288,7 @@ tr:hover {
             <strong>BB-</strong>
         </td>
         <td>
-            104,84
+            105,10
         </td>
         <td>11,88</td>
         <td style="white-space: nowrap;">2030-01-15</td>
@@ -14519,7 +14563,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            72,87
+            73,05
         </td>
         <td>5,12</td>
         <td style="white-space: nowrap;">2048-06-15</td>
@@ -14544,7 +14588,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            50,00
+            50,13
         </td>
         <td>2,00</td>
         <td style="white-space: nowrap;">2051-08-15</td>
@@ -14669,7 +14713,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            70,35
+            70,52
         </td>
         <td>3,62</td>
         <td style="white-space: nowrap;">2053-02-15</td>
@@ -14719,7 +14763,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            55,92
+            56,05
         </td>
         <td>2,38</td>
         <td style="white-space: nowrap;">2049-11-15</td>
@@ -14869,7 +14913,7 @@ tr:hover {
             <strong>AA+</strong>
         </td>
         <td>
-            68,64
+            68,81
         </td>
         <td>3,12</td>
         <td style="white-space: nowrap;">2044-08-15</td>
@@ -14894,7 +14938,7 @@ tr:hover {
             <strong>BBB-</strong>
         </td>
         <td>
-            89,86
+            90,08
         </td>
         <td>6,62</td>
         <td style="white-space: nowrap;">2036-05-16</td>
@@ -14994,7 +15038,7 @@ tr:hover {
             <strong>AAA</strong>
         </td>
         <td>
-            55,96
+            55,81
         </td>
         <td>4,75</td>
         <td style="white-space: nowrap;">2054-06-21</td>
@@ -15076,12 +15120,11 @@ tr:hover {
             <div class="search-section">
                 <h3>1️⃣ Search & Add Bond</h3>
                 <div class="search-bar">
-                    <input type="text" id="isinSearch" placeholder="Enter ISIN (e.g., US0378331005)"
+                    <input type="text"
+                           id="isinSearch"
+                           placeholder="Search ISIN, issuer or coupon (e.g. XS 3%, Romania 2.5)"
                            onkeyup="window.portfolioAnalyzer.searchBond()"
                            class="search-input">
-                    <button onclick="window.portfolioAnalyzer.handleSearch()" class="btn btn-search">
-                        🔍 Search
-                    </button>
                 </div>
                 <div id="searchResults" class="search-results"></div>
             </div>
@@ -16078,6 +16121,8 @@ class PortfolioAnalyzer {
             this.modal.style.display = 'flex';
             this.updatePortfolioTable();
             this.updateStatistics();
+
+            document.getElementById('searchResults').style.display = "none";
         }
     }
 
@@ -16089,25 +16134,146 @@ class PortfolioAnalyzer {
     }
 
     searchBond() {
-        const isin = document.getElementById('isinSearch').value.trim().toUpperCase();
-        const resultsDiv = document.getElementById('searchResults');
 
-        if (isin.length < 3) {
-            resultsDiv.innerHTML = '';
-            document.getElementById('addBondForm').style.display = 'none';
+        const input = document.getElementById('isinSearch');
+        const query = input.value.toLowerCase().trim();
+
+        const resultsContainer = document.getElementById('searchResults');
+
+        if (!query) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = "none";
             return;
         }
 
-        const bond = this.allBonds.find(b => b.isin.toUpperCase() === isin);
+        // --- normalize helper ---
+        const normalize = s =>
+            String(s)
+                .toLowerCase()
+                .replace(',', '.')
+                .replace('%', '')
+                .trim();
 
-        if (bond) {
-            resultsDiv.innerHTML = `✅ Bond found: <strong>${bond.issuer}</strong>`;
-            this.showAddBondForm(bond);
-        } else {
-            resultsDiv.innerHTML = `❌ No bond found with ISIN: ${isin}`;
-            document.getElementById('addBondForm').style.display = 'none';
-        }
+        // --- split words ---
+        // --- split tokens ---
+        const tokens = query
+            .split(/\s+/)
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
+
+        // --- classify tokens ---
+        const percentTokens = [];
+        const textTokens = [];
+
+        tokens.forEach(t => {
+            const normalized = t.replace(',', '.');
+            // nombre avec ou sans %
+            if (/^\d+(\.\d*)?%?$/.test(normalized)) {
+                percentTokens.push(parseFloat(normalized));
+            } else {
+                textTokens.push(normalize(t));
+            }
+        });
+
+
+        const matches = this.allBonds.filter(bond => {
+            const coupon = Number(bond.coupon);
+
+            // --- coupon match (optional) ---
+            let couponMatch = true;
+            if (percentTokens.length > 0) {
+                couponMatch = percentTokens.every(p => {
+                    if (Number.isInteger(p)) {
+                        return Math.floor(coupon) === p;
+                    }
+
+                    const decimals = (String(p).split('.')[1] || '').length;
+                    const factor = 10 ** decimals;
+
+                    return Math.floor(coupon * factor) === Math.floor(p * factor);
+                });
+            }
+
+            // --- text match (optional) ---
+            let textMatch = true;
+            if (textTokens.length > 0) {
+                const searchable = normalize([
+                    bond.isin,
+                    bond.issuer
+                ].join(' '));
+
+                textMatch = textTokens.every(t => searchable.includes(t));
+            }
+
+            return couponMatch && textMatch;
+        });
+
+        this.showSearchResults(matches);
     }
+
+    showSearchResults = function (matches) {
+
+        const container = document.getElementById("searchResults");
+        container.innerHTML = "";
+
+        if (!matches || matches.length === 0) {
+            container.innerHTML = `
+                <div class="search-no-results">
+                    No bond found
+                </div>
+            `;
+            container.style.display = "block";
+            return;
+        }
+
+        // limit results (important UX)
+        const MAX_RESULTS = 8;
+        const resultsToShow = matches.slice(0, MAX_RESULTS);
+
+        resultsToShow.forEach(bond => {
+
+            const row = document.createElement("div");
+            row.className = "search-result";
+
+            row.innerHTML = `
+                <div class="sr-main">
+                    <strong>${bond.issuer}</strong>
+                    ${bond.coupon}%
+                    ${this.formatDate(bond.maturity)}
+                </div>
+                <div class="sr-meta">
+                    ${bond.isin} - ${bond.price}${bond.currency}
+                </div>
+            `;
+
+            row.onclick = () => {
+                this.showAddBondForm(bond);
+                container.innerHTML = "";
+                container.style.display = "none";
+            };
+
+            container.appendChild(row);
+        });
+
+        // Show message in case the results are too many
+        if (matches.length > MAX_RESULTS) {
+            const remaining = matches.length - MAX_RESULTS;
+
+            const moreMsg = document.createElement("div");
+            moreMsg.className = "search-results-more";
+            moreMsg.textContent = `${remaining} more result${remaining > 1 ? "s are" : " is"} not shown`;
+
+            container.appendChild(moreMsg);
+        }
+
+        container.style.display = "block";
+    };
+
+    formatDate = function (dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString();
+    };
+
 
     handleSearch() {
         this.searchBond();
