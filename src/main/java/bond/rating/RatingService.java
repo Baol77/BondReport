@@ -57,18 +57,20 @@ public class RatingService {
 
         // AA
         FALLBACK_MAP.put("FRANCIA", "AA");        // France
-        FALLBACK_MAP.put("REGNO UNITO", "AA");    // United Kingdom
         FALLBACK_MAP.put("BELGIO", "AA");         // Belgium
 
         // A+
         FALLBACK_MAP.put("GIAPPONE", "A+");       // Japan
         FALLBACK_MAP.put("IRLANDA", "A+");        // Ireland
 
+        // AA-
+        FALLBACK_MAP.put("REPUBBLICA CECA", "AA-"); // Czech Republic
+        FALLBACK_MAP.put("REGNO UNITO", "AA-");     // United Kingdom
+
         // A
         FALLBACK_MAP.put("SPAGNA", "A");          // Spain
-        FALLBACK_MAP.put("REPUBBLICA CECA", "AA"); // Czech Republic
         FALLBACK_MAP.put("POLONIA", "A");         // Poland
-        FALLBACK_MAP.put("SLOVENIA", "A+");       // Slovenia
+        FALLBACK_MAP.put("SLOVENIA", "A");        // Slovenia
         FALLBACK_MAP.put("SLOVACCHIA", "A");      // Slovakia
         FALLBACK_MAP.put("CILE", "A");            // Chile
         FALLBACK_MAP.put("LITUANIA", "A");        // Lithuania
@@ -83,20 +85,21 @@ public class RatingService {
 
         // BBB (Investment Grade - Minimum for profiles)
         FALLBACK_MAP.put("ITALIA", "BBB");        // Italy ⭐
-        FALLBACK_MAP.put("UNGHERIA", "BBB");      // Hungary
         FALLBACK_MAP.put("ROMANIA", "BBB");       // Romania
         FALLBACK_MAP.put("BULGARIA", "BBB");      // Bulgaria
-        FALLBACK_MAP.put("MESSICO", "BBB");       // Mexico
-        FALLBACK_MAP.put("INDIA", "BBB-");        // India
+        FALLBACK_MAP.put("INDIA", "BBB");         // India
 
         // BBB-
         FALLBACK_MAP.put("CROAZIA", "BBB-");      // Croatia
+        FALLBACK_MAP.put("UNGHERIA", "BBB-");     // Hungary
+        FALLBACK_MAP.put("MESSICO", "BBB-");      // Mexico
 
         // BB+ (Speculative - Likely filtered)
         FALLBACK_MAP.put("GRECIA", "BB+");        // Greece
 
         // BB
         FALLBACK_MAP.put("SUDAFRICA", "BB");      // South Africa
+        FALLBACK_MAP.put("BRASILE", "BB");        // Brazil
 
         // B+
         FALLBACK_MAP.put("TURCHIA", "B+");        // Turkey
@@ -105,7 +108,6 @@ public class RatingService {
         FALLBACK_MAP.put("RUSSIA", "B");          // Russia (sanctions)
 
         // BB-
-        FALLBACK_MAP.put("BRASILE", "BB-");       // Brazil
 
         // CCC
         FALLBACK_MAP.put("ARGENTINA", "CCC");     // Argentina
