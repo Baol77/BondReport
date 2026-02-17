@@ -1,27 +1,34 @@
 /* --- 1. Modal Container & Layout --- */
 .portfolio-modal {
-  display: none; /* Toggled via JS */
+  display: none; /* toggled via JS */
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  inset: 0;
   z-index: 10000;
-  overflow-y: auto;
+
+  /* centrer la modale */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   padding: 20px;
+  box-sizing: border-box;
+
+  /* IMPORTANT → laisse passer les clics */
   pointer-events: none;
 }
 
 .portfolio-modal-content {
-  pointer-events: auto;
+pointer-events: auto;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   max-width: 1000px;
   width: 90%;
   margin: 20px auto;
-  cursor: move;
+
+  display: flex;
+  flex-direction: column;
+
+  max-height: 90vh;   /* IMPORTANT → limite hauteur modale */
 }
 
 .portfolio-modal-header {
@@ -50,9 +57,10 @@
 }
 
 .portfolio-modal-body {
+  flex: 1;
   padding: 20px;
-  max-height: 80vh;
   overflow-y: auto;
+  min-height: 0;      /* CRUCIAL en flexbox sinon pas de scroll */
 }
 
 /* --- 2. Search Section --- */
