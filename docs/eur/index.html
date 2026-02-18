@@ -345,6 +345,7 @@ pointer-events: auto;
   display: flex;
   gap: 10px;
   margin-bottom: 5px;
+  position: relative;   /* search box must be attached to search bar */
 }
 
 .search-input {
@@ -356,11 +357,22 @@ pointer-events: auto;
 }
 
 .search-results {
-  background: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  min-height: 20px;
+    position: absolute;
+
+    top: calc(100% + 4px);   /* directly under input */
+    left: 0;                  /* align left edge */
+    width: 100%;              /* same width as search bar */
+    max-width: 300px;         /* your desired constraint */
+
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+
+    max-height: 260px;
+    overflow-y: auto;
+
+    z-index: 9999;
 }
 
 /* --- 3. Add Bond Form --- */
@@ -519,17 +531,6 @@ pointer-events: auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
-}
-
-
-.search-results {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    max-width: 300px;
-    max-height: 260px;
-    overflow-y: auto;
-    z-index: 999;
 }
 
 .search-result {
@@ -813,7 +814,7 @@ pointer-events: auto;
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-18 21:18
+        — 📅 2026-02-18 21:38
     </span>
 </h2>
 
@@ -15547,8 +15548,8 @@ pointer-events: auto;
                            placeholder="Search ISIN, issuer or coupon (e.g. XS 3%, Romania 2.5)"
                            onkeyup="window.portfolioAnalyzer.searchBond()"
                            class="search-input">
+                    <div id="searchResults" class="search-results"></div>
                 </div>
-                <div id="searchResults" class="search-results"></div>
             </div>
 
             <div id="addBondForm" class="add-bond-form">
@@ -16627,12 +16628,12 @@ class PortfolioAnalyzer {
         const el = results[this.highlightedIndex];
         el.classList.add('active');
 
-        // ✅ keep visible when navigating
+        // keep visible when navigating
         el.scrollIntoView({
             block: 'nearest'
         });
 
-        // ⭐ NEW — reveal "more results" label when last result selected
+        // NEW — reveal "more results" label when last result selected
         if (this.highlightedIndex === results.length - 1 && moreLabel) {
             moreLabel.scrollIntoView({
                 block: 'nearest'

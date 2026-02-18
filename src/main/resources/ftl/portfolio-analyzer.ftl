@@ -16,8 +16,8 @@
                            placeholder="Search ISIN, issuer or coupon (e.g. XS 3%, Romania 2.5)"
                            onkeyup="window.portfolioAnalyzer.searchBond()"
                            class="search-input">
+                    <div id="searchResults" class="search-results"></div>
                 </div>
-                <div id="searchResults" class="search-results"></div>
             </div>
 
             <div id="addBondForm" class="add-bond-form">
