@@ -112,17 +112,16 @@ class PortfolioAnalyzer {
 
     openModal() {
         if (this.modal) {
-            this.modal.style.display = 'flex';
+            this.modal.classList.add('open');
             this.updatePortfolioTable();
             this.updateStatistics();
-
             document.getElementById('searchResults').style.display = "none";
         }
     }
 
     closeModal() {
         if (this.modal) {
-            this.modal.style.display = 'none';
+            this.modal.classList.remove('open');
             this.clearSearch();
         }
     }

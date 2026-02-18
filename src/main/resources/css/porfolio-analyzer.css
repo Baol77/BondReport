@@ -6,7 +6,6 @@
   z-index: 10000;
 
   /* centrer la modale */
-  display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
@@ -14,6 +13,11 @@
 
   /* IMPORTANT → laisse passer les clics */
   pointer-events: none;
+}
+
+/* visible only when open */
+.portfolio-modal.open {
+  display: flex;
 }
 
 .portfolio-modal-content {
