@@ -9,6 +9,8 @@ class PortfolioAnalyzer {
         this.allBonds = [];
         this.modal = null;
         this.currentBond = null;
+        this.highlightedIndex = -1;
+        this.currentMatches = [];
         this.init();
     }
 
@@ -30,7 +32,16 @@ class PortfolioAnalyzer {
         // Create modal interface
         this.createModal();
 
-        console.log(`📊 Portfolio Analyzer initialized with ${this.allBonds.length} bonds`);
+        const input = document.getElementById('isinSearch');
+        input.addEventListener('input', () => {
+            this.searchBond();
+        });
+
+       input.addEventListener('keydown', (e) => {
+           this.handleSearchKeydown(e);
+       });
+
+       console.log(`📊 Portfolio Analyzer initialized with ${this.allBonds.length} bonds`);
     }
 
     loadBondsFromTable() {
@@ -112,18 +123,91 @@ class PortfolioAnalyzer {
 
     openModal() {
         if (this.modal) {
-            this.modal.style.display = 'flex';
+            this.modal.classList.add('open');
             this.updatePortfolioTable();
             this.updateStatistics();
-
             document.getElementById('searchResults').style.display = "none";
         }
     }
 
     closeModal() {
         if (this.modal) {
-            this.modal.style.display = 'none';
+            this.modal.classList.remove('open');
             this.clearSearch();
+        }
+    }
+
+    handleSearchKeydown(e) {
+        const container = document.getElementById('searchResults');
+        if (container.style.display !== 'block') return;
+
+        if (!['ArrowDown','ArrowUp','Enter'].includes(e.key)) return;
+
+        const results = document.querySelectorAll('.search-result');
+        if (!results.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.highlightedIndex =
+                (this.highlightedIndex + 1) % results.length;
+            this.updateHighlightedResult();
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.highlightedIndex =
+                (this.highlightedIndex - 1 + results.length) % results.length;
+            this.updateHighlightedResult();
+        }
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+
+            if (this.highlightedIndex >= 0) {
+                const bond = this.currentMatches[this.highlightedIndex];
+
+                this.showAddBondForm(bond);
+
+                document.getElementById('isinSearch').value = '';
+                this.clearSearchResults();
+            }
+        }
+    }
+
+
+    clearSearchResults() {
+        const container = document.getElementById('searchResults');
+        container.innerHTML = '';
+        container.style.display = 'none';
+
+        this.highlightedIndex = -1;
+        this.currentMatches = [];
+    }
+
+    updateHighlightedResult() {
+        const results = document.querySelectorAll('.search-result');
+        const container = document.getElementById('searchResults');
+        const moreLabel = container.querySelector('.search-results-more');
+
+        // remove previous highlight
+        results.forEach(r => r.classList.remove('active'));
+
+        if (this.highlightedIndex < 0) return;
+        if (this.highlightedIndex >= results.length) return;
+
+        const el = results[this.highlightedIndex];
+        el.classList.add('active');
+
+        // keep visible when navigating
+        el.scrollIntoView({
+            block: 'nearest'
+        });
+
+        // NEW — reveal "more results" label when last result selected
+        if (this.highlightedIndex === results.length - 1 && moreLabel) {
+            moreLabel.scrollIntoView({
+                block: 'nearest'
+            });
         }
     }
 
@@ -206,6 +290,22 @@ class PortfolioAnalyzer {
     }
 
     showSearchResults = function (matches) {
+        const MAX_RESULTS = 8;
+        const newMatches = matches.slice(0, MAX_RESULTS);
+
+        const sameResults =
+            this.currentMatches.length === newMatches.length &&
+            this.currentMatches.every((b, i) => b.isin === newMatches[i].isin);
+
+        this.currentMatches = newMatches;
+
+        if (!sameResults) {
+            this.highlightedIndex = 0; // auto select first result (professional UX)
+        }
+
+        if (this.highlightedIndex >= newMatches.length) {
+            this.highlightedIndex = newMatches.length - 1;
+        }
 
         const container = document.getElementById("searchResults");
         container.innerHTML = "";
@@ -221,7 +321,6 @@ class PortfolioAnalyzer {
         }
 
         // limit results (important UX)
-        const MAX_RESULTS = 8;
         const resultsToShow = matches.slice(0, MAX_RESULTS);
 
         resultsToShow.forEach(bond => {
@@ -261,6 +360,9 @@ class PortfolioAnalyzer {
         }
 
         container.style.display = "block";
+
+        // CRITICAL — reapply highlight after DOM render
+        this.updateHighlightedResult();
     };
 
     formatDate = function (dateStr) {

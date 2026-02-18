@@ -6,7 +6,6 @@
   z-index: 10000;
 
   /* centrer la modale */
-  display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
@@ -14,6 +13,11 @@
 
   /* IMPORTANT → laisse passer les clics */
   pointer-events: none;
+}
+
+/* visible only when open */
+.portfolio-modal.open {
+  display: flex;
 }
 
 .portfolio-modal-content {
@@ -73,6 +77,7 @@ pointer-events: auto;
   display: flex;
   gap: 10px;
   margin-bottom: 5px;
+  position: relative;   /* search box must be attached to search bar */
 }
 
 .search-input {
@@ -84,11 +89,22 @@ pointer-events: auto;
 }
 
 .search-results {
-  background: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  min-height: 20px;
+    position: absolute;
+
+    top: calc(100% + 4px);   /* directly under input */
+    left: 0;                  /* align left edge */
+    width: 100%;              /* same width as search bar */
+    max-width: 300px;         /* your desired constraint */
+
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+
+    max-height: 260px;
+    overflow-y: auto;
+
+    z-index: 9999;
 }
 
 /* --- 3. Add Bond Form --- */
@@ -249,21 +265,14 @@ pointer-events: auto;
   gap: 10px;
 }
 
-
-.search-results {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    max-width: 300px;
-    max-height: 260px;
-    overflow-y: auto;
-    z-index: 999;
-}
-
 .search-result {
     padding: 8px 10px;
     cursor: pointer;
     border-bottom: 1px solid #f0f0f0;
+}
+
+.search-result.active {
+    background: #e3f2fd;
 }
 
 .search-result:hover {

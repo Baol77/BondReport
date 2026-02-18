@@ -8,13 +8,13 @@ public final class CountryNormalizer {
         if (country == null) return "";
 
         String upper = country.toUpperCase()
-            .replace("GREEN", "")
-            .replace("BOND", "")
-            .replace("BTPI", "ITALIA")
-            .replace("BTP", "ITALIA")
-            .replace("FUTURA", "")
+            // normalize all "Italia" instruments first
+            .replaceAll("\\b(BTP\\s+ITALIA|BTPI|BTP)\\b", "ITALIA")
+            // remove unwanted keywords
+            .replaceAll("\\b(GREEN|BOND|FUTURA|VALORE)\\b", "")
             .replace(" PIU'", "")
-            .replace("VALORE", "")
+            // normalize spaces
+            .replaceAll("\\s+", " ")
             .trim();
 
         return switch (upper) {
