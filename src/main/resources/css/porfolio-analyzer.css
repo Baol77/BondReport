@@ -270,6 +270,10 @@ pointer-events: auto;
     border-bottom: 1px solid #f0f0f0;
 }
 
+.search-result.active {
+    background: #e3f2fd;
+}
+
 .search-result:hover {
     background: #f5f7fb;
 }
