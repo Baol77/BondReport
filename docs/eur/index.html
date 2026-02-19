@@ -814,7 +814,7 @@ pointer-events: auto;
 <h2>
     Bond Yield Ranking (EUR)
     <span style="font-size:12px;color:#666;">
-        — 📅 2026-02-20 00:19
+        — 📅 2026-02-20 00:44
     </span>
 </h2>
 
@@ -826,38 +826,50 @@ pointer-events: auto;
     <button class="preset-button"
             id="cashParking"
             onclick="applyPreset('cashParking')"
-            title="Short (<2.5y) investment grade for liquidity">
+            title="Short (<2.5y) investment grade bonds for liquidity management">
         🅿️🛡️ Cash Parking
     </button>
     <button class="preset-button"
             id="ultraShortHigh"
             onclick="applyPreset('ultraShortHigh')"
-            title="Short-term (1-3y) bonds with very high yield (6%+)">
+            title="Short-term (1-3y) high yield bonds (6%+), accepts sub-IG risk">
         ⚡💰 Ultra Short High
     </button>
     <button class="preset-button"
             id="balancedCore"
             onclick="applyPreset('balancedCore')"
-            title="Mid-term (5-15y), Investment Grade,>3.5% yield with >3.5% SAY">
+            title="Mid-term (5-15y), Investment Grade, 3.5%+ yield AND 3.5%+ SAY">
         ⚖️🌲 Balanced Core
-    </button>
-    <button class="preset-button"
-            id="maxIncome"
-            onclick="applyPreset('maxIncome')"
-            title="High current yield (>6%) with price protection (<110)">
-        💵🔥 Max Income
     </button>
     <button class="preset-button"
             id="deepDiscount"
             onclick="applyPreset('deepDiscount')"
-            title="Bonds trading <90% par. Profit comes from pull-to-par (<20y).">
+            title="Below-par bonds (<90) with strong SAY (5%+). Profit from pull-to-par (<20y).">
         📉🚀 Deep Discount
+    </button>
+    <button class="preset-button"
+            id="maxIncome"
+            onclick="applyPreset('maxIncome')"
+            title="High current yield (6%+) with price protection (<110) and min BBB- rating">
+        💵🔥 Max Income
     </button>
     <button class="preset-button"
             id="fortressSafe"
             onclick="applyPreset('fortressSafe')"
-            title="Top-tier sovereigns (AA-/AAA) only">
+            title="Top-tier sovereigns (AA- minimum) with 3%+ SAY, 5-30y horizon">
         🏰🛡️ AAA/AA Fortress
+    </button>
+    <button class="preset-button"
+            id="longQuality"
+            onclick="applyPreset('longQuality')"
+            title="Long-term (20-40y) A- rated bonds with 4%+ yield. Benefits from rate cuts.">
+        🏛️📈 Long Quality
+    </button>
+    <button class="preset-button"
+            id="retirementIncome"
+            onclick="applyPreset('retirementIncome')"
+            title="Long-term stable income (20-35y) with 4%+ yield and BBB+ minimum rating">
+        🏖️💵 Retirement Income
     </button>
 <button class="preset-button" id="preset-reset"
         onclick="applyPreset('reset')">🧹 Reset
@@ -16054,7 +16066,7 @@ function setDefaultMaturityFilters() {
         const PRESETS = {
                   cashParking: {
             name: "Cash Parking",
-            description: "Short (<2.5y) investment grade for liquidity",
+            description: "Short (<2.5y) investment grade bonds for liquidity management",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
@@ -16065,7 +16077,7 @@ function setDefaultMaturityFilters() {
           },
           ultraShortHigh: {
             name: "Ultra Short High",
-            description: "Short-term (1-3y) bonds with very high yield (6%+)",
+            description: "Short-term (1-3y) high yield bonds (6%+), accepts sub-IG risk",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
@@ -16076,7 +16088,7 @@ function setDefaultMaturityFilters() {
           },
           balancedCore: {
             name: "Balanced Core",
-            description: "Mid-term (5-15y), Investment Grade,>3.5% yield with >3.5% SAY",
+            description: "Mid-term (5-15y), Investment Grade, 3.5%+ yield AND 3.5%+ SAY",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
@@ -16087,21 +16099,9 @@ function setDefaultMaturityFilters() {
               minRating: "BBB+"
             }
           },
-          maxIncome: {
-            name: "Max Income",
-            description: "High current yield (>6%) with price protection (<110)",
-            profileType: "income",
-            sortedBy: "CURR_YIELD",
-            filters: {
-              maxPrice: 110,
-              minMatYears: 15,
-              minYield: 6,
-              minRating: "BB+"
-            }
-          },
           deepDiscount: {
             name: "Deep Discount",
-            description: "Bonds trading <90% par. Profit comes from pull-to-par (<20y).",
+            description: "Below-par bonds (<90) with strong SAY (5%+). Profit from pull-to-par (<20y).",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
@@ -16111,16 +16111,52 @@ function setDefaultMaturityFilters() {
               minSAY: 5
             }
           },
+          maxIncome: {
+            name: "Max Income",
+            description: "High current yield (6%+) with price protection (<110) and min BBB- rating",
+            profileType: "income",
+            sortedBy: "CURR_YIELD",
+            filters: {
+              maxPrice: 110,
+              minMatYears: 15,
+              minYield: 6,
+              minRating: "BBB-"
+            }
+          },
           fortressSafe: {
             name: "AAA/AA Fortress",
-            description: "Top-tier sovereigns (AA-/AAA) only",
+            description: "Top-tier sovereigns (AA- minimum) with 3%+ SAY, 5-30y horizon",
             profileType: "SAY",
             sortedBy: "SAY",
             filters: {
               minRating: "AA-",
-              minSAL: 3,
+              minSAY: 3,
               minMatYears: 5,
               maxMatYears: 30
+            }
+          },
+          longQuality: {
+            name: "Long Quality",
+            description: "Long-term (20-40y) A- rated bonds with 4%+ yield. Benefits from rate cuts.",
+            profileType: "income",
+            sortedBy: "CURR_YIELD",
+            filters: {
+              minMatYears: 20,
+              maxMatYears: 40,
+              minYield: 4,
+              minRating: "A-"
+            }
+          },
+          retirementIncome: {
+            name: "Retirement Income",
+            description: "Long-term stable income (20-35y) with 4%+ yield and BBB+ minimum rating",
+            profileType: "income",
+            sortedBy: "CURR_YIELD",
+            filters: {
+              minMatYears: 20,
+              maxMatYears: 35,
+              minYield: 4,
+              minRating: "BBB+"
             }
           }
         };

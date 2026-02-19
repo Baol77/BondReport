@@ -1,234 +1,50 @@
-# Custom Bond Profiles - v3.0 Template
-#
-# This file demonstrates how to create custom investment profiles
-# that can be imported into the Bond Analytics report (v3.0+).
-#
-# YAML Format Requirements:
-# - Start with "profiles:" header
-# - Each profile starts with "- id:"
-# - Required fields: id, label, description
-# - Optional fields: emoji, profileType, sortedBy
-# - Filters section contains the actual filter criteria
-#
-# NEW IN v4.0:
-# - profileType: Specify "SAY" or "income" to control profile behavior
-# - sortedBy: Default sort column ("SAY", "CURR_YIELD", "CAPITAL_AT_MAT", etc.)
+# Custom Bond Profiles - Template v4.0
 #
 # Available Filters:
-# - minPrice / maxPrice: Price range in bond currency
+# - minPrice / maxPrice:       Price range in bond currency
 # - minMatYears / maxMatYears: Years to maturity range (from today)
-# - minSAY: Minimum Simple Annual Yield (%)
-# - minYield: Minimum Current Yield (%)
-# - minCapitalAtMat: Minimum final capital at maturity (EUR)
-# - minRating: Minimum credit rating (e.g., BBB+, A, AA-)
+# - minSAY:                    Minimum Simple Annual Yield (%)  ← note: SAY not SAL
+# - minYield:                  Minimum Current Yield (%)
+# - minCapitalAtMat:           Minimum final capital at maturity (EUR)
+# - minRating:                 Minimum credit rating (e.g., BBB+, A, AA-)
+#
+# RATING HIERARCHY:
+# AAA > AA+ > AA > AA- > A+ > A > A- > BBB+ > BBB > BBB- > BB+ > BB > B+ > B
+#
+# VALIDATION:
+# - Numeric values without quotes  (minSAY: 4.0 ✅   minSAY: "4.0" ❌)
+# - minSAY not minSAL (common typo — filter silently ignored if wrong)
+# - camelCase IDs, no spaces or hyphens
+# ─────────────────────────────────────────────────────────────────────────────
 
 profiles:
-  # Example 1: Ultra Short-Term High Yield
-  - id: ultraShortHigh
-    label: Ultra Short High
-    emoji: "⚡💰"
-    description: Ultra short-term (1-3y) bonds with very high yield (6%+)
-    profileType: income
-    sortedBy: CURR_YIELD
-    filters:
-      minMatYears: 1
-      maxMatYears: 3
-      minYield: 6.0
 
-  # Example 2: Long-Term Quality Income
-  - id: longQuality
-    label: Long Quality
-    emoji: "🏛️📈"
-    description: Long-term (25-40y) A- rated bonds with 4%+ current yield
-    profileType: income
-    sortedBy: CURR_YIELD
-    filters:
-      minMatYears: 25
-      maxMatYears: 40
-      minYield: 4.0
-      minRating: A-
-
-  # Example 3: Medium-Term SAY Focus
-  - id: mediumSay
-    label: Medium SAY Focus
-    emoji: "⚖️💼"
-    description: Medium-term (5-15y) bonds with 4.5%+ SAY and BBB+ minimum rating
-    profileType: SAY
-    sortedBy: SAY
-    filters:
-      minMatYears: 5
-      maxMatYears: 15
-      minSAY: 4.5
-      minRating: BBB+
-
-  # Example 4: High Final Capital
+  # Capital target: selects bonds that return at least €1,600 from €1,000 invested.
+  # Uses minCapitalAtMat — the only filter not covered by the default profiles.
   - id: highFinalCapital
     label: High Final Capital
     emoji: "🎯💎"
-    description: Bonds that reach at least €1,600 final capital from €1,000
+    description: Bonds returning at least €1,600 from €1,000 invested at maturity
     profileType: SAY
     sortedBy: CAPITAL_AT_MAT
     filters:
       minCapitalAtMat: 1600
-      minMatYears: 1
-      maxMatYears: 30
-
-  # Example 5: Premium Bonds Only
-  - id: premiumBonds
-    label: Premium Bonds
-    emoji: "👑✨"
-    description: Premium-priced bonds (105-120) with 3.5%+ current yield
-    profileType: income
-    sortedBy: CURR_YIELD
-    filters:
-      minPrice: 105
-      maxPrice: 120
-      minYield: 3.5
-      minMatYears: 10
-      maxMatYears: 30
-
-  # Example 6: AAA/AA Sovereigns
-  - id: topRated
-    label: Top Rated Only
-    emoji: "⭐🛡️"
-    description: Only AAA and AA rated sovereigns with 3%+ SAY
-    profileType: SAY
-    sortedBy: SAY
-    filters:
-      minRating: AA-
-      minSAY: 3.0
-      minMatYears: 5
-      maxMatYears: 25
-
-  # Example 7: Aggressive Growth (v4.0 Feature)
-  - id: aggressiveGrowth
-    label: Aggressive Growth
-    emoji: "🚀📈"
-    description: Short to medium-term (2-12y) with maximum SAY focus (5.5%+ minimum)
-    profileType: SAY
-    sortedBy: SAY
-    filters:
-      minMatYears: 2
-      maxMatYears: 12
-      minSAY: 5.5
-
-  # Example 8: Retirement Income (v4.0 Feature)
-  - id: retirementIncome
-    label: Retirement Income
-    emoji: "🏖️💵"
-    description: Long-term stable income (20-35y) with 4%+ yield and BBB+ minimum
-    profileType: income
-    sortedBy: CURR_YIELD
-    filters:
-      minMatYears: 20
-      maxMatYears: 35
-      minYield: 4.0
-      minRating: BBB+
-
-  # Example 9: Discounted Bonds Opportunity
-  - id: discountedOpportunity
-    label: Discounted Opportunity
-    emoji: "🔍💡"
-    description: Below-par bonds (< 100) with 5%+ SAY potential
-    profileType: SAY
-    sortedBy: SAY
-    filters:
-      maxPrice: 100
-      minSAY: 5.0
       minMatYears: 3
-      maxMatYears: 20
+      maxMatYears: 30
+      minRating: BBB-
 
-  # Example 10: Investment Grade Focus
-  - id: investmentGradeFocus
-    label: Investment Grade Focus
-    emoji: "🛡️📊"
-    description: BBB minimum rating with 3.5%+ SAY focus
+  # Near-maturity at par: short runway (1-4y) with price close to par (95-105).
+  # Return is essentially certain — no mark-to-market risk, no pull-to-par speculation.
+  # Different from cashParking (no price filter) and ultraShortHigh (high yield / no price filter).
+  - id: nearMaturityPar
+    label: Near Maturity Par
+    emoji: "🏁💶"
+    description: Short runway (1-4y) near par price (95-105). Predictable, low volatility return.
     profileType: SAY
     sortedBy: SAY
     filters:
-      minRating: BBB
-      minSAY: 3.5
+      minPrice: 95
+      maxPrice: 105
       minMatYears: 1
-      maxMatYears: 30
-
-# ===============================================================================
-# USAGE INSTRUCTIONS (v4.0+)
-# ===============================================================================
-#
-# BASIC WORKFLOW:
-# 1. Customize the profiles below to match your investment strategy
-# 2. Save with a .yaml or .yml extension (e.g., my-profiles.yaml)
-# 3. In the Bond Report HTML page, click "📁 Import YAML"
-# 4. Select your custom YAML file
-# 5. Custom profiles appear as buttons with orange/dashed borders
-# 6. Click any profile to apply filters and sort by your preference
-#
-# NEW v4.0 FEATURES:
-#
-# profileType: Controls the mode and default view
-#   - "SAY": Activates Simple Annual Yield mode, emphasizes total return
-#   - "income": Activates Income mode, emphasizes current yield
-#   - Optional: defaults to "SAY" if omitted
-#
-# sortedBy: Sets default sort column when profile is applied
-#   - "SAY": Sort by Simple Annual Yield (%)
-#   - "CURR_YIELD": Sort by Current Yield (%)
-#   - "CAPITAL_AT_MAT": Sort by final capital at maturity
-#   - "PRICE": Sort by bond price
-#   - "MATURITY": Sort by maturity date
-#   - Optional: defaults to profile's primary metric if omitted
-#
-# COMBINING FILTERS:
-# You can combine multiple filters for precise targeting:
-#   filters:
-#     minPrice: 95
-#     maxPrice: 105
-#     minMatYears: 5
-#     maxMatYears: 15
-#     minSAY: 4.0
-#     minRating: A
-#     minCapitalAtMat: 1200
-#
-# TIPS:
-# - Use meaningful profile IDs (camelCase, no spaces)
-# - Emojis make profiles visually distinctive (optional)
-# - Combine profileType + sortedBy for better UX
-# - Income profiles work best sorted by CURR_YIELD
-# - SAY profiles work best sorted by SAY
-# - You can have unlimited custom profiles
-# - Import multiple files to test different strategies
-# - Re-import to update custom profiles (won't remove defaults)
-#
-# RATING HIERARCHY (use minRating to filter):
-# AAA > AA+ > AA > AA- > A+ > A > A- > BBB+ > BBB > BBB- > BB+ > BB > B+ > B
-#
-# EXAMPLE: Creating a "My Strategy" Profile
-# ─────────────────────────────────────────
-#   - id: myStrategy
-#     label: My Strategy
-#     emoji: "🎯"
-#     description: Description of your investment approach
-#     profileType: SAY
-#     sortedBy: SAY
-#     filters:
-#       minMatYears: 5
-#       maxMatYears: 20
-#       minSAY: 4.0
-#       minRating: BBB+
-#
-# VALIDATION:
-# - All numeric values must be numbers (no quotes needed)
-# - Rating values must be strings (BBB+, A-, AA, etc.)
-# - YAML is indentation-sensitive (use 2 or 4 spaces consistently)
-# - Profile IDs must be unique (no duplicates)
-# - All ID values should be camelCase (no spaces or hyphens)
-#
-# TROUBLESHOOTING:
-# If profiles don't appear after import:
-#   1. Check YAML syntax (use a YAML validator)
-#   2. Verify profileType is "SAY" or "income"
-#   3. Ensure all filter values are valid numbers/ratings
-#   4. Check browser console for error messages
-#   5. Try re-importing the file
-#
-# ===============================================================================
+      maxMatYears: 4
+      minRating: BBB
