@@ -648,7 +648,7 @@ function applyPreset(presetName) {
 
 function updatePresetButtons(activePreset) {
     // Update built-in preset buttons
-    const ids = ["cashParking", "ultraShortHigh", "balancedCore", "maxIncome", "deepDiscount", "fortressSafe"];
+    const ids = ["cashParking", "ultraShortHigh", "balancedCore", "maxIncome", "deepDiscount", "fortressSafe", "longQuality", "retirementIncome"];
     ids.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle("active", id === activePreset);
